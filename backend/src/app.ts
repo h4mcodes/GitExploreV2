@@ -2,6 +2,7 @@ import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import { env } from './config/env.js';
 import { healthRouter } from './routes/health.js';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 
 export function createApp(): Express {
   const app: Express = express();
@@ -11,6 +12,8 @@ export function createApp(): Express {
     cors({
       origin: env.corsOrigin === '*' ? true : env.corsOrigin,
       credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
     })
   );
   app.use(express.json());
@@ -26,6 +29,12 @@ export function createApp(): Express {
       status: 'active',
     });
   });
+
+  // 404 Route Catch-All
+  app.use(notFoundHandler);
+
+  // Centralized Error Handling (Must be last)
+  app.use(errorHandler);
 
   return app;
 }

@@ -267,11 +267,11 @@ Every subsequent API endpoint depends on consistent error formatting, input vali
 - Unhandled errors return HTTP 500 with structured JSON (not stack traces in production mode)
 
 **Completion Criteria**
-- [ ] Error handler middleware catches and formats all unhandled errors
-- [ ] Validation middleware rejects invalid requests with structured 400 response
-- [ ] CORS configured for frontend origin
-- [ ] Error response type defined in `backend/src/types/api.ts`
-- [ ] `GET /api/health` still works after middleware registration
+- [x] Error handler middleware catches and formats all unhandled errors
+- [x] Validation middleware rejects invalid requests with structured 400 response
+- [x] CORS configured for frontend origin
+- [x] Error response type defined in `backend/src/types/api.ts`
+- [x] `GET /api/health` still works after middleware registration
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -282,7 +282,7 @@ Every subsequent API endpoint depends on consistent error formatting, input vali
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

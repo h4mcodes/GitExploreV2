@@ -230,10 +230,10 @@ See `docs/PRD.md` for full product requirements and `docs/ARCHITECTURE.md` for s
 
 ```
 Current Day:    1
-Current Push:   3 (D1-P3: Backend skeleton)
-Current Objective: Initialize backend directory, Express server, health check
+Current Push:   4 (D1-P4: API Infrastructure)
+Current Objective: Centralized error handling, validation middleware, and CORS
 Current Status: Completed
-Next Task:      D1-P4: API Infrastructure (centralized error handler, validation, CORS)
+Next Task:      D1-P5: CI Backend Validation (extend .github/workflows/ci.yml)
 ```
 
 ---
@@ -274,3 +274,4 @@ Next Task:      D1-P4: API Infrastructure (centralized error handler, validation
 | 2026-09-28 | Created `docs/TASK.md` | 60-milestone execution roadmap created |
 | 2026-09-28 | Created `docs/MEMORY.md` | Persistent project memory initialized |
 | 2026-09-28 | Initialized `backend/` skeleton (D1-P3) | Express, TypeScript strict, `GET /api/health` tested |
+| 2026-09-28 | Added API infrastructure (D1-P4) | Centralized error handler, request validation middleware, AppError hierarchy |

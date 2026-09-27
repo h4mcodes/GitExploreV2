@@ -1,0 +1,274 @@
+# GitExplore V2 — Project Memory
+
+This document is the persistent memory for AI agents and developers working on GitExplore. A new agent should be able to read this file and understand the project's current state, decisions, and constraints without reading the entire codebase.
+
+---
+
+## Project Identity
+
+**GitExplore** — Git Repository Intelligence & Management Platform
+
+A developer workbench for exploring, analyzing, investigating, and understanding Git repositories. Centralizes GitHub profiles, repositories, branches, commits, DAG relationships, code diffs, branch comparisons, contribution calendars, and activity feeds into a single workspace.
+
+---
+
+## Current State
+
+### V1 — Completed, Production, Frontend-Only
+
+- **Status:** IMPLEMENTED, DEPLOYED
+- **Branch:** `main`
+- **Hosting:** Vercel (static SPA deployment)
+- **URL:** Production on Vercel (SPA with `vercel.json` rewrites)
+- **Stack:** React 19, TypeScript 5 (strict), Vite 6, React Router DOM 7, Framer Motion, Lucide React, native Fetch API, handcrafted CSS
+- **Backend:** None
+- **Database:** None
+- **Authentication:** None
+- **AI:** None
+
+### V2 — Planned, In Documentation Phase
+
+- **Status:** PLANNED (documentation phase)
+- **Branch:** `v2-fullstack`
+- **Stack (planned):** Existing frontend + Node.js backend + PostgreSQL (Prisma) + AI provider abstraction
+- **Backend:** PLANNED
+- **Database:** PLANNED
+- **Authentication:** PLANNED
+- **AI:** PLANNED
+
+---
+
+## Branch Strategy
+
+| Branch | Purpose | Status |
+| :--- | :--- | :--- |
+| `main` | V1 production | Active, deployed on Vercel |
+| `v2-fullstack` | V2 development | Active, current working branch |
+
+**Rule:** Never develop V2 features on `main`. Never force-push `main`. Never auto-merge `v2-fullstack` to `main`.
+
+---
+
+## V1 Verified Capabilities
+
+The following capabilities are **IMPLEMENTED and verified** in the V1 codebase on the `main` branch:
+
+### Profile & Search
+- Username search with validation (empty-input prevention, Enter-key submission)
+- Client-side routing to `/profile/:username`
+- Real GitHub profile data display (avatar, login, name, bio, company, location, blog, followers, following, repos, join date)
+- Profile loading skeletons, 404 not-found state, network error state, retry capability
+
+### Repository Explorer
+- Fetches first 100 public repositories per user (`per_page=100&sort=updated`)
+- Repository cards with name, description, language, stars, forks, open issues, visibility, last updated, homepage, GitHub link
+- Client-side search across name, full_name, description, language
+- Dynamic language dropdown generated from loaded repositories
+- Multi-criteria sorting: recently updated, stars, forks, newest, name
+- Incremental pagination (12 per batch, "Load More")
+- Aggregate statistics (loaded repos, total stars, total forks)
+- No-results state with clear-filters action
+
+### Branch Explorer
+- Fetches repository branches (`per_page=100`)
+- Default branch pinning
+- Protected branch badges
+- Instant client-side branch search
+
+### Commit History
+- Fetches branch commits (`per_page=15` with pagination)
+- Commit messages, author avatars, timestamps, SHA links
+- Parent-child relationship display
+
+### Commit DAG
+- `buildCommitRelationshipModel()` in `githubApi.ts` (lines 375–483)
+- Bidirectional parent ↔ child linking
+- Merge commit detection (`parents.length > 1`)
+- Root commit detection (`parents.length === 0` or no known parents)
+- Head commit detection (`childShas.length === 0`)
+- Fingerprint-based graph caching
+- `getParentCommits()`, `getChildCommits()`, `getCommitNode()` graph query functions
+
+### Commit Inspection
+- Detailed commit modal (`CommitInspection.tsx`)
+- Commit metadata, parent hashes, file list, additions/deletions statistics
+- Interactive patch review
+
+### Diff Viewer
+- Unified (inline) and split (side-by-side) diff rendering (`DiffViewer.tsx`)
+- Syntax-aware line highlighting (additions, deletions, context)
+- Chunked rendering for large diffs
+
+### Branch Comparison
+- Branch-to-branch comparison (`BranchCompare.tsx`)
+- Ahead/behind counts
+- Commit delta log
+- Cumulative changed-file diffs
+
+### Contribution Calendar
+- Full 12-month, 365-day calendar matrix (`ContributionGraph.tsx`)
+- External contribution API (`github-contributions-api.jogruber.de`) with fallback
+- 5-level intensity coloring (0–4)
+- Rolling 72-hour event feed with category filtering (Pushes, PRs, Issues, Creates, Stars/Forks)
+- Expandable commit details in event feed
+
+### Caching & Performance
+- In-memory API response cache with tuned TTLs (1min–15min per resource type)
+- In-flight request deduplication (promise sharing)
+- Max 250 cache entries with LRU eviction
+- DAG graph model cache (50 entries max)
+- Parsed patch memoization
+
+### Rate Limiting
+- `x-ratelimit-*` header parsing
+- Client-side rate-limit block (prevents requests when remaining = 0)
+- Rate-limit error class with reset date
+- UI countdown banner
+
+### Error Handling
+- React Error Boundary (`ErrorBoundary.tsx`) with diagnostic logging and recovery actions
+- `GithubApiError` class with typed error kinds: `not-found`, `rate-limit`, `network`, `unexpected`, `empty`
+- Contextual in-UI error banners with retry (no `alert()`)
+
+### Network Status
+- `NetworkStatusBanner.tsx` monitors `online`/`offline` events
+- Persistent amber warning banner when offline
+
+### Security
+- `sanitizeUrl()` — protocol whitelist (`http:`, `https:`), blocks `javascript:`, `data:`, `vbscript:`
+- `sanitizeText()` — strips control characters
+- `sanitizeUsername()` — alphanumeric + hyphens, max 39 chars
+- External links use `rel="noopener noreferrer"`
+
+### CI/CD
+- GitHub Actions workflow (`.github/workflows/ci.yml`)
+- Triggered on push/PR to `main`
+- Node.js 20, `npm ci`, `npm run build` (tsc + vite)
+
+### Design System
+- Handcrafted CSS in `src/index.css` (105 KB)
+- Light frosted material theme (overrides earlier dark foundation)
+- Frosted glass surfaces, subtle borders, soft shadows
+- Responsive breakpoints: desktop (>1024px), tablet, mobile (<680px)
+- Framer Motion entrance animations
+- Lucide React vector icons
+- Accessible `:focus-visible` rings
+
+### Files & Sizes
+- `src/services/githubApi.ts` — 786 lines, 26,619 bytes (largest source file)
+- `src/index.css` — 105,156 bytes
+- `src/pages/Profile.tsx` — 503 lines, 21,926 bytes
+- `src/types/github.ts` — 256 lines, 25+ interfaces
+- 14 components, 2 pages, 2 services, 1 type file
+
+---
+
+## V2 Direction
+
+### Architecture
+- Frontend: Existing React app (preserved)
+- Backend: Node.js + TypeScript + Express REST API
+- Database: PostgreSQL + Prisma ORM
+- AI: Provider abstraction layer with structured prompts, schema validation, and caching
+- GitHub: Server-side token-authenticated requests (5,000 req/hr)
+
+### Key additions over V1
+1. Server-side GitHub proxy (token security, higher rate limits, server caching)
+2. Persistent user workspace (saved repos, investigations, notes, bookmarks, tags)
+3. Repository intelligence engine (server-side DAG, statistics, divergence, file analysis, evolution)
+4. AI analysis layer (repository overview, commit explanation, diff review, branch analysis, health)
+5. Repository Q&A (natural-language questions answered with evidence)
+
+See `docs/PRD.md` for full product requirements and `docs/ARCHITECTURE.md` for system design.
+
+---
+
+## Product Principles
+
+1. **Real problem first.** Every feature solves a documented developer problem.
+2. **Engineering over decoration.** Functionality and correctness before visual polish.
+3. **Deterministic Git intelligence.** DAGs, statistics, and divergence are computed deterministically. They do not depend on AI.
+4. **AI as interpretation layer.** AI receives structured evidence and interprets it. AI does not invent repository facts.
+5. **Simple architecture.** One frontend, one backend, one database. No unnecessary infrastructure.
+6. **Preserve existing functionality.** V1 is production software. Do not break it.
+
+---
+
+## Important Technical Decisions
+
+### DECIDED
+
+| Decision | Choice | Rationale |
+| :--- | :--- | :--- |
+| V2 development branch | `v2-fullstack` | Isolates V2 work from production `main` |
+| Frontend framework | React 19 (existing) | V1 is already built and working |
+| Build tool | Vite 6 (existing) | V1 is already configured |
+| CSS approach | Handcrafted CSS (existing) | No migration to Tailwind or CSS modules |
+| Backend language | TypeScript (strict) | Type consistency with frontend |
+| Database | PostgreSQL | Relational data (users, repos, investigations, notes) |
+| ORM | Prisma | Type-safe, migration support, TypeScript integration |
+| HTTP client for GitHub | Native Fetch (server-side) | Same approach as V1 frontend, no Axios |
+| API data validation | Type guard functions (existing pattern) | V1 uses runtime type guards for all GitHub responses |
+| Frontend routing | React Router DOM 7 (existing) | Already configured |
+
+### UNDECIDED
+
+| Decision | Options | Notes |
+| :--- | :--- | :--- |
+| Backend framework | Express, Fastify, Hono | Express is most common; Fastify is faster; Hono is lightweight. Decision deferred to D1-P3. |
+| Authentication method | Session-based, JWT | Both viable. Decision deferred to D5-P1. |
+| AI provider | OpenAI, Anthropic, Google, other | Provider abstraction means this can be swapped. Initial implementation TBD. |
+| AI model | GPT-4, Claude, Gemini, etc. | Depends on provider choice. Configurable via env. |
+| Backend hosting | Render, Railway, Fly.io, Vercel Serverless | Depends on cost, latency, and PostgreSQL proximity. Decision deferred to D10-P3. |
+| Database hosting | Supabase, Neon, Railway, managed PostgreSQL | Decision deferred to D10-P3. |
+| Schema validation library | Zod, io-ts, ArkType | Zod is most popular in TypeScript ecosystem. Likely choice but not locked. |
+| AI auth requirement | AI endpoints public with rate limits vs. auth-required | Deferred to D5-P1 / D6-P6. |
+
+---
+
+## Current Task
+
+```
+Current Day:    0
+Current Push:   2 (D1-P2: V2 documentation blueprint)
+Current Objective: Create docs/ planning system
+Current Status: In Progress
+Next Task:      D1-P3: Backend skeleton (after documentation approval)
+```
+
+---
+
+## Known Constraints
+
+- V1 must remain safe and recoverable on `main` at all times
+- No production changes during V2 development on `v2-fullstack`
+- No unnecessary infrastructure (no Redis, no queues, no microservices, no Kubernetes unless justified)
+- No exposed secrets in committed files or client-side bundles
+- No undocumented architecture changes
+- GitHub unauthenticated rate limit: 60 req/hr per IP (V1 constraint)
+- GitHub authenticated rate limit: 5,000 req/hr per token (V2 improvement)
+- V1 only fetches first 100 repositories per user (GitHub API per_page limit)
+- V1 contribution calendar depends on third-party proxy API (`github-contributions-api.jogruber.de`)
+- The `.gitignore` excludes `AGENTS.md`, `skills.md`, and `PROJECT_HANDOFF.md` from the repository (they exist locally but are not committed)
+
+---
+
+## Completed Decisions Log
+
+| Date | Decision | Context |
+| :--- | :--- | :--- |
+| 2026-09-28 | V2 documentation system created in `docs/` | 5 documents: PRD, Architecture, Rules, Task, Memory |
+| 2026-09-28 | 60-milestone roadmap defined (10 days × 6 pushes) | Covers foundation through production deployment |
+| 2026-09-28 | V1 baseline verified on `v2-fullstack` branch | Build passes, working tree clean (except `.planning/`), all 14 components + 2 pages verified |
+
+---
+
+## Change Log
+
+| Date | Change | Impact |
+| :--- | :--- | :--- |
+| 2026-09-28 | Created `docs/PRD.md` | V2 product requirements documented |
+| 2026-09-28 | Created `docs/ARCHITECTURE.md` | V2 system architecture documented |
+| 2026-09-28 | Created `docs/RULES.md` | Engineering constraints codified |
+| 2026-09-28 | Created `docs/TASK.md` | 60-milestone execution roadmap created |
+| 2026-09-28 | Created `docs/MEMORY.md` | Persistent project memory initialized |

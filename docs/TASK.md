@@ -377,11 +377,11 @@ Each day ends with a verification pass to confirm all milestones were met before
 - All D1 completion criteria reviewed
 
 **Completion Criteria**
-- [ ] Frontend `npm run build` passes
-- [ ] Backend `npm run build` passes
-- [ ] `GET /api/health` returns 200
-- [ ] `docs/MEMORY.md` updated with Day 1 decisions and state
-- [ ] `docs/TASK.md` statuses accurate for all D1 tasks
+- [x] Frontend `npm run build` passes
+- [x] Backend `npm run build` passes
+- [x] `GET /api/health` returns 200
+- [x] `docs/MEMORY.md` updated with Day 1 decisions and state
+- [x] `docs/TASK.md` statuses accurate for all D1 tasks
 
 **Documentation Updates**
 - `docs/MEMORY.md` — update Current Task, Completed Decisions Log, Change Log
@@ -393,7 +393,7 @@ Each day ends with a verification pass to confirm all milestones were met before
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

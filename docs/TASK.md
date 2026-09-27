@@ -206,11 +206,11 @@ The backend is the foundation for all V2 server-side work: GitHub proxy, databas
 - `backend/tsconfig.json` has `"strict": true`
 
 **Completion Criteria**
-- [ ] `backend/` directory created with valid `package.json` and `tsconfig.json`
-- [ ] `app.ts` compiles and starts an HTTP server
-- [ ] `GET /api/health` returns 200
-- [ ] Environment config loads from `.env` with validation
-- [ ] Backend framework decision documented in `docs/MEMORY.md`
+- [x] `backend/` directory created with valid `package.json` and `tsconfig.json`
+- [x] `app.ts` compiles and starts an HTTP server
+- [x] `GET /api/health` returns 200
+- [x] Environment config loads from `.env` with validation
+- [x] Backend framework decision documented in `docs/MEMORY.md`
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — move backend framework from UNDECIDED to DECIDED
@@ -222,7 +222,7 @@ The backend is the foundation for all V2 server-side work: GitHub proxy, databas
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

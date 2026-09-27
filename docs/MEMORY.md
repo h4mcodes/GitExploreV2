@@ -205,6 +205,7 @@ See `docs/PRD.md` for full product requirements and `docs/ARCHITECTURE.md` for s
 | Build tool | Vite 6 (existing) | V1 is already configured |
 | CSS approach | Handcrafted CSS (existing) | No migration to Tailwind or CSS modules |
 | Backend language | TypeScript (strict) | Type consistency with frontend |
+| Backend framework | Express 4 | Minimal, standard, reliable middleware ecosystem, strict TypeScript compatibility |
 | Database | PostgreSQL | Relational data (users, repos, investigations, notes) |
 | ORM | Prisma | Type-safe, migration support, TypeScript integration |
 | HTTP client for GitHub | Native Fetch (server-side) | Same approach as V1 frontend, no Axios |
@@ -215,7 +216,6 @@ See `docs/PRD.md` for full product requirements and `docs/ARCHITECTURE.md` for s
 
 | Decision | Options | Notes |
 | :--- | :--- | :--- |
-| Backend framework | Express, Fastify, Hono | Express is most common; Fastify is faster; Hono is lightweight. Decision deferred to D1-P3. |
 | Authentication method | Session-based, JWT | Both viable. Decision deferred to D5-P1. |
 | AI provider | OpenAI, Anthropic, Google, other | Provider abstraction means this can be swapped. Initial implementation TBD. |
 | AI model | GPT-4, Claude, Gemini, etc. | Depends on provider choice. Configurable via env. |
@@ -229,11 +229,11 @@ See `docs/PRD.md` for full product requirements and `docs/ARCHITECTURE.md` for s
 ## Current Task
 
 ```
-Current Day:    0
-Current Push:   2 (D1-P2: V2 documentation blueprint)
-Current Objective: Create docs/ planning system
-Current Status: In Progress
-Next Task:      D1-P3: Backend skeleton (after documentation approval)
+Current Day:    1
+Current Push:   3 (D1-P3: Backend skeleton)
+Current Objective: Initialize backend directory, Express server, health check
+Current Status: Completed
+Next Task:      D1-P4: API Infrastructure (centralized error handler, validation, CORS)
 ```
 
 ---
@@ -260,6 +260,7 @@ Next Task:      D1-P3: Backend skeleton (after documentation approval)
 | 2026-09-28 | V2 documentation system created in `docs/` | 5 documents: PRD, Architecture, Rules, Task, Memory |
 | 2026-09-28 | 60-milestone roadmap defined (10 days × 6 pushes) | Covers foundation through production deployment |
 | 2026-09-28 | V1 baseline verified on `v2-fullstack` branch | Build passes, working tree clean (except `.planning/`), all 14 components + 2 pages verified |
+| 2026-09-28 | Selected Express 4 as V2 backend framework | Strict TypeScript, minimal footprint, standard middleware architecture |
 
 ---
 
@@ -272,3 +273,4 @@ Next Task:      D1-P3: Backend skeleton (after documentation approval)
 | 2026-09-28 | Created `docs/RULES.md` | Engineering constraints codified |
 | 2026-09-28 | Created `docs/TASK.md` | 60-milestone execution roadmap created |
 | 2026-09-28 | Created `docs/MEMORY.md` | Persistent project memory initialized |
+| 2026-09-28 | Initialized `backend/` skeleton (D1-P3) | Express, TypeScript strict, `GET /api/health` tested |

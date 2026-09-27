@@ -230,10 +230,10 @@ See `docs/PRD.md` for full product requirements and `docs/ARCHITECTURE.md` for s
 
 ```
 Current Day:    1
-Current Push:   4 (D1-P4: API Infrastructure)
-Current Objective: Centralized error handling, validation middleware, and CORS
+Current Push:   5 (D1-P5: CI Backend Validation)
+Current Objective: Extend GitHub Actions CI for backend typecheck and build
 Current Status: Completed
-Next Task:      D1-P5: CI Backend Validation (extend .github/workflows/ci.yml)
+Next Task:      D1-P6: Day 1 Audit (full build, runtime verification, Day 1 completion gate)
 ```
 
 ---
@@ -275,3 +275,4 @@ Next Task:      D1-P5: CI Backend Validation (extend .github/workflows/ci.yml)
 | 2026-09-28 | Created `docs/MEMORY.md` | Persistent project memory initialized |
 | 2026-09-28 | Initialized `backend/` skeleton (D1-P3) | Express, TypeScript strict, `GET /api/health` tested |
 | 2026-09-28 | Added API infrastructure (D1-P4) | Centralized error handler, request validation middleware, AppError hierarchy |
+| 2026-09-28 | Extended CI workflow (D1-P5) | Parallel frontend and backend build/typecheck jobs in `.github/workflows/ci.yml` |

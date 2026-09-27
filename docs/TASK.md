@@ -320,10 +320,10 @@ CI must catch TypeScript and build failures in both frontend and backend on ever
 - If run locally: `cd backend && npm run build` passes
 
 **Completion Criteria**
-- [ ] `.github/workflows/ci.yml` updated with backend build step
-- [ ] Frontend build step preserved (not broken)
-- [ ] Backend step runs `npm ci` and `npm run build`
-- [ ] CI workflow syntax is valid
+- [x] `.github/workflows/ci.yml` updated with backend build step
+- [x] Frontend build step preserved (not broken)
+- [x] Backend step runs `npm ci` and `npm run build`
+- [x] CI workflow syntax is valid
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -334,7 +334,7 @@ CI must catch TypeScript and build failures in both frontend and backend on ever
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

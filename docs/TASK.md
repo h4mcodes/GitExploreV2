@@ -442,11 +442,11 @@ PostgreSQL with Prisma is the persistence layer for all V2 workspace data. Setup
 - `GET /api/health` still works
 
 **Completion Criteria**
-- [ ] `backend/prisma/schema.prisma` exists with PostgreSQL datasource
-- [ ] `@prisma/client` and `prisma` in `backend/package.json`
-- [ ] `database.ts` exports a Prisma client singleton
-- [ ] `DATABASE_URL` in `.env.example`
-- [ ] `npx prisma validate` passes
+- [x] `backend/prisma/schema.prisma` exists with PostgreSQL datasource
+- [x] `@prisma/client` and `prisma` in `backend/package.json`
+- [x] `database.ts` exports a Prisma client singleton
+- [x] `DATABASE_URL` in `.env.example`
+- [x] `npx prisma validate` passes
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -457,7 +457,7 @@ PostgreSQL with Prisma is the persistence layer for all V2 workspace data. Setup
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

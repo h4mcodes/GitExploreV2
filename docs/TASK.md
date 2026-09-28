@@ -663,10 +663,10 @@ The repository layer encapsulates database queries behind typed functions. Contr
 - CRUD operations execute against the database without errors
 
 **Completion Criteria**
-- [ ] `userRepository.ts` with findById, findByGithubId, create, update
-- [ ] `savedRepoRepository.ts` with findByUserId, findById, create, update, delete
-- [ ] All functions strictly typed
-- [ ] Backend builds successfully
+- [x] `userRepository.ts` with findById, findByGithubId, create, update
+- [x] `savedRepoRepository.ts` with findByUserId, findById, create, update, delete
+- [x] All functions strictly typed
+- [x] Backend builds successfully
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -677,7 +677,7 @@ The repository layer encapsulates database queries behind typed functions. Contr
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

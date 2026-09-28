@@ -496,10 +496,10 @@ Users and saved repositories are the foundational entities for the workspace. Al
 - User → SavedRepository relationship defined with proper FK constraint
 
 **Completion Criteria**
-- [ ] `User` model defined with all specified fields
-- [ ] `SavedRepository` model defined with userId FK
-- [ ] Relationship declared with `@relation`
-- [ ] `npx prisma validate` passes
+- [x] `User` model defined with all specified fields
+- [x] `SavedRepository` model defined with userId FK
+- [x] Relationship declared with `@relation`
+- [x] `npx prisma validate` passes
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -510,7 +510,7 @@ Users and saved repositories are the foundational entities for the workspace. Al
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

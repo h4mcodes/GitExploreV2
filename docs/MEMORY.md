@@ -208,6 +208,7 @@ See `docs/PRD.md` for full product requirements and `docs/ARCHITECTURE.md` for s
 | Backend framework | Express 4 | Minimal, standard, reliable middleware ecosystem, strict TypeScript compatibility |
 | Database | PostgreSQL | Relational data (users, repos, investigations, notes) |
 | ORM | Prisma | Type-safe, migration support, TypeScript integration |
+| Backend test runner | Vitest | Fast, native ESM/TypeScript execution, Vite ecosystem alignment |
 | HTTP client for GitHub | Native Fetch (server-side) | Same approach as V1 frontend, no Axios |
 | API data validation | Type guard functions (existing pattern) | V1 uses runtime type guards for all GitHub responses |
 | Frontend routing | React Router DOM 7 (existing) | Already configured |
@@ -229,11 +230,11 @@ See `docs/PRD.md` for full product requirements and `docs/ARCHITECTURE.md` for s
 ## Current Task
 
 ```
-Current Day:    2 (In Progress)
-Current Push:   5 (D2-P5: Repository Persistence API)
-Current Objective: Create CRUD data access layer for User and SavedRepository
+Current Day:    2 (Completed)
+Current Push:   6 (D2-P6: Database Tests)
+Current Objective: Unit and contract tests for database persistence repository layer
 Current Status: Completed
-Next Task:      D2-P6: Database Tests (Write tests for userRepository and savedRepoRepository CRUD)
+Next Task:      D3-P1: GitHub Service (Create server-side GitHub client with auth & cache)
 ```
 
 ---
@@ -266,6 +267,7 @@ Next Task:      D2-P6: Database Tests (Write tests for userRepository and savedR
 | 2026-09-28 | Defined Workspace Entities & Enums in Prisma | `Investigation`, `Note`, `Bookmark`, `Tag`, `RepositoryTag`, `AIAnalysis` with cascade & index rules |
 | 2026-09-28 | Generated Initial PostgreSQL Migration | Migration SQL in `prisma/migrations/20260928000000_init/migration.sql` with health check utility |
 | 2026-09-28 | Implemented Repository Data Access Layer | `userRepository` and `savedRepoRepository` with typed CRUD operations |
+| 2026-09-29 | Configured Vitest as Backend Test Runner | Fast ESM-native testing with mocked Prisma client suites for all repository operations |
 
 ---
 
@@ -287,3 +289,4 @@ Next Task:      D2-P6: Database Tests (Write tests for userRepository and savedR
 | 2026-09-28 | Completed Workspace Entities Schema (D2-P3) | Added `Investigation`, `Note`, `Bookmark`, `Tag`, `RepositoryTag`, `AIAnalysis` models and enums |
 | 2026-09-28 | Completed Database Migrations & Service (D2-P4) | Generated initial migration SQL, lockfile, and enhanced database health verification |
 | 2026-09-28 | Implemented Repository Persistence API (D2-P5) | Created `userRepository.ts` and `savedRepoRepository.ts` with strict types |
+| 2026-09-29 | Completed Database Tests (D2-P6) | Configured Vitest, added 12 unit tests across `userRepository` and `savedRepoRepository`, updated CI |

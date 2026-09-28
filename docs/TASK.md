@@ -718,10 +718,10 @@ The repository layer is the foundation for all workspace operations. Bugs here c
 - Test runner configured with scripts in `package.json`
 
 **Completion Criteria**
-- [ ] User repository tests: create, findById, findByGithubId, update
-- [ ] SavedRepository tests: create, findByUserId, findById, update, delete
-- [ ] All tests pass
-- [ ] Test runner configured and runnable via `npm test`
+- [x] User repository tests: create, findById, findByGithubId, update
+- [x] SavedRepository tests: create, findByUserId, findById, update, delete
+- [x] All tests pass
+- [x] Test runner configured and runnable via `npm test`
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section, test runner decision
@@ -732,7 +732,7 @@ The repository layer is the foundation for all workspace operations. Bugs here c
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

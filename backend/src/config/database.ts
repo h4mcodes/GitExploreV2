@@ -16,15 +16,30 @@ if (env.nodeEnv !== 'production') {
   globalForPrisma.prisma = prisma;
 }
 
+export interface DatabaseHealthStatus {
+  readonly connected: boolean;
+  readonly latencyMs?: number;
+  readonly error?: string;
+}
+
 /**
  * Validates database connectivity by executing a lightweight ping query.
  */
-export async function checkDatabaseConnection(): Promise<boolean> {
+export async function checkDatabaseConnection(): Promise<DatabaseHealthStatus> {
+  const startTime = Date.now();
   try {
     await prisma.$queryRaw`SELECT 1`;
-    return true;
-  } catch {
-    return false;
+    const latencyMs = Date.now() - startTime;
+    return {
+      connected: true,
+      latencyMs,
+    };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown database error';
+    return {
+      connected: false,
+      error: message,
+    };
   }
 }
 

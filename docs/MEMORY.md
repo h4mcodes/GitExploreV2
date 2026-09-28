@@ -230,10 +230,10 @@ See `docs/PRD.md` for full product requirements and `docs/ARCHITECTURE.md` for s
 
 ```
 Current Day:    2 (In Progress)
-Current Push:   2 (D2-P2: Core Persistence Schema)
-Current Objective: Define User and SavedRepository models in Prisma schema
+Current Push:   3 (D2-P3: Workspace Entities)
+Current Objective: Define Workspace Entities (Investigation, Note, Bookmark, Tag, AIAnalysis) in Prisma
 Current Status: Completed
-Next Task:      D2-P3: Workspace Entities (Define Investigation, Note, Bookmark, Tag, AIAnalysis models)
+Next Task:      D2-P4: Database Migrations and Service (Run initial migration and test DB connectivity)
 ```
 
 ---
@@ -263,6 +263,7 @@ Next Task:      D2-P3: Workspace Entities (Define Investigation, Note, Bookmark,
 | 2026-09-28 | Selected Express 4 as V2 backend framework | Strict TypeScript, minimal footprint, standard middleware architecture |
 | 2026-09-28 | Configured Prisma ORM with PostgreSQL datasource | Singleton client in `src/config/database.ts` with ping & disconnect helpers |
 | 2026-09-28 | Defined Core Persistence Schema in Prisma | `User` and `SavedRepository` models with cascade delete and indexing |
+| 2026-09-28 | Defined Workspace Entities & Enums in Prisma | `Investigation`, `Note`, `Bookmark`, `Tag`, `RepositoryTag`, `AIAnalysis` with cascade & index rules |
 
 ---
 
@@ -281,3 +282,4 @@ Next Task:      D2-P3: Workspace Entities (Define Investigation, Note, Bookmark,
 | 2026-09-28 | Completed Day 1 audit (D1-P6) | All 6 milestones verified green across frontend, backend, CI, and docs |
 | 2026-09-28 | Completed Prisma setup (D2-P1) | Initialized `backend/prisma/schema.prisma` and `backend/src/config/database.ts` |
 | 2026-09-28 | Completed Core Persistence Schema (D2-P2) | Added `User` and `SavedRepository` models with validation and client generation |
+| 2026-09-28 | Completed Workspace Entities Schema (D2-P3) | Added `Investigation`, `Note`, `Bookmark`, `Tag`, `RepositoryTag`, `AIAnalysis` models and enums |

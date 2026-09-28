@@ -553,11 +553,11 @@ These entities complete the workspace data model, enabling persistent investigat
 - Entity definitions match ARCHITECTURE.md Section 5
 
 **Completion Criteria**
-- [ ] Investigation, Note, Bookmark, Tag, RepositoryTag, AIAnalysis models all defined
-- [ ] Enums declared for targetType and analysisType
-- [ ] JSON fields used for context, response, tokenUsage
-- [ ] FK relationships with onDelete rules
-- [ ] `npx prisma validate` passes
+- [x] Investigation, Note, Bookmark, Tag, RepositoryTag, AIAnalysis models all defined
+- [x] Enums declared for targetType and analysisType
+- [x] JSON fields used for context, response, tokenUsage
+- [x] FK relationships with onDelete rules
+- [x] `npx prisma validate` passes
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -568,7 +568,7 @@ These entities complete the workspace data model, enabling persistent investigat
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

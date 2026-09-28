@@ -10,6 +10,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum TargetType {
+  COMMIT
+  BRANCH
+  DIFF
+  REPOSITORY
+  FILE
+  COMPARISON
+}
+
+enum AnalysisType {
+  OVERVIEW
+  COMMIT
+  DIFF
+  BRANCH
+  HEALTH
+}
+
 model User {
   id        String   @id @default(uuid())
   githubId  String?  @unique
@@ -20,6 +37,10 @@ model User {
   updatedAt DateTime @updatedAt
 
   savedRepositories SavedRepository[]
+  investigations    Investigation[]
+  notes             Note[]
+  bookmarks         Bookmark[]
+  tags              Tag[]
 
   @@map("users")
 }
@@ -38,8 +59,118 @@ model SavedRepository {
   savedAt       DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  investigations Investigation[]
+  notes          Note[]
+  bookmarks      Bookmark[]
+  repositoryTags RepositoryTag[]
+  aiAnalyses     AIAnalysis[]
 
   @@index([userId])
   @@map("saved_repositories")
+}
+
+model Investigation {
+  id           String   @id @default(uuid())
+  userId       String
+  repositoryId String
+  title        String
+  description  String?
+  context      Json
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  repository SavedRepository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  notes      Note[]
+
+  @@index([userId])
+  @@index([repositoryId])
+  @@map("investigations")
+}
+
+model Note {
+  id              String     @id @default(uuid())
+  userId          String
+  investigationId String?
+  repositoryId    String?
+  targetType      TargetType
+  targetRef       String
+  content         String
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  investigation Investigation?   @relation(fields: [investigationId], references: [id], onDelete: SetNull)
+  repository    SavedRepository? @relation(fields: [repositoryId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([investigationId])
+  @@index([repositoryId])
+  @@map("notes")
+}
+
+model Bookmark {
+  id           String     @id @default(uuid())
+  userId       String
+  repositoryId String
+  targetType   TargetType
+  targetRef    String
+  label        String
+  createdAt    DateTime   @default(now())
+
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  repository SavedRepository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([repositoryId])
+  @@map("bookmarks")
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  userId    String
+  name      String
+  color     String
+  createdAt DateTime @default(now())
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  repositoryTags RepositoryTag[]
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@map("tags")
+}
+
+model RepositoryTag {
+  repositoryId String
+  tagId        String
+
+  repository SavedRepository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  tag        Tag             @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([repositoryId, tagId])
+  @@index([tagId])
+  @@index([repositoryId])
+  @@map("repository_tags")
+}
+
+model AIAnalysis {
+  id           String       @id @default(uuid())
+  repositoryId String?
+  analysisType AnalysisType
+  contextHash  String
+  prompt       String
+  response     Json
+  provider     String
+  modelId      String
+  tokenUsage   Json
+  createdAt    DateTime     @default(now())
+  expiresAt    DateTime?
+
+  repository SavedRepository? @relation(fields: [repositoryId], references: [id], onDelete: SetNull)
+
+  @@index([contextHash])
+  @@index([repositoryId])
+  @@map("ai_analyses")
 }

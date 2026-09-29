@@ -272,6 +272,7 @@ Next Task:      D3-P4: Branch API (Create GET /api/github/repos/:owner/:repo/bra
 | 2026-09-29 | Implemented Validated Profile Proxy Route | `GET /api/github/users/:username` mounted with schema validation and error handling |
 | 2026-09-29 | Implemented Validated Repository Listing Route | `GET /api/github/users/:username/repos` supporting pagination, sorting, and field validation |
 | 2026-09-29 | Implemented Validated Repository Branches Route | `GET /api/github/repos/:owner/:repo/branches` supporting owner/repo validation and branch list |
+| 2026-09-29 | Implemented Validated Commit & Compare Routes | Added `GET /api/github/repos/:owner/:repo/commits`, `GET .../commits/:sha`, and `GET .../compare/:basehead` |
 
 ---
 
@@ -298,4 +299,6 @@ Next Task:      D3-P4: Branch API (Create GET /api/github/repos/:owner/:repo/bra
 | 2026-09-29 | Implemented Profile API (D3-P2) | Added `GET /api/github/users/:username`, controller, supertest route tests, and app mounting |
 | 2026-09-29 | Implemented Repository API (D3-P3) | Added `GET /api/github/users/:username/repos`, controller, supertest route tests, and query validation |
 | 2026-09-29 | Implemented Branch API (D3-P4) | Added `GET /api/github/repos/:owner/:repo/branches`, controller, supertest route tests, and param validation |
+| 2026-09-29 | Implemented Commit & Compare API (D3-P5) | Added commits list, commit detail with patches, and branch comparison endpoints with route tests |
+
 

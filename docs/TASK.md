@@ -1002,11 +1002,11 @@ These three endpoints power the commit history, commit inspection, diff viewer, 
 - Backend builds
 
 **Completion Criteria**
-- [ ] Commit list endpoint with branch/pagination params
-- [ ] Commit detail endpoint with stats and files
-- [ ] Branch comparison endpoint with ahead/behind
-- [ ] Response shapes match V1 TypeScript interfaces
-- [ ] Backend builds
+- [x] Commit list endpoint with branch/pagination params
+- [x] Commit detail endpoint with stats and files
+- [x] Branch comparison endpoint with ahead/behind
+- [x] Response shapes match V1 TypeScript interfaces
+- [x] Backend builds
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -1017,7 +1017,7 @@ These three endpoints power the commit history, commit inspection, diff viewer, 
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

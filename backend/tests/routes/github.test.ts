@@ -148,4 +148,59 @@ describe('GitHub Routes', () => {
       expect(response.body.code).toBe('GITHUB_NOT_FOUND');
     });
   });
+
+  describe('GET /api/github/repos/:owner/:repo/branches', () => {
+    it('returns HTTP 200 with branches list for valid repo', async () => {
+      const mockBranches = [
+        {
+          name: 'master',
+          commit: {
+            sha: 'abcdef1234567890abcdef1234567890abcdef12',
+            url: 'https://api.github.com/repos/torvalds/linux/commits/abcdef',
+          },
+          protected: true,
+        },
+        {
+          name: 'next',
+          commit: {
+            sha: '123456abcdef123456abcdef123456abcdef1234',
+            url: 'https://api.github.com/repos/torvalds/linux/commits/123456',
+          },
+          protected: false,
+        },
+      ];
+
+      vi.mocked(githubClient.getBranches).mockResolvedValueOnce(mockBranches);
+
+      const response = await request(app).get('/api/github/repos/torvalds/linux/branches?page=1&per_page=30');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(mockBranches);
+      expect(githubClient.getBranches).toHaveBeenCalledWith('torvalds', 'linux', {
+        page: 1,
+        per_page: 30,
+      });
+    });
+
+    it('returns HTTP 400 when invalid owner or repo parameters are provided', async () => {
+      const response = await request(app).get('/api/github/repos/-invalid-owner/invalid@repo/branches');
+
+      expect(response.status).toBe(400);
+      expect(response.body.code).toBe('VALIDATION_ERROR');
+      expect(githubClient.getBranches).not.toHaveBeenCalled();
+    });
+
+    it('returns HTTP 404 when repository is not found', async () => {
+      vi.mocked(githubClient.getBranches).mockRejectedValueOnce(
+        new NotFoundError('GitHub resource not found at /repos/torvalds/nonexistent/branches', 'GITHUB_NOT_FOUND')
+      );
+
+      const response = await request(app).get('/api/github/repos/torvalds/nonexistent/branches');
+
+      expect(response.status).toBe(404);
+      expect(response.body.code).toBe('GITHUB_NOT_FOUND');
+      expect(response.body.error).toContain('not found');
+    });
+  });
 });
+

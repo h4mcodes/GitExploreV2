@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { githubClient } from '../github/client.js';
-import { GithubApiUser, GithubApiRepo } from '../github/types.js';
+import { GithubApiUser, GithubApiRepo, GithubApiBranch } from '../github/types.js';
 
 /**
  * Controller handler to fetch a normalized GitHub user profile by username.
@@ -47,6 +47,35 @@ export async function getUserRepositories(
     });
 
     res.status(200).json(repos);
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * Controller handler to fetch branches of a repository.
+ */
+export async function getRepositoryBranches(
+  req: Request<
+    { owner: string; repo: string },
+    GithubApiBranch[],
+    unknown,
+    { page?: string; per_page?: string }
+  >,
+  res: Response<GithubApiBranch[]>,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const { owner, repo } = req.params;
+    const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+    const per_page = req.query.per_page ? parseInt(req.query.per_page, 10) : 100;
+
+    const branches = await githubClient.getBranches(owner, repo, {
+      page: isNaN(page) ? 1 : page,
+      per_page: isNaN(per_page) ? 100 : per_page,
+    });
+
+    res.status(200).json(branches);
   } catch (err) {
     next(err);
   }

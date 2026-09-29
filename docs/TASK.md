@@ -948,9 +948,9 @@ Branch listing is required for the branch explorer, commit history, and branch c
 - Backend builds
 
 **Completion Criteria**
-- [ ] Branches endpoint functional
-- [ ] Response matches GithubBranch interface
-- [ ] Backend builds
+- [x] Branches endpoint functional
+- [x] Response matches GithubBranch interface
+- [x] Backend builds
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -961,7 +961,7 @@ Branch listing is required for the branch explorer, commit history, and branch c
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

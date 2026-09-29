@@ -19,9 +19,11 @@ export function createApp(): Express {
   );
   app.use(express.json());
 
-  // Mount routes
+  // Mount routes (supporting both with and without /api prefix for proxy/serverless flexibility)
   app.use('/api/health', healthRouter);
+  app.use('/health', healthRouter);
   app.use('/api/github', githubRouter);
+  app.use('/github', githubRouter);
 
   // Root fallback
   app.get('/', (_req: Request, res: Response): void => {
@@ -43,11 +45,26 @@ export function createApp(): Express {
 
 const app: Express = createApp();
 
-if (process.env['NODE_ENV'] !== 'test') {
+// Only start the HTTP listener when running directly in local Node, not on Vercel or in tests
+const isServerless = Boolean(process.env['VERCEL'] || process.env['AWS_LAMBDA_FUNCTION_NAME']);
+if (process.env['NODE_ENV'] !== 'test' && !isServerless) {
   app.listen(env.port, (): void => {
     console.log(`[GitExplore Backend] Server running on port ${env.port} (${env.nodeEnv})`);
     console.log(`[GitExplore Backend] Health check: http://localhost:${env.port}/api/health`);
   });
 }
 
+// Export callable app compatible with both ES Modules and Vercel CommonJS handler expectations
+try {
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = Object.assign(app, { createApp, default: app });
+  }
+} catch {
+  // Ignored in strict ESM runtime environments
+}
+
 export default app;
+
+
+
+

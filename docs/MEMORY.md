@@ -231,10 +231,10 @@ See `docs/PRD.md` for full product requirements and `docs/ARCHITECTURE.md` for s
 
 ```
 Current Day:    3 (In Progress)
-Current Push:   2 (D3-P2: Profile API)
-Current Objective: Create validated GET /api/github/users/:username proxy endpoint
+Current Push:   3 (D3-P3: Repository API)
+Current Objective: Create validated GET /api/github/users/:username/repos endpoint with pagination & sorting
 Current Status: Completed
-Next Task:      D3-P3: Repository API (Create GET /api/github/users/:username/repos and /api/github/repos/:owner/:repo)
+Next Task:      D3-P4: Branch API (Create GET /api/github/repos/:owner/:repo/branches endpoint)
 ```
 
 ---
@@ -270,6 +270,32 @@ Next Task:      D3-P3: Repository API (Create GET /api/github/users/:username/re
 | 2026-09-29 | Configured Vitest as Backend Test Runner | Fast ESM-native testing with mocked Prisma client suites for all repository operations |
 | 2026-09-29 | Created Server-Side GitHub Client & Normalizer | Bearer token auth, rate-limit header parsing, in-flight deduplication, and in-memory TTL cache |
 | 2026-09-29 | Implemented Validated Profile Proxy Route | `GET /api/github/users/:username` mounted with schema validation and error handling |
+| 2026-09-29 | Implemented Validated Repository Listing Route | `GET /api/github/users/:username/repos` supporting pagination, sorting, and field validation |
+
+---
+
+## Change Log
+
+| Date | Change | Impact |
+| :--- | :--- | :--- |
+| 2026-09-28 | Created `docs/PRD.md` | V2 product requirements documented |
+| 2026-09-28 | Created `docs/ARCHITECTURE.md` | V2 system architecture documented |
+| 2026-09-28 | Created `docs/RULES.md` | Engineering constraints codified |
+| 2026-09-28 | Created `docs/TASK.md` | 60-milestone execution roadmap created |
+| 2026-09-28 | Created `docs/MEMORY.md` | Persistent project memory initialized |
+| 2026-09-28 | Initialized `backend/` skeleton (D1-P3) | Express, TypeScript strict, `GET /api/health` tested |
+| 2026-09-28 | Added API infrastructure (D1-P4) | Centralized error handler, request validation middleware, AppError hierarchy |
+| 2026-09-28 | Extended CI workflow (D1-P5) | Parallel frontend and backend build/typecheck jobs in `.github/workflows/ci.yml` |
+| 2026-09-28 | Completed Day 1 audit (D1-P6) | All 6 milestones verified green across frontend, backend, CI, and docs |
+| 2026-09-28 | Completed Prisma setup (D2-P1) | Initialized `backend/prisma/schema.prisma` and `backend/src/config/database.ts` |
+| 2026-09-28 | Completed Core Persistence Schema (D2-P2) | Added `User` and `SavedRepository` models with validation and client generation |
+| 2026-09-28 | Completed Workspace Entities Schema (D2-P3) | Added `Investigation`, `Note`, `Bookmark`, `Tag`, `RepositoryTag`, `AIAnalysis` models and enums |
+| 2026-09-28 | Completed Database Migrations & Service (D2-P4) | Generated initial migration SQL, lockfile, and enhanced database health verification |
+| 2026-09-28 | Implemented Repository Persistence API (D2-P5) | Created `userRepository.ts` and `savedRepoRepository.ts` with strict types |
+| 2026-09-29 | Completed Database Tests (D2-P6) | Configured Vitest, added 12 unit tests across `userRepository` and `savedRepoRepository`, updated CI |
+| 2026-09-29 | Implemented GitHub Service (D3-P1) | Created `GithubClient`, response normalizers, types, and comprehensive Vitest test suite |
+| 2026-09-29 | Implemented Profile API (D3-P2) | Added `GET /api/github/users/:username`, controller, supertest route tests, and app mounting |
+| 2026-09-29 | Implemented Repository API (D3-P3) | Added `GET /api/github/users/:username/repos`, controller, supertest route tests, and query validation |
 
 ---
 

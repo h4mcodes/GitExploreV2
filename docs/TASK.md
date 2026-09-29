@@ -896,10 +896,10 @@ Repository listing is the second most-used GitHub endpoint in the V1 frontend. M
 - Backend builds
 
 **Completion Criteria**
-- [ ] Repos endpoint functional with query parameters
-- [ ] Response matches GithubRepository interface
-- [ ] Error handling for invalid users
-- [ ] Backend builds
+- [x] Repos endpoint functional with query parameters
+- [x] Response matches GithubRepository interface
+- [x] Error handling for invalid users
+- [x] Backend builds
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -910,7 +910,7 @@ Repository listing is the second most-used GitHub endpoint in the V1 frontend. M
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

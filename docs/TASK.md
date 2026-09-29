@@ -783,12 +783,12 @@ Moving GitHub API calls server-side unlocks 5,000 req/hr (vs. 60 unauthenticated
 - Token not exposed in logs or responses
 
 **Completion Criteria**
-- [ ] GitHub client with token authentication
-- [ ] Rate-limit header parsing
-- [ ] In-memory TTL cache
-- [ ] Response type definitions
-- [ ] Token loaded from env, never exposed
-- [ ] Backend builds
+- [x] GitHub client with token authentication
+- [x] Rate-limit header parsing
+- [x] In-memory TTL cache
+- [x] Response type definitions
+- [x] Token loaded from env, never exposed
+- [x] Backend builds
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -799,7 +799,7 @@ Moving GitHub API calls server-side unlocks 5,000 req/hr (vs. 60 unauthenticated
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

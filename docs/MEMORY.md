@@ -230,11 +230,11 @@ See `docs/PRD.md` for full product requirements and `docs/ARCHITECTURE.md` for s
 ## Current Task
 
 ```
-Current Day:    2 (Completed)
-Current Push:   6 (D2-P6: Database Tests)
-Current Objective: Unit and contract tests for database persistence repository layer
+Current Day:    3 (In Progress)
+Current Push:   1 (D3-P1: GitHub Service)
+Current Objective: Create server-side GitHub client with auth, rate-limiting, and caching
 Current Status: Completed
-Next Task:      D3-P1: GitHub Service (Create server-side GitHub client with auth & cache)
+Next Task:      D3-P2: GitHub Proxy Routes (Create Express routes for GitHub data with validation)
 ```
 
 ---
@@ -268,6 +268,7 @@ Next Task:      D3-P1: GitHub Service (Create server-side GitHub client with aut
 | 2026-09-28 | Generated Initial PostgreSQL Migration | Migration SQL in `prisma/migrations/20260928000000_init/migration.sql` with health check utility |
 | 2026-09-28 | Implemented Repository Data Access Layer | `userRepository` and `savedRepoRepository` with typed CRUD operations |
 | 2026-09-29 | Configured Vitest as Backend Test Runner | Fast ESM-native testing with mocked Prisma client suites for all repository operations |
+| 2026-09-29 | Created Server-Side GitHub Client & Normalizer | Bearer token auth, rate-limit header parsing, in-flight deduplication, and in-memory TTL cache |
 
 ---
 
@@ -290,3 +291,4 @@ Next Task:      D3-P1: GitHub Service (Create server-side GitHub client with aut
 | 2026-09-28 | Completed Database Migrations & Service (D2-P4) | Generated initial migration SQL, lockfile, and enhanced database health verification |
 | 2026-09-28 | Implemented Repository Persistence API (D2-P5) | Created `userRepository.ts` and `savedRepoRepository.ts` with strict types |
 | 2026-09-29 | Completed Database Tests (D2-P6) | Configured Vitest, added 12 unit tests across `userRepository` and `savedRepoRepository`, updated CI |
+| 2026-09-29 | Implemented GitHub Service (D3-P1) | Created `GithubClient`, response normalizers, types, and comprehensive Vitest test suite |

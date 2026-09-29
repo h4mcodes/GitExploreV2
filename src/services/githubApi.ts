@@ -1,3 +1,4 @@
+import { apiClient, BackendApiError } from './api';
 import type {
   ActivityStats,
   CommitNode,
@@ -43,6 +44,7 @@ export class GithubApiError extends Error {
 export interface RequestOptions {
   bypassCache?: boolean;
   ttlMs?: number;
+  signal?: AbortSignal;
 }
 
 interface CacheEntry<T> {
@@ -298,9 +300,66 @@ export async function fetchGithubUser(
 ): Promise<GithubUser> {
   const normalized = username.trim().toLowerCase();
   const cacheKey = `user:${normalized}`;
-  const url = `${GITHUB_API_URL}/${encodeURIComponent(username.trim())}`;
-  return executeGithubRequest(cacheKey, url, isGithubUser, CACHE_TTL.USER_PROFILE, options);
+
+  // Check client-side memory cache if not bypassing
+  if (!options?.bypassCache) {
+    const cached = apiCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp < cached.ttlMs)) {
+      return cached.data as GithubUser;
+    }
+  }
+
+  try {
+    const user = await apiClient.getGithubUser(username, {
+      signal: options?.signal,
+      bypassCache: options?.bypassCache,
+      ttlMs: options?.ttlMs,
+    });
+
+    if (!isGithubUser(user)) {
+      throw new GithubApiError('unexpected');
+    }
+
+    // Cache valid profile response
+    const effectiveTtl = options?.ttlMs ?? CACHE_TTL.USER_PROFILE;
+    if (effectiveTtl > 0) {
+      if (apiCache.size >= MAX_CACHE_ENTRIES) {
+        const oldestKey = apiCache.keys().next().value;
+        if (oldestKey) apiCache.delete(oldestKey);
+      }
+      apiCache.set(cacheKey, {
+        data: user,
+        timestamp: Date.now(),
+        ttlMs: effectiveTtl,
+      });
+    }
+
+    return user;
+  } catch (err) {
+    if (err instanceof BackendApiError) {
+      if (err.kind === 'not-found') {
+        throw new GithubApiError('not-found', 404, undefined, err.message);
+      }
+      if (err.kind === 'rate-limit') {
+        throw new GithubApiError('rate-limit', 429, err.rateLimitResetDate, err.message);
+      }
+      if (err.kind === 'network') {
+        throw new GithubApiError('network', undefined, undefined, err.message);
+      }
+      throw new GithubApiError('unexpected', err.status, undefined, err.message);
+    }
+    if (err instanceof GithubApiError) {
+      throw err;
+    }
+    throw new GithubApiError(
+      'unexpected',
+      undefined,
+      undefined,
+      err instanceof Error ? err.message : 'Unknown error'
+    );
+  }
 }
+
 
 export async function fetchGithubRepositories(
   username: string,

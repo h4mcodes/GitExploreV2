@@ -1061,11 +1061,11 @@ This is the first concrete integration between frontend and backend. It proves t
 **Browser Testing Required:** Yes — verify profile search end-to-end in browser
 
 **Completion Criteria**
-- [ ] `src/services/api.ts` created with typed backend API client
-- [ ] `fetchGithubUser` migrated to use backend API
-- [ ] Profile search works through backend
-- [ ] All other features still work via direct GitHub calls
-- [ ] Frontend builds with zero errors
+- [x] `src/services/api.ts` created with typed backend API client
+- [x] `fetchGithubUser` migrated to use backend API
+- [x] Profile search works through backend
+- [x] All other features still work via direct GitHub calls
+- [x] Frontend builds with zero errors
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section, first migration milestone
@@ -1076,7 +1076,7 @@ This is the first concrete integration between frontend and backend. It proves t
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

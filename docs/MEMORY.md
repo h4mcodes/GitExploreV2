@@ -273,6 +273,7 @@ Next Task:      D3-P4: Branch API (Create GET /api/github/repos/:owner/:repo/bra
 | 2026-09-29 | Implemented Validated Repository Listing Route | `GET /api/github/users/:username/repos` supporting pagination, sorting, and field validation |
 | 2026-09-29 | Implemented Validated Repository Branches Route | `GET /api/github/repos/:owner/:repo/branches` supporting owner/repo validation and branch list |
 | 2026-09-29 | Implemented Validated Commit & Compare Routes | Added `GET /api/github/repos/:owner/:repo/commits`, `GET .../commits/:sha`, and `GET .../compare/:basehead` |
+| 2026-09-29 | Migrated Frontend Profile Service to Backend Proxy | Created `src/services/api.ts` and routed `fetchGithubUser` through backend API with error mapping |
 
 ---
 
@@ -300,5 +301,7 @@ Next Task:      D3-P4: Branch API (Create GET /api/github/repos/:owner/:repo/bra
 | 2026-09-29 | Implemented Repository API (D3-P3) | Added `GET /api/github/users/:username/repos`, controller, supertest route tests, and query validation |
 | 2026-09-29 | Implemented Branch API (D3-P4) | Added `GET /api/github/repos/:owner/:repo/branches`, controller, supertest route tests, and param validation |
 | 2026-09-29 | Implemented Commit & Compare API (D3-P5) | Added commits list, commit detail with patches, and branch comparison endpoints with route tests |
+| 2026-09-29 | First Frontend-to-Backend Migration (D3-P6) | Created `api.ts`, migrated `fetchGithubUser` to proxy through backend, configured dev server proxy |
+
 
 

@@ -2,6 +2,7 @@ import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import { env } from './config/env.js';
 import { healthRouter } from './routes/health.js';
+import { githubRouter } from './routes/github.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 
 export function createApp(): Express {
@@ -20,6 +21,7 @@ export function createApp(): Express {
 
   // Mount routes
   app.use('/api/health', healthRouter);
+  app.use('/api/github', githubRouter);
 
   // Root fallback
   app.get('/', (_req: Request, res: Response): void => {

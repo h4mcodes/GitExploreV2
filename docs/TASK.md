@@ -841,11 +841,11 @@ This is the first GitHub proxy endpoint. It replaces direct frontend-to-GitHub c
 - Backend builds
 
 **Completion Criteria**
-- [ ] Profile endpoint returns normalized GitHub user data
-- [ ] 404 handling for non-existent users
-- [ ] Rate-limit error handling
-- [ ] Username parameter validated
-- [ ] Backend builds
+- [x] Profile endpoint returns normalized GitHub user data
+- [x] 404 handling for non-existent users
+- [x] Rate-limit error handling
+- [x] Username parameter validated
+- [x] Backend builds
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -856,7 +856,7 @@ This is the first GitHub proxy endpoint. It replaces direct frontend-to-GitHub c
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

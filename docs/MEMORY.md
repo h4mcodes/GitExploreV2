@@ -206,8 +206,9 @@ See `docs/PRD.md` for full product requirements and `docs/ARCHITECTURE.md` for s
 | CSS approach | Handcrafted CSS (existing) | No migration to Tailwind or CSS modules |
 | Backend language | TypeScript (strict) | Type consistency with frontend |
 | Backend framework | Express 4 | Minimal, standard, reliable middleware ecosystem, strict TypeScript compatibility |
-| Database | PostgreSQL | Relational data (users, repos, investigations, notes) |
+| Database | PostgreSQL (Neon Free Plan) | Cloud serverless PostgreSQL provider with fast branching, high availability, and generous free tier |
 | ORM | Prisma | Type-safe, migration support, TypeScript integration |
+| Backend hosting | Vercel Services | Unified fullstack deployment with Vite frontend service + Express backend service |
 | Backend test runner | Vitest | Fast, native ESM/TypeScript execution, Vite ecosystem alignment |
 | HTTP client for GitHub | Native Fetch (server-side) | Same approach as V1 frontend, no Axios |
 | API data validation | Type guard functions (existing pattern) | V1 uses runtime type guards for all GitHub responses |
@@ -220,8 +221,6 @@ See `docs/PRD.md` for full product requirements and `docs/ARCHITECTURE.md` for s
 | Authentication method | Session-based, JWT | Both viable. Decision deferred to D5-P1. |
 | AI provider | OpenAI, Anthropic, Google, other | Provider abstraction means this can be swapped. Initial implementation TBD. |
 | AI model | GPT-4, Claude, Gemini, etc. | Depends on provider choice. Configurable via env. |
-| Backend hosting | Render, Railway, Fly.io, Vercel Serverless | Depends on cost, latency, and PostgreSQL proximity. Decision deferred to D10-P3. |
-| Database hosting | Supabase, Neon, Railway, managed PostgreSQL | Decision deferred to D10-P3. |
 | Schema validation library | Zod, io-ts, ArkType | Zod is most popular in TypeScript ecosystem. Likely choice but not locked. |
 | AI auth requirement | AI endpoints public with rate limits vs. auth-required | Deferred to D5-P1 / D6-P6. |
 
@@ -230,11 +229,11 @@ See `docs/PRD.md` for full product requirements and `docs/ARCHITECTURE.md` for s
 ## Current Task
 
 ```
-Current Day:    3 (In Progress)
-Current Push:   3 (D3-P3: Repository API)
-Current Objective: Create validated GET /api/github/users/:username/repos endpoint with pagination & sorting
+Current Day:    4 (In Progress)
+Current Push:   1 (D4-P1: Commit Graph Engine)
+Current Objective: Port buildCommitRelationshipModel to backend intelligence engine
 Current Status: Completed
-Next Task:      D3-P4: Branch API (Create GET /api/github/repos/:owner/:repo/branches endpoint)
+Next Task:      D4-P2: Commit Statistics (Compute commit frequency, average additions/deletions, active days)
 ```
 
 ---
@@ -274,6 +273,8 @@ Next Task:      D3-P4: Branch API (Create GET /api/github/repos/:owner/:repo/bra
 | 2026-09-29 | Implemented Validated Repository Branches Route | `GET /api/github/repos/:owner/:repo/branches` supporting owner/repo validation and branch list |
 | 2026-09-29 | Implemented Validated Commit & Compare Routes | Added `GET /api/github/repos/:owner/:repo/commits`, `GET .../commits/:sha`, and `GET .../compare/:basehead` |
 | 2026-09-29 | Migrated Frontend Profile Service to Backend Proxy | Created `src/services/api.ts` and routed `fetchGithubUser` through backend API with error mapping |
+| 2026-10-01 | Locked Neon PostgreSQL (Free Plan) with Prisma ORM as official database provider | Removed undecided provider references; database creation and DATABASE_URL deferred |
+| 2026-10-01 | Implemented Server-Side Commit Graph Engine (D4-P1) | Ported deterministic DAG builder to backend intelligence engine with strict typing and caching |
 
 ---
 
@@ -302,6 +303,8 @@ Next Task:      D3-P4: Branch API (Create GET /api/github/repos/:owner/:repo/bra
 | 2026-09-29 | Implemented Branch API (D3-P4) | Added `GET /api/github/repos/:owner/:repo/branches`, controller, supertest route tests, and param validation |
 | 2026-09-29 | Implemented Commit & Compare API (D3-P5) | Added commits list, commit detail with patches, and branch comparison endpoints with route tests |
 | 2026-09-29 | First Frontend-to-Backend Migration (D3-P6) | Created `api.ts`, migrated `fetchGithubUser` to proxy through backend, configured dev server proxy |
+| 2026-10-01 | Locked Neon PostgreSQL (Free Plan) database decision in docs | Updated PRD, ARCHITECTURE, RULES, TASK, and MEMORY |
+| 2026-10-01 | Implemented Commit Graph Engine (D4-P1) | Added commitGraph.ts, types.ts, and Vitest test suite |
 
 
 

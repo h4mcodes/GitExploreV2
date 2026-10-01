@@ -9,7 +9,7 @@ The V1 frontend (production on Vercel) already centralizes GitHub profile search
 V2 extends this foundation with three new capabilities:
 
 1. **Server-side GitHub integration** — moves API calls behind a Node.js backend so GitHub tokens can be stored securely, rate limits are managed per-server instead of per-browser, and response shaping happens before data reaches the client.
-2. **Persistent workspace** — a PostgreSQL database (accessed through Prisma) stores saved repositories, investigations, notes, bookmarks, and tags so a developer can close the browser and pick up exactly where they left off.
+2. **Persistent workspace** — a Neon PostgreSQL database (Free Plan, accessed through Prisma ORM) stores saved repositories, investigations, notes, bookmarks, and tags so a developer can close the browser and pick up exactly where they left off.
 3. **AI-assisted repository investigation** — an AI interpretation layer that receives structured, deterministic Git analysis evidence and returns grounded explanations. AI does not invent repository facts. It interprets data GitExplore has already computed.
 
 The relationship between these layers:
@@ -121,7 +121,7 @@ GitExplore V2 is **not** trying to become:
 | Area | Requirement |
 | :--- | :--- |
 | **Backend** | Node.js + TypeScript REST API server |
-| **Database** | PostgreSQL with Prisma ORM and migrations |
+| **Database** | PostgreSQL on Neon (Free Plan) with Prisma ORM and migrations |
 | **GitHub backend** | Server-side GitHub API integration with token management |
 | **Repository intelligence** | Commit DAG engine, statistics, branch divergence, file-change analysis |
 | **Persistent workspace** | User sessions, saved repositories, investigation records |
@@ -320,7 +320,7 @@ Rules:
 The V2 MVP is considered complete when:
 
 - [ ] A Node.js backend serves GitHub data to the frontend through `/api/github/*` endpoints
-- [ ] PostgreSQL stores user workspaces, saved repositories, investigations, notes, and bookmarks
+- [ ] PostgreSQL (Neon Free Plan, via Prisma) stores user workspaces, saved repositories, investigations, notes, and bookmarks
 - [ ] GitHub API calls happen server-side with a configured token
 - [ ] The repository intelligence engine computes DAG, statistics, divergence, and file-change analysis
 - [ ] AI provider abstraction supports at least one provider

@@ -70,7 +70,7 @@
 - **Frontend**: User interface, client-side routing, API client calls to the GitExplore backend, workspace UI, AI result rendering.
 - **Backend API**: Request routing, input validation, authentication, session management, response formatting. Orchestrates calls to GitHub, the intelligence engine, the database, and AI.
 - **GitHub API**: External data source. Called from the backend with a server-side token.
-- **PostgreSQL + Prisma**: Persistent storage for users, saved repositories, investigations, notes, bookmarks, tags, and cached AI analyses.
+- **PostgreSQL + Prisma**: Persistent storage for users, saved repositories, investigations, notes, bookmarks, tags, and cached AI analyses (hosted on Neon Free Plan, accessed via Prisma ORM).
 - **Repository Intelligence Engine**: Deterministic computation of commit DAGs, statistics, branch divergence, file-change analysis. Pure functions operating on GitHub data.
 - **AI Context Builder**: Assembles structured prompts from intelligence engine output. Manages context window limits and prompt versioning.
 - **AI Provider**: Sends prompts to an LLM provider and returns raw responses. Abstracted behind an interface so providers can be swapped.
@@ -232,7 +232,7 @@ backend/
 
 ### Technology
 
-- **PostgreSQL** — relational database for structured workspace data.
+- **PostgreSQL (Neon Free Plan)** — serverless cloud PostgreSQL database for structured workspace data.
 - **Prisma** — type-safe ORM with migration management.
 
 ### Conceptual entities
@@ -616,9 +616,9 @@ main branch
 
 ```
 v2-fullstack branch
-  → Vercel Preview (frontend)
-  → Backend host TBD (Render, Railway, Fly.io, or Vercel Serverless)
-  → PostgreSQL host TBD (Supabase, Neon, Railway, or managed provider)
+  → Vercel Preview (frontend service)
+  → Vercel Services (backend service)
+  → PostgreSQL (Neon Free Plan)
 ```
 
 ### V2 (production target)
@@ -627,9 +627,9 @@ v2-fullstack branch
 v2-fullstack
   → full validation pass
   → merge to main
-  → Vercel Production (frontend)
-  → Backend production deployment
-  → PostgreSQL production database
+  → Vercel Production (frontend service)
+  → Vercel Services (backend production deployment)
+  → PostgreSQL production database (Neon Free Plan)
 ```
 
 ### Environment configuration

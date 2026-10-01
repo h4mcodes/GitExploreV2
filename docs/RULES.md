@@ -65,7 +65,7 @@ This document defines mandatory engineering constraints for all agents and devel
 
 ## Database Rules
 
-- **PostgreSQL only.** Do not introduce SQLite, MongoDB, or other databases.
+- **PostgreSQL (Neon Free Plan) only.** Do not introduce SQLite, MongoDB, Supabase, or other database engines/providers.
 - **Prisma ORM.** All database access goes through Prisma. No raw SQL unless Prisma genuinely cannot express the query.
 - **Migrations.** Schema changes must use Prisma migrations. Do not modify the database schema manually.
 - **Indexes where justified.** Add indexes on foreign keys and frequently queried columns. Do not add indexes speculatively.

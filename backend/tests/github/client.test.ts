@@ -103,6 +103,8 @@ describe('GithubClient', () => {
       name: 'cached-repo',
       full_name: 'octocat/cached-repo',
       owner: { login: 'octocat', id: 1, avatar_url: '' },
+      created_at: '2026-01-01T00:00:00Z',
+      updated_at: '2026-01-02T00:00:00Z',
     };
 
     mockFetch.mockResolvedValue({

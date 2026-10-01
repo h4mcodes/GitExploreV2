@@ -1121,10 +1121,10 @@ The commit DAG is the foundation of GitExplore's repository intelligence. Runnin
 - Backend builds
 
 **Completion Criteria**
-- [ ] `commitGraph.ts` implements the DAG algorithm
-- [ ] Output matches V1 for identical input
-- [ ] Strict TypeScript types for all graph structures
-- [ ] Backend builds
+- [x] `commitGraph.ts` implements the DAG algorithm
+- [x] Output matches V1 for identical input
+- [x] Strict TypeScript types for all graph structures
+- [x] Backend builds
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -1135,7 +1135,7 @@ The commit DAG is the foundation of GitExplore's repository intelligence. Runnin
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 
@@ -3017,15 +3017,15 @@ Documentation must accurately describe what was built. Stale documentation misle
 ### D10-P3 — Production Configuration
 
 **Objective**
-Configure production environment variables, database connection, CORS origins, and deployment settings.
+Configure production environment variables, Neon PostgreSQL database connection (Free Plan), CORS origins, and deployment settings.
 
 **Why**
-Production configuration must be correct before deployment. Misconfigured CORS, database URLs, or API keys will cause immediate production failures.
+Production configuration must be correct before deployment. Misconfigured CORS, Neon database URLs, or API keys will cause immediate production failures.
 
 **Scope**
 - Finalize production env configuration
 - Configure production CORS origins
-- Configure production database URL
+- Configure production Neon PostgreSQL database URL (`DATABASE_URL`) and verify Prisma migrations
 - Verify `.env.example` is complete and accurate
 
 **Required Skills**

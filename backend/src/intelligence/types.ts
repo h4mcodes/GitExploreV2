@@ -65,3 +65,30 @@ export interface CommitStatistics {
   readonly timeline: CommitTimelineDistribution;
 }
 
+export interface CommitDeltaAuthorSummary {
+  readonly name: string;
+  readonly login: string | null;
+  readonly commitCount: number;
+}
+
+export interface CommitDeltaSummary {
+  readonly totalCommits: number;
+  readonly authors: readonly CommitDeltaAuthorSummary[];
+  readonly totalAdditions: number;
+  readonly totalDeletions: number;
+  readonly totalFilesChanged: number;
+  readonly commitMessages: readonly string[];
+}
+
+export interface BranchDivergenceAnalysis {
+  readonly baseRef: string;
+  readonly headRef: string;
+  readonly status: 'ahead' | 'behind' | 'identical' | 'diverged';
+  readonly aheadBy: number;
+  readonly behindBy: number;
+  readonly mergeBaseSha: string | null;
+  readonly mergeBaseMessage: string | null;
+  readonly delta: CommitDeltaSummary;
+}
+
+

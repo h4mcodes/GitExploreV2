@@ -111,5 +111,39 @@ export interface FileChurnAnalysis {
   readonly fileExtensions: Record<string, number>;
 }
 
+export interface ActivityPeriod {
+  readonly startDate: string;
+  readonly endDate: string;
+  readonly commitCount: number;
+  readonly intensity: 'surge' | 'steady' | 'quiet' | 'dormant';
+}
+
+export interface GrowthTrajectory {
+  readonly pattern: 'accelerating' | 'steady' | 'decelerating' | 'dormant' | 'sporadic';
+  readonly description: string;
+  readonly recentVelocity: number;
+  readonly previousVelocity: number;
+  readonly momentumMultiplier: number;
+}
+
+export interface EvolutionTimelineBucket {
+  readonly period: string;
+  readonly commitCount: number;
+  readonly authorsCount: number;
+  readonly additions: number;
+  readonly deletions: number;
+}
+
+export interface RepositoryEvolutionAnalysis {
+  readonly totalSpanDays: number;
+  readonly totalCommits: number;
+  readonly periods: readonly ActivityPeriod[];
+  readonly trajectory: GrowthTrajectory;
+  readonly monthlyBuckets: readonly EvolutionTimelineBucket[];
+  readonly firstCommitDate: string | null;
+  readonly lastCommitDate: string | null;
+}
+
+
 
 

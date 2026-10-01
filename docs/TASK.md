@@ -1166,11 +1166,11 @@ Commit statistics provide quantitative repository intelligence that is always de
 - Backend builds
 
 **Completion Criteria**
-- [ ] Commit frequency calculation
-- [ ] Average additions/deletions per commit
-- [ ] Active days count
-- [ ] Commit distribution over time periods
-- [ ] Backend builds
+- [x] Commit frequency calculation
+- [x] Average additions/deletions per commit
+- [x] Active days count
+- [x] Commit distribution over time periods
+- [x] Backend builds
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -1181,7 +1181,7 @@ Commit statistics provide quantitative repository intelligence that is always de
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

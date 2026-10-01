@@ -230,10 +230,10 @@ See `docs/PRD.md` for full product requirements and `docs/ARCHITECTURE.md` for s
 
 ```
 Current Day:    4 (In Progress)
-Current Push:   1 (D4-P1: Commit Graph Engine)
-Current Objective: Port buildCommitRelationshipModel to backend intelligence engine
+Current Push:   2 (D4-P2: Commit Statistics)
+Current Objective: Compute commit frequency, average additions/deletions, active days, and timeline distributions
 Current Status: Completed
-Next Task:      D4-P2: Commit Statistics (Compute commit frequency, average additions/deletions, active days)
+Next Task:      D4-P3: Branch Divergence (Compute branch divergence, ahead/behind counts, divergence point, and commit delta summary)
 ```
 
 ---
@@ -275,6 +275,7 @@ Next Task:      D4-P2: Commit Statistics (Compute commit frequency, average addi
 | 2026-09-29 | Migrated Frontend Profile Service to Backend Proxy | Created `src/services/api.ts` and routed `fetchGithubUser` through backend API with error mapping |
 | 2026-10-01 | Locked Neon PostgreSQL (Free Plan) with Prisma ORM as official database provider | Removed undecided provider references; database creation and DATABASE_URL deferred |
 | 2026-10-01 | Implemented Server-Side Commit Graph Engine (D4-P1) | Ported deterministic DAG builder to backend intelligence engine with strict typing and caching |
+| 2026-10-01 | Implemented Commit Statistics Engine (D4-P2) | Deterministic frequency, change stats, and timeline distributions |
 
 ---
 
@@ -305,6 +306,7 @@ Next Task:      D4-P2: Commit Statistics (Compute commit frequency, average addi
 | 2026-09-29 | First Frontend-to-Backend Migration (D3-P6) | Created `api.ts`, migrated `fetchGithubUser` to proxy through backend, configured dev server proxy |
 | 2026-10-01 | Locked Neon PostgreSQL (Free Plan) database decision in docs | Updated PRD, ARCHITECTURE, RULES, TASK, and MEMORY |
 | 2026-10-01 | Implemented Commit Graph Engine (D4-P1) | Added commitGraph.ts, types.ts, and Vitest test suite |
+| 2026-10-01 | Implemented Commit Statistics (D4-P2) | Added statistics.ts, types in types.ts, and Vitest suite |
 
 
 

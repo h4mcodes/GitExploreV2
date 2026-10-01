@@ -91,4 +91,25 @@ export interface BranchDivergenceAnalysis {
   readonly delta: CommitDeltaSummary;
 }
 
+export interface FileMetrics {
+  readonly filename: string;
+  readonly changeCount: number;
+  readonly additions: number;
+  readonly deletions: number;
+  readonly totalChanges: number;
+  readonly churnScore: number;
+  readonly lastModifiedDate: string | null;
+  readonly statuses: readonly string[];
+}
+
+export interface FileChurnAnalysis {
+  readonly totalFilesChanged: number;
+  readonly totalFileModifications: number;
+  readonly totalAdditions: number;
+  readonly totalDeletions: number;
+  readonly hotspots: readonly FileMetrics[];
+  readonly fileExtensions: Record<string, number>;
+}
+
+
 

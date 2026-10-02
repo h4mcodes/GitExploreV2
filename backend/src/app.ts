@@ -5,6 +5,7 @@ import { healthRouter } from './routes/health.js';
 import { githubRouter } from './routes/github.js';
 import { repositoriesRouter } from './routes/repositories.js';
 import { authRouter } from './routes/auth.js';
+import { workspaceRouter } from './routes/workspace.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 
 export function createApp(): Express {
@@ -30,6 +31,8 @@ export function createApp(): Express {
   app.use('/repositories', repositoriesRouter);
   app.use('/api/auth', authRouter);
   app.use('/auth', authRouter);
+  app.use('/api/workspace', workspaceRouter);
+  app.use('/workspace', workspaceRouter);
 
   // Root fallback
   app.get('/', (_req: Request, res: Response): void => {

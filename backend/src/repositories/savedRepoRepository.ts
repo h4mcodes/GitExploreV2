@@ -41,6 +41,25 @@ export async function findSavedRepoById(id: string): Promise<SavedRepository | n
 }
 
 /**
+ * Retrieves a saved repository for a specific user by its full name (owner/name).
+ */
+export async function findSavedRepoByUserAndFullName(
+  userId: string,
+  fullName: string
+): Promise<SavedRepository | null> {
+  return prisma.savedRepository.findFirst({
+    where: {
+      userId,
+      fullName: {
+        equals: fullName,
+        mode: 'insensitive',
+      },
+    },
+  });
+}
+
+
+/**
  * Creates a new saved repository record.
  */
 export async function createSavedRepo(data: CreateSavedRepoInput): Promise<SavedRepository> {

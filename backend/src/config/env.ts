@@ -10,6 +10,7 @@ export interface EnvironmentConfig {
   readonly corsOrigin: string;
   readonly githubToken?: string;
   readonly databaseUrl?: string;
+  readonly jwtSecret: string;
   readonly aiProvider?: string;
   readonly aiApiKey?: string;
 }
@@ -39,6 +40,7 @@ export function loadEnvironmentConfig(): EnvironmentConfig {
   const corsOrigin = process.env['CORS_ORIGIN'] || 'http://localhost:5173';
   const githubToken = process.env['GITHUB_TOKEN'] || undefined;
   const databaseUrl = process.env['DATABASE_URL'] || undefined;
+  const jwtSecret = process.env['JWT_SECRET'] || 'gitexplore-v2-jwt-secret-key-32-chars-minimum-token';
   const aiProvider = process.env['AI_PROVIDER'] || undefined;
   const aiApiKey = process.env['AI_API_KEY'] || undefined;
 
@@ -48,9 +50,11 @@ export function loadEnvironmentConfig(): EnvironmentConfig {
     corsOrigin,
     githubToken,
     databaseUrl,
+    jwtSecret,
     aiProvider,
     aiApiKey,
   };
 }
+
 
 export const env: EnvironmentConfig = loadEnvironmentConfig();

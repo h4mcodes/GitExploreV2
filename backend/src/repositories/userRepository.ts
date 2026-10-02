@@ -6,6 +6,7 @@ export interface CreateUserInput {
   readonly githubId?: string | null;
   readonly email?: string | null;
   readonly avatarUrl?: string | null;
+  readonly passwordHash?: string | null;
 }
 
 export interface UpdateUserInput {
@@ -13,7 +14,9 @@ export interface UpdateUserInput {
   readonly githubId?: string | null;
   readonly email?: string | null;
   readonly avatarUrl?: string | null;
+  readonly passwordHash?: string | null;
 }
+
 
 /**
  * Retrieves a user by their unique primary key UUID.
@@ -52,6 +55,7 @@ export async function createUser(data: CreateUserInput): Promise<User> {
       githubId: data.githubId ?? undefined,
       email: data.email ?? undefined,
       avatarUrl: data.avatarUrl ?? undefined,
+      passwordHash: data.passwordHash ?? undefined,
     },
   });
 }
@@ -67,6 +71,8 @@ export async function updateUser(id: string, data: UpdateUserInput): Promise<Use
       ...(data.githubId !== undefined ? { githubId: data.githubId } : {}),
       ...(data.email !== undefined ? { email: data.email } : {}),
       ...(data.avatarUrl !== undefined ? { avatarUrl: data.avatarUrl } : {}),
+      ...(data.passwordHash !== undefined ? { passwordHash: data.passwordHash } : {}),
     },
   });
 }
+

@@ -59,9 +59,17 @@ export class ForbiddenError extends AppError {
   }
 }
 
+export class ConflictError extends AppError {
+  constructor(message: string = 'Resource conflict', code: string = 'CONFLICT', details?: unknown) {
+    super(message, 409, code, details);
+    this.name = 'ConflictError';
+  }
+}
+
 export class RateLimitError extends AppError {
   constructor(message: string = 'Rate limit exceeded', code: string = 'RATE_LIMIT_EXCEEDED') {
     super(message, 429, code);
     this.name = 'RateLimitError';
   }
 }
+

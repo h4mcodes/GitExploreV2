@@ -28,13 +28,15 @@ enum AnalysisType {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  githubId  String?  @unique
-  username  String   @unique
-  email     String?
-  avatarUrl String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(uuid())
+  githubId     String?  @unique
+  username     String   @unique
+  email        String?
+  avatarUrl    String?
+  passwordHash String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
 
   savedRepositories SavedRepository[]
   investigations    Investigation[]

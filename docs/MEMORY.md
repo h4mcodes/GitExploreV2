@@ -213,28 +213,30 @@ See `docs/PRD.md` for full product requirements and `docs/ARCHITECTURE.md` for s
 | HTTP client for GitHub | Native Fetch (server-side) | Same approach as V1 frontend, no Axios |
 | API data validation | Type guard functions (existing pattern) | V1 uses runtime type guards for all GitHub responses |
 | Frontend routing | React Router DOM 7 (existing) | Already configured |
+| Authentication method | HMAC-SHA256 JWT with salted scrypt hashing | Stateless Bearer tokens ideal for serverless/Vercel scaling, standard expiration and in-memory revocation |
 
 ### UNDECIDED
 
 | Decision | Options | Notes |
 | :--- | :--- | :--- |
-| Authentication method | Session-based, JWT | Both viable. Decision deferred to D5-P1. |
 | AI provider | OpenAI, Anthropic, Google, other | Provider abstraction means this can be swapped. Initial implementation TBD. |
 | AI model | GPT-4, Claude, Gemini, etc. | Depends on provider choice. Configurable via env. |
 | Schema validation library | Zod, io-ts, ArkType | Zod is most popular in TypeScript ecosystem. Likely choice but not locked. |
-| AI auth requirement | AI endpoints public with rate limits vs. auth-required | Deferred to D5-P1 / D6-P6. |
+| AI auth requirement | AI endpoints public with rate limits vs. auth-required | Deferred to D6-P6. |
 
 ---
 
 ## Current Task
 
 ```
-Current Day:    4 (In Progress)
-Current Push:   2 (D4-P2: Commit Statistics)
-Current Objective: Compute commit frequency, average additions/deletions, active days, and timeline distributions
+Current Day:    5 (In Progress)
+Current Push:   3 (D5-P3: Saved Repositories)
+Current Objective: Create endpoints for saving, listing, and removing repositories from a user's workspace
 Current Status: Completed
-Next Task:      D4-P3: Branch Divergence (Compute branch divergence, ahead/behind counts, divergence point, and commit delta summary)
+Next Task:      D5-P4: Investigations (Create CRUD endpoints for investigations with context snapshots)
 ```
+
+
 
 ---
 
@@ -276,6 +278,13 @@ Next Task:      D4-P3: Branch Divergence (Compute branch divergence, ahead/behin
 | 2026-10-01 | Locked Neon PostgreSQL (Free Plan) with Prisma ORM as official database provider | Removed undecided provider references; database creation and DATABASE_URL deferred |
 | 2026-10-01 | Implemented Server-Side Commit Graph Engine (D4-P1) | Ported deterministic DAG builder to backend intelligence engine with strict typing and caching |
 | 2026-10-01 | Implemented Commit Statistics Engine (D4-P2) | Deterministic frequency, change stats, and timeline distributions |
+| 2026-10-01 | Implemented Branch Divergence Engine (D4-P3) | Deterministic ahead/behind, merge base, and author/file commit delta summary |
+| 2026-10-01 | Implemented File-Change Intelligence Engine (D4-P4) | File churn, hotspot detection, additions/deletions aggregation, and extension distribution |
+| 2026-10-02 | Implemented Repository Evolution Engine (D4-P5) | Activity periods classification, growth trajectory patterns, and monthly timeline bucketing |
+| 2026-10-02 | Implemented Intelligence API (D4-P6) | REST endpoints GET /api/repositories/:owner/:repo/analysis and POST /api/repositories/:owner/:repo/analyze with caching |
+| 2026-10-02 | Implemented Authentication Foundation (D5-P1) | User registration, login, logout, salted scrypt password hashing, and JWT auth middleware |
+| 2026-10-02 | Implemented User Workspace Overview (D5-P2) | GET /api/workspace endpoint returning aggregated metrics and chronological activity feed |
+| 2026-10-02 | Implemented Saved Repositories API (D5-P3) | GET /api/workspace/repositories, POST save repository with duplicate prevention, DELETE saved repo |
 
 ---
 
@@ -307,6 +316,15 @@ Next Task:      D4-P3: Branch Divergence (Compute branch divergence, ahead/behin
 | 2026-10-01 | Locked Neon PostgreSQL (Free Plan) database decision in docs | Updated PRD, ARCHITECTURE, RULES, TASK, and MEMORY |
 | 2026-10-01 | Implemented Commit Graph Engine (D4-P1) | Added commitGraph.ts, types.ts, and Vitest test suite |
 | 2026-10-01 | Implemented Commit Statistics (D4-P2) | Added statistics.ts, types in types.ts, and Vitest suite |
+| 2026-10-01 | Implemented Branch Divergence (D4-P3) | Added divergence.ts, types in types.ts, and Vitest suite |
+| 2026-10-01 | Implemented File-Change Intelligence (D4-P4) | Added fileAnalysis.ts, types in types.ts, and Vitest suite |
+| 2026-10-02 | Implemented Repository Evolution (D4-P5) | Added evolution.ts, types in types.ts, and Vitest suite |
+| 2026-10-02 | Implemented Intelligence API (D4-P6) | Added repositoriesRouter, repositoryController, analysis caching, and route tests |
+| 2026-10-02 | Implemented Authentication Foundation (D5-P1) | Added authRouter, authController, authService, scrypt hashing, JWT tokens, and route protection |
+| 2026-10-02 | Implemented User Workspace Overview (D5-P2) | Added workspaceRouter, workspaceController, aggregate metrics, and activity feed |
+| 2026-10-02 | Implemented Saved Repositories API (D5-P3) | Added saved repositories list, save, and delete handlers with duplicate checks and auth |
+
+
 
 
 

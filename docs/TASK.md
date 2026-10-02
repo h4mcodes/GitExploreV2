@@ -1212,10 +1212,10 @@ Branch divergence is critical for branch comparison and AI branch analysis. It m
 - Backend builds
 
 **Completion Criteria**
-- [ ] Ahead/behind counts computed
-- [ ] Divergence point identified
-- [ ] Commit delta summary generated
-- [ ] Backend builds
+- [x] Ahead/behind counts computed
+- [x] Divergence point identified
+- [x] Commit delta summary generated
+- [x] Backend builds
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -1226,7 +1226,7 @@ Branch divergence is critical for branch comparison and AI branch analysis. It m
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 
@@ -1257,10 +1257,10 @@ File-change analysis reveals hotspots in the codebase — files that change freq
 - Backend builds
 
 **Completion Criteria**
-- [ ] File-change frequency computed
-- [ ] Most-changed files identified
-- [ ] Additions/deletions aggregated per file
-- [ ] Backend builds
+- [x] File-change frequency computed
+- [x] Most-changed files identified
+- [x] Additions/deletions aggregated per file
+- [x] Backend builds
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -1271,7 +1271,7 @@ File-change analysis reveals hotspots in the codebase — files that change freq
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 
@@ -1302,10 +1302,10 @@ Evolution analysis shows how a repository developed over its lifespan — identi
 - Backend builds
 
 **Completion Criteria**
-- [ ] Activity period identification
-- [ ] Growth trajectory assessment
-- [ ] Commit density over time
-- [ ] Backend builds
+- [x] Activity period identification
+- [x] Growth trajectory assessment
+- [x] Commit density over time
+- [x] Backend builds
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -1316,7 +1316,7 @@ Evolution analysis shows how a repository developed over its lifespan — identi
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 
@@ -1358,11 +1358,11 @@ The intelligence engine's output must be accessible to both the frontend (for di
 - Backend builds
 
 **Completion Criteria**
-- [ ] GET analysis endpoint functional
-- [ ] POST analyze endpoint triggers intelligence engine
-- [ ] Combined response with all analysis types
-- [ ] Results cached for subsequent GET requests
-- [ ] Backend builds
+- [x] GET analysis endpoint functional
+- [x] POST analyze endpoint triggers intelligence engine
+- [x] Combined response with all analysis types
+- [x] Results cached for subsequent GET requests
+- [x] Backend builds
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -1373,7 +1373,8 @@ The intelligence engine's output must be accessible to both the frontend (for di
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
+
 
 ---
 
@@ -1426,12 +1427,12 @@ Persistent workspaces require user identity. Without authentication, saved repos
 - Backend builds
 
 **Completion Criteria**
-- [ ] Registration endpoint creates user with hashed password
-- [ ] Login endpoint returns session/token
-- [ ] Logout endpoint invalidates session/token
-- [ ] Auth middleware protects routes
-- [ ] 401 returned for unauthenticated requests
-- [ ] Auth method decision documented in MEMORY.md
+- [x] Registration endpoint creates user with hashed password
+- [x] Login endpoint returns session/token
+- [x] Logout endpoint invalidates session/token
+- [x] Auth middleware protects routes
+- [x] 401 returned for unauthenticated requests
+- [x] Auth method decision documented in MEMORY.md
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — move auth method from UNDECIDED to DECIDED, Current Task section
@@ -1442,7 +1443,8 @@ Persistent workspaces require user identity. Without authentication, saved repos
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
+
 
 ---
 
@@ -1477,10 +1479,10 @@ The workspace overview gives users a quick summary of their saved content — re
 - Backend builds
 
 **Completion Criteria**
-- [ ] Workspace overview endpoint functional
-- [ ] Requires authentication
-- [ ] Returns accurate counts
-- [ ] Backend builds
+- [x] Workspace overview endpoint functional
+- [x] Requires authentication
+- [x] Returns accurate counts
+- [x] Backend builds
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -1491,7 +1493,7 @@ The workspace overview gives users a quick summary of their saved content — re
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 
@@ -1526,9 +1528,9 @@ Saved repositories are the central organizing concept of the workspace. Users sa
 - Backend builds
 
 **Completion Criteria**
-- [ ] List, save, and delete saved repositories functional
-- [ ] Authorization enforced (user sees only their own repos)
-- [ ] Backend builds
+- [x] List, save, and delete saved repositories functional
+- [x] Authorization enforced (user sees only their own repos)
+- [x] Backend builds
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -1539,7 +1541,8 @@ Saved repositories are the central organizing concept of the workspace. Users sa
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
+
 
 ---
 
@@ -1576,11 +1579,11 @@ Investigations are the core persistence feature of GitExplore V2. They capture w
 - Backend builds
 
 **Completion Criteria**
-- [ ] Create, list, get, update, delete investigations functional
-- [ ] Linked to saved repositories via FK
-- [ ] Context (JSON) stored correctly
-- [ ] Authorization enforced
-- [ ] Backend builds
+- [x] Create, list, get, update, delete investigations functional
+- [x] Linked to saved repositories via FK
+- [x] Context (JSON) stored correctly
+- [x] Authorization enforced
+- [x] Backend builds
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -1591,7 +1594,8 @@ Investigations are the core persistence feature of GitExplore V2. They capture w
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
+
 
 ---
 

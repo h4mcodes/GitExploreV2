@@ -187,12 +187,15 @@ export function computeActiveTimeline(
  * Computes all commit statistics in one combined pass.
  */
 export function computeCommitStatistics(
-  commits: readonly (GithubApiCommitSummary | GithubApiCommitDetail)[]
+  commits: readonly (GithubApiCommitSummary | GithubApiCommitDetail)[],
+  detailedCommits?: readonly GithubApiCommitDetail[]
 ): CommitStatistics {
+  const commitsForChanges = detailedCommits && detailedCommits.length > 0 ? detailedCommits : commits;
   return {
     totalCommits: commits.length,
     frequency: computeCommitFrequency(commits),
-    changeStats: computeChangeStats(commits),
+    changeStats: computeChangeStats(commitsForChanges),
     timeline: computeActiveTimeline(commits),
   };
 }
+

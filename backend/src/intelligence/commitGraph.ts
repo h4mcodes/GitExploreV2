@@ -197,3 +197,9 @@ export function getCommitNode(
 export function clearCommitGraphCache(): void {
   graphModelCache.clear();
 }
+
+/**
+ * Alias for buildCommitRelationshipModel.
+ */
+export const buildCommitRelationshipGraph = buildCommitRelationshipModel;
+

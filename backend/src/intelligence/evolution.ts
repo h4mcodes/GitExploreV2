@@ -299,3 +299,9 @@ export function computeEvolutionTimeline(
     lastCommitDate,
   };
 }
+
+/**
+ * Alias for computeEvolutionTimeline.
+ */
+export const computeRepositoryEvolution = computeEvolutionTimeline;
+

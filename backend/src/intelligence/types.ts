@@ -144,6 +144,19 @@ export interface RepositoryEvolutionAnalysis {
   readonly lastCommitDate: string | null;
 }
 
+export interface RepositoryAnalysis {
+  readonly owner: string;
+  readonly repo: string;
+  readonly analyzedAt: string;
+  readonly defaultBranch: string;
+  readonly graph: CommitRelationshipGraph;
+  readonly statistics: CommitStatistics;
+  readonly divergence: BranchDivergenceAnalysis | null;
+  readonly fileAnalysis: FileChurnAnalysis;
+  readonly evolution: RepositoryEvolutionAnalysis;
+}
+
+
 
 
 

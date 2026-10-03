@@ -9,8 +9,6 @@ import {
   ExternalLink,
   Star,
   GitFork,
-  GitBranch,
-  Clock,
   ShieldCheck,
   User,
   LogOut,
@@ -22,6 +20,8 @@ import {
   Bookmark,
   Activity,
   ArrowUpRight,
+  X,
+  Compass,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
@@ -34,14 +34,14 @@ import type {
 } from '../types/workspace';
 
 const PRESET_COLORS = [
-  '#3b82f6', // Blue
-  '#10b981', // Emerald
-  '#8b5cf6', // Purple
-  '#f59e0b', // Amber
-  '#ef4444', // Rose
-  '#06b6d4', // Cyan
-  '#ec4899', // Pink
-  '#64748b', // Slate
+  '#2563eb', // Blue
+  '#059669', // Emerald
+  '#7c3aed', // Purple
+  '#d97706', // Amber
+  '#dc2626', // Red
+  '#0891b2', // Cyan
+  '#db2777', // Pink
+  '#475569', // Slate
 ];
 
 export function Workspace() {
@@ -53,7 +53,7 @@ export function Workspace() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'repositories' | 'activity'>('repositories');
 
-  // Loading & Error states
+  // Loading & Notification states
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -71,16 +71,16 @@ export function Workspace() {
   const [isSavingRepo, setIsSavingRepo] = useState(false);
   const [saveRepoError, setSaveRepoError] = useState<string | null>(null);
 
-  // Tag Creation Modal / Inline
+  // Tag Creation Modal
   const [showTagModal, setShowTagModal] = useState(false);
   const [newTagName, setNewTagName] = useState('');
-  const [newTagColor, setNewTagColor] = useState(PRESET_COLORS[0] || '#3b82f6');
+  const [newTagColor, setNewTagColor] = useState(PRESET_COLORS[0] || '#2563eb');
   const [isCreatingTag, setIsCreatingTag] = useState(false);
 
   // Tag Assignment Dropdown
   const [tagAssignRepoId, setTagAssignRepoId] = useState<string | null>(null);
 
-  // Auto-dismiss notification
+  // Auto-dismiss notifications
   useEffect(() => {
     if (successMessage) {
       const timer = setTimeout(() => setSuccessMessage(null), 3500);
@@ -88,7 +88,7 @@ export function Workspace() {
     }
   }, [successMessage]);
 
-  // Load workspace data when session changes
+  // Load workspace data when session is active
   const loadWorkspaceData = useCallback(async () => {
     if (!session) return;
     setIsLoading(true);
@@ -106,7 +106,7 @@ export function Workspace() {
       if (err instanceof BackendApiError && err.status === 401) {
         apiClient.clearStoredAuth();
         setSession(null);
-        setError('Your session has expired. Please log in again.');
+        setError('Your session has expired. Please sign in again.');
       } else {
         setError(err instanceof Error ? err.message : 'Failed to load workspace data.');
       }
@@ -170,7 +170,7 @@ export function Workspace() {
     setIsAuthenticating(true);
     setAuthError(null);
     try {
-      const demoUser = `demo_engineer_${Math.floor(1000 + Math.random() * 9000)}`;
+      const demoUser = `demo_dev_${Math.floor(1000 + Math.random() * 9000)}`;
       const authSession = await apiClient.register({
         username: demoUser,
         password: 'Password123!',
@@ -179,7 +179,6 @@ export function Workspace() {
       setSession(authSession);
       setSuccessMessage(`Logged into demo workspace as @${demoUser}!`);
     } catch {
-      // If user exists, login
       try {
         const authSession = await apiClient.login({
           username: 'demo_developer',
@@ -201,7 +200,7 @@ export function Workspace() {
     setOverview(null);
     setRepositories([]);
     setTags([]);
-    setSuccessMessage('Successfully logged out.');
+    setSuccessMessage('Successfully signed out.');
   };
 
   // Handle Saving New Repository
@@ -209,7 +208,7 @@ export function Workspace() {
     e.preventDefault();
     const input = repoInput.trim().replace(/^https?:\/\/github\.com\//, '').replace(/\/+$/, '');
     if (!input || !input.includes('/')) {
-      setSaveRepoError('Please provide a repository in format owner/name (e.g. facebook/react)');
+      setSaveRepoError('Please specify repository in owner/name format (e.g. facebook/react)');
       return;
     }
 
@@ -234,8 +233,7 @@ export function Workspace() {
 
       setRepositories((prev) => [saved, ...prev]);
       setRepoInput('');
-      setSuccessMessage(`Saved ${saved.fullName} to your workspace!`);
-      // Refresh overview stats
+      setSuccessMessage(`Saved ${saved.fullName} to workspace!`);
       apiClient.getWorkspaceOverview().then(setOverview).catch(() => {});
     } catch (err) {
       if (err instanceof BackendApiError) {
@@ -278,7 +276,7 @@ export function Workspace() {
       setTags((prev) => [...prev, created]);
       setNewTagName('');
       setShowTagModal(false);
-      setSuccessMessage(`Tag '${created.name}' created.`);
+      setSuccessMessage(`Tag '${created.name}' created successfully.`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create tag');
     } finally {
@@ -288,7 +286,7 @@ export function Workspace() {
 
   // Handle Deleting Tag
   const handleDeleteTag = async (id: string, name: string) => {
-    if (!confirm(`Delete tag '${name}'? This removes it from all assigned repositories.`)) {
+    if (!confirm(`Delete tag '${name}'? This unassigns it from all repositories.`)) {
       return;
     }
 
@@ -296,7 +294,6 @@ export function Workspace() {
       await apiClient.deleteTag(id);
       setTags((prev) => prev.filter((t) => t.id !== id));
       if (selectedTagId === id) setSelectedTagId(null);
-      // Reload repositories to reflect unlinked tags
       loadWorkspaceData();
       setSuccessMessage(`Tag '${name}' deleted.`);
     } catch (err) {
@@ -352,30 +349,27 @@ export function Workspace() {
 
       <Navbar showLabel={false} />
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem', width: '100%' }}>
-        {/* Notification Banner */}
+      <div className="ws-container">
+        {/* Notification Banners */}
         <AnimatePresence>
           {successMessage && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.625rem',
-                padding: '0.75rem 1.25rem',
-                marginBottom: '1.5rem',
-                borderRadius: '12px',
-                background: 'rgba(16, 185, 129, 0.12)',
-                border: '1px solid rgba(16, 185, 129, 0.3)',
-                color: '#34d399',
-                fontSize: '0.875rem',
-                fontWeight: 500,
-              }}
+              className="ws-alert ws-alert-success"
             >
-              <CheckCircle2 size={16} />
-              {successMessage}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+                <CheckCircle2 size={16} />
+                <span>{successMessage}</span>
+              </div>
+              <button
+                type="button"
+                className="ws-alert-dismiss"
+                onClick={() => setSuccessMessage(null)}
+              >
+                Dismiss
+              </button>
             </motion.div>
           )}
 
@@ -384,35 +378,16 @@ export function Workspace() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '0.625rem',
-                padding: '0.75rem 1.25rem',
-                marginBottom: '1.5rem',
-                borderRadius: '12px',
-                background: 'rgba(239, 68, 68, 0.12)',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
-                color: '#f87171',
-                fontSize: '0.875rem',
-                fontWeight: 500,
-              }}
+              className="ws-alert ws-alert-error"
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
                 <AlertCircle size={16} />
-                {error}
+                <span>{error}</span>
               </div>
               <button
+                type="button"
+                className="ws-alert-dismiss"
                 onClick={() => setError(null)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'inherit',
-                  cursor: 'pointer',
-                  fontSize: '0.75rem',
-                  textDecoration: 'underline',
-                }}
               >
                 Dismiss
               </button>
@@ -422,315 +397,197 @@ export function Workspace() {
 
         {/* Unauthenticated State */}
         {!session ? (
-          <div style={{ maxWidth: '480px', margin: '3rem auto 0 auto' }}>
-            <motion.div
-              className="glass-card"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              style={{
-                padding: '2.5rem 2rem',
-                borderRadius: '20px',
-                background: 'rgba(15, 23, 42, 0.75)',
-                backdropFilter: 'blur(16px)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                boxShadow: '0 20px 40px -15px rgba(0, 0, 0, 0.5)',
-              }}
-            >
-              <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
-                <div
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '48px',
-                    height: '48px',
-                    borderRadius: '12px',
-                    background: 'rgba(59, 130, 246, 0.15)',
-                    border: '1px solid rgba(59, 130, 246, 0.3)',
-                    color: '#60a5fa',
-                    marginBottom: '1rem',
-                  }}
-                >
-                  <FolderGit2 size={24} />
-                </div>
-                <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc', marginBottom: '0.5rem' }}>
-                  Developer Workspace
-                </h2>
-                <p style={{ fontSize: '0.875rem', color: '#94a3b8' }}>
-                  Save repositories, run investigations, and organize notes in your private engineering dashboard.
-                </p>
+          <motion.div
+            className="ws-auth-card"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <div className="ws-auth-header">
+              <div className="ws-auth-icon-wrap">
+                <FolderGit2 size={24} />
               </div>
+              <h2 className="ws-auth-title">Developer Workspace</h2>
+              <p className="ws-auth-subtitle">
+                Save repositories, track investigations, and organize notes in your private workbench.
+              </p>
+            </div>
 
-              {/* Tabs */}
-              <div
-                style={{
-                  display: 'flex',
-                  background: 'rgba(255, 255, 255, 0.04)',
-                  padding: '0.25rem',
-                  borderRadius: '10px',
-                  marginBottom: '1.5rem',
+            {/* Auth Mode Tabs */}
+            <div className="ws-auth-tabs">
+              <button
+                type="button"
+                className={`ws-auth-tab ${authMode === 'login' ? 'active' : ''}`}
+                onClick={() => {
+                  setAuthMode('login');
+                  setAuthError(null);
                 }}
               >
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAuthMode('login');
-                    setAuthError(null);
-                  }}
+                Sign In
+              </button>
+              <button
+                type="button"
+                className={`ws-auth-tab ${authMode === 'register' ? 'active' : ''}`}
+                onClick={() => {
+                  setAuthMode('register');
+                  setAuthError(null);
+                }}
+              >
+                Create Account
+              </button>
+            </div>
+
+            {authError && (
+              <div
+                style={{
+                  padding: '0.75rem',
+                  borderRadius: '8px',
+                  background: 'rgba(239, 68, 68, 0.12)',
+                  border: '1px solid rgba(239, 68, 68, 0.25)',
+                  color: '#b91c1c',
+                  fontSize: '0.8125rem',
+                  fontWeight: 600,
+                  marginBottom: '1.25rem',
+                }}
+              >
+                {authError}
+              </div>
+            )}
+
+            <form onSubmit={handleAuthSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label
                   style={{
-                    flex: 1,
-                    padding: '0.5rem',
-                    borderRadius: '8px',
-                    border: 'none',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    background: authMode === 'login' ? 'rgba(255, 255, 255, 0.12)' : 'transparent',
-                    color: authMode === 'login' ? '#f8fafc' : '#64748b',
-                    transition: 'all 0.2s ease',
+                    display: 'block',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    color: '#2e4d70',
+                    textTransform: 'uppercase',
+                    marginBottom: '0.375rem',
+                    letterSpacing: '0.04em',
                   }}
                 >
-                  Sign In
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAuthMode('register');
-                    setAuthError(null);
-                  }}
-                  style={{
-                    flex: 1,
-                    padding: '0.5rem',
-                    borderRadius: '8px',
-                    border: 'none',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    background: authMode === 'register' ? 'rgba(255, 255, 255, 0.12)' : 'transparent',
-                    color: authMode === 'register' ? '#f8fafc' : '#64748b',
-                    transition: 'all 0.2s ease',
-                  }}
-                >
-                  Create Account
-                </button>
+                  Username
+                </label>
+                <input
+                  type="text"
+                  value={authUsername}
+                  onChange={(e) => setAuthUsername(e.target.value)}
+                  placeholder="e.g. octocat"
+                  required
+                  className="ws-auth-input"
+                />
               </div>
 
-              {authError && (
-                <div
-                  style={{
-                    padding: '0.75rem',
-                    borderRadius: '8px',
-                    background: 'rgba(239, 68, 68, 0.15)',
-                    border: '1px solid rgba(239, 68, 68, 0.3)',
-                    color: '#f87171',
-                    fontSize: '0.8125rem',
-                    marginBottom: '1.25rem',
-                  }}
-                >
-                  {authError}
+              {authMode === 'register' && (
+                <div>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      color: '#2e4d70',
+                      textTransform: 'uppercase',
+                      marginBottom: '0.375rem',
+                      letterSpacing: '0.04em',
+                    }}
+                  >
+                    Email (Optional)
+                  </label>
+                  <input
+                    type="email"
+                    value={authEmail}
+                    onChange={(e) => setAuthEmail(e.target.value)}
+                    placeholder="engineer@gitexplore.io"
+                    className="ws-auth-input"
+                  />
                 </div>
               )}
 
-              <form onSubmit={handleAuthSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '0.375rem', letterSpacing: '0.05em' }}>
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    value={authUsername}
-                    onChange={(e) => setAuthUsername(e.target.value)}
-                    placeholder="e.g. octocat"
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '0.625rem 0.875rem',
-                      borderRadius: '8px',
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      color: '#f8fafc',
-                      fontSize: '0.875rem',
-                      outline: 'none',
-                    }}
-                  />
-                </div>
-
-                {authMode === 'register' && (
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '0.375rem', letterSpacing: '0.05em' }}>
-                      Email (Optional)
-                    </label>
-                    <input
-                      type="email"
-                      value={authEmail}
-                      onChange={(e) => setAuthEmail(e.target.value)}
-                      placeholder="developer@company.com"
-                      style={{
-                        width: '100%',
-                        padding: '0.625rem 0.875rem',
-                        borderRadius: '8px',
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.12)',
-                        color: '#f8fafc',
-                        fontSize: '0.875rem',
-                        outline: 'none',
-                      }}
-                    />
-                  </div>
-                )}
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '0.375rem', letterSpacing: '0.05em' }}>
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    value={authPassword}
-                    onChange={(e) => setAuthPassword(e.target.value)}
-                    placeholder="••••••••••••"
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '0.625rem 0.875rem',
-                      borderRadius: '8px',
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      color: '#f8fafc',
-                      fontSize: '0.875rem',
-                      outline: 'none',
-                    }}
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isAuthenticating}
+              <div>
+                <label
                   style={{
-                    marginTop: '0.5rem',
-                    padding: '0.75rem',
-                    borderRadius: '8px',
-                    background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                    border: 'none',
-                    color: '#ffffff',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    cursor: isAuthenticating ? 'not-allowed' : 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem',
-                    opacity: isAuthenticating ? 0.7 : 1,
+                    display: 'block',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    color: '#2e4d70',
+                    textTransform: 'uppercase',
+                    marginBottom: '0.375rem',
+                    letterSpacing: '0.04em',
                   }}
                 >
-                  <ShieldCheck size={16} />
-                  {isAuthenticating ? 'Authenticating...' : authMode === 'login' ? 'Sign In to Workspace' : 'Create Workspace Account'}
-                </button>
-              </form>
-
-              <div style={{ textAlign: 'center', marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.75rem' }}>
-                  Want to explore workspace features immediately?
-                </p>
-                <button
-                  type="button"
-                  onClick={handleDemoLogin}
-                  disabled={isAuthenticating}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    borderRadius: '8px',
-                    background: 'rgba(255, 255, 255, 0.06)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    color: '#e2e8f0',
-                    fontSize: '0.8125rem',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.375rem',
-                  }}
-                >
-                  <Sparkles size={14} style={{ color: '#fbbf24' }} />
-                  Launch Instant Demo Workspace
-                </button>
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={authPassword}
+                  onChange={(e) => setAuthPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="ws-auth-input"
+                />
               </div>
-            </motion.div>
-          </div>
+
+              <button
+                type="submit"
+                disabled={isAuthenticating}
+                className="ws-auth-submit-btn"
+              >
+                <ShieldCheck size={16} />
+                {isAuthenticating
+                  ? 'Authenticating...'
+                  : authMode === 'login'
+                  ? 'Sign In to Workspace'
+                  : 'Create Workspace Account'}
+              </button>
+            </form>
+
+            <div
+              style={{
+                textAlign: 'center',
+                marginTop: '1.5rem',
+                paddingTop: '1.25rem',
+                borderTop: '1px solid rgba(35, 70, 108, 0.1)',
+              }}
+            >
+              <p style={{ fontSize: '0.75rem', color: '#436488', marginBottom: '0.75rem', fontWeight: 500 }}>
+                Want to explore workspace features immediately?
+              </p>
+              <button
+                type="button"
+                onClick={handleDemoLogin}
+                disabled={isAuthenticating}
+                className="ws-auth-demo-btn"
+              >
+                <Sparkles size={14} style={{ color: '#d97706' }} />
+                Launch Instant Demo Workspace
+              </button>
+            </div>
+          </motion.div>
         ) : (
           /* Authenticated Workspace */
           <div>
-            {/* Top Workspace Header */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: '1rem',
-                marginBottom: '2rem',
-                paddingBottom: '1.25rem',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-              }}
-            >
+            {/* Header */}
+            <div className="ws-header">
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '0.25rem' }}>
-                  <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc', margin: 0 }}>
-                    Workspace
-                  </h1>
-                  <span
-                    style={{
-                      fontSize: '0.6875rem',
-                      fontWeight: 700,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                      padding: '0.2rem 0.5rem',
-                      borderRadius: '9999px',
-                      background: 'rgba(59, 130, 246, 0.15)',
-                      color: '#60a5fa',
-                      border: '1px solid rgba(59, 130, 246, 0.3)',
-                    }}
-                  >
-                    V2 Cloud
-                  </span>
+                <div className="ws-title-row">
+                  <h1 className="ws-title">Workspace</h1>
+                  <span className="ws-badge">V2 Cloud</span>
                 </div>
-                <p style={{ fontSize: '0.875rem', color: '#94a3b8', margin: 0 }}>
-                  Centralized intelligence dashboard for saved repositories, investigations, and annotations.
+                <p className="ws-subtitle">
+                  Centralized intelligence dashboard for saved repositories, investigations, and research notes.
                 </p>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    padding: '0.4rem 0.875rem',
-                    borderRadius: '9999px',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    fontSize: '0.8125rem',
-                    color: '#e2e8f0',
-                  }}
-                >
-                  <User size={14} style={{ color: '#60a5fa' }} />
+              <div className="ws-user-section">
+                <div className="ws-user-badge">
+                  <User size={14} style={{ color: '#245691' }} />
                   <span>@{session.user.username}</span>
                 </div>
                 <button
                   type="button"
                   onClick={handleLogout}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.375rem',
-                    padding: '0.4rem 0.875rem',
-                    borderRadius: '8px',
-                    background: 'rgba(239, 68, 68, 0.1)',
-                    border: '1px solid rgba(239, 68, 68, 0.2)',
-                    color: '#f87171',
-                    fontSize: '0.8125rem',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                  }}
+                  className="ws-logout-btn"
                 >
                   <LogOut size={14} />
                   Sign Out
@@ -738,702 +595,461 @@ export function Workspace() {
               </div>
             </div>
 
-            {/* Overview Metrics Cards */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                gap: '1rem',
-                marginBottom: '2rem',
-              }}
-            >
-              <div
-                style={{
-                  padding: '1.25rem',
-                  borderRadius: '16px',
-                  background: 'rgba(15, 23, 42, 0.65)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  backdropFilter: 'blur(12px)',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#94a3b8', marginBottom: '0.5rem' }}>
-                  <span style={{ fontSize: '0.8125rem', fontWeight: 600 }}>Saved Repositories</span>
-                  <FolderGit2 size={16} style={{ color: '#3b82f6' }} />
+            {/* Overview Metrics */}
+            <div className="ws-stats-grid">
+              <div className="ws-stat-card">
+                <div className="ws-stat-header">
+                  <span>Saved Repositories</span>
+                  <FolderGit2 size={16} style={{ color: '#2563eb' }} />
                 </div>
-                <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc' }}>
+                <div className="ws-stat-value">
                   {overview?.metrics.savedReposCount ?? repositories.length}
                 </div>
               </div>
 
-              <div
-                style={{
-                  padding: '1.25rem',
-                  borderRadius: '16px',
-                  background: 'rgba(15, 23, 42, 0.65)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  backdropFilter: 'blur(12px)',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#94a3b8', marginBottom: '0.5rem' }}>
-                  <span style={{ fontSize: '0.8125rem', fontWeight: 600 }}>Investigations</span>
-                  <Layers size={16} style={{ color: '#8b5cf6' }} />
+              <div className="ws-stat-card">
+                <div className="ws-stat-header">
+                  <span>Investigations</span>
+                  <Layers size={16} style={{ color: '#7c3aed' }} />
                 </div>
-                <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc' }}>
+                <div className="ws-stat-value">
                   {overview?.metrics.investigationsCount ?? 0}
                 </div>
               </div>
 
-              <div
-                style={{
-                  padding: '1.25rem',
-                  borderRadius: '16px',
-                  background: 'rgba(15, 23, 42, 0.65)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  backdropFilter: 'blur(12px)',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#94a3b8', marginBottom: '0.5rem' }}>
-                  <span style={{ fontSize: '0.8125rem', fontWeight: 600 }}>Research Notes</span>
-                  <FileCode2 size={16} style={{ color: '#10b981' }} />
+              <div className="ws-stat-card">
+                <div className="ws-stat-header">
+                  <span>Research Notes</span>
+                  <FileCode2 size={16} style={{ color: '#059669' }} />
                 </div>
-                <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc' }}>
+                <div className="ws-stat-value">
                   {overview?.metrics.notesCount ?? 0}
                 </div>
               </div>
 
-              <div
-                style={{
-                  padding: '1.25rem',
-                  borderRadius: '16px',
-                  background: 'rgba(15, 23, 42, 0.65)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  backdropFilter: 'blur(12px)',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#94a3b8', marginBottom: '0.5rem' }}>
-                  <span style={{ fontSize: '0.8125rem', fontWeight: 600 }}>Bookmarks</span>
-                  <Bookmark size={16} style={{ color: '#f59e0b' }} />
+              <div className="ws-stat-card">
+                <div className="ws-stat-header">
+                  <span>Bookmarks</span>
+                  <Bookmark size={16} style={{ color: '#d97706' }} />
                 </div>
-                <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc' }}>
+                <div className="ws-stat-value">
                   {overview?.metrics.bookmarksCount ?? 0}
                 </div>
               </div>
             </div>
 
             {/* Quick Add Repository Bar */}
-            <div
-              style={{
-                padding: '1.25rem',
-                borderRadius: '16px',
-                background: 'rgba(15, 23, 42, 0.65)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                marginBottom: '2rem',
-              }}
-            >
-              <form onSubmit={handleSaveRepository} style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                <div style={{ flex: 1, minWidth: '240px', position: 'relative' }}>
+            <div className="ws-save-card">
+              <form onSubmit={handleSaveRepository} className="ws-save-form">
+                <div className="ws-save-input-wrap">
+                  <FolderGit2
+                    size={16}
+                    style={{
+                      position: 'absolute',
+                      left: '0.85rem',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      color: '#436488',
+                    }}
+                  />
                   <input
                     type="text"
                     value={repoInput}
                     onChange={(e) => setRepoInput(e.target.value)}
                     placeholder="Save repository to workspace (e.g. facebook/react or torvalds/linux)"
-                    style={{
-                      width: '100%',
-                      padding: '0.625rem 1rem 0.625rem 2.25rem',
-                      borderRadius: '10px',
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      color: '#f8fafc',
-                      fontSize: '0.875rem',
-                      outline: 'none',
-                    }}
-                  />
-                  <FolderGit2
-                    size={16}
-                    style={{
-                      position: 'absolute',
-                      left: '0.75rem',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      color: '#64748b',
-                    }}
+                    className="ws-save-input"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={isSavingRepo || !repoInput.trim()}
-                  style={{
-                    padding: '0.625rem 1.25rem',
-                    borderRadius: '10px',
-                    background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                    border: 'none',
-                    color: '#ffffff',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    cursor: isSavingRepo || !repoInput.trim() ? 'not-allowed' : 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.375rem',
-                    opacity: isSavingRepo || !repoInput.trim() ? 0.6 : 1,
-                  }}
+                  className="ws-save-btn"
                 >
                   <Plus size={16} />
                   {isSavingRepo ? 'Saving...' : 'Save Repository'}
                 </button>
               </form>
               {saveRepoError && (
-                <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#f87171' }}>
+                <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#b91c1c', fontWeight: 600 }}>
                   {saveRepoError}
                 </div>
               )}
             </div>
 
-            {/* View Switcher & Tags Filter Strip */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: '1rem',
-                marginBottom: '1.5rem',
-              }}
-            >
-              {/* Tab Selector */}
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+            {/* Tabs & Search Controls */}
+            <div className="ws-toolbar">
+              <div className="ws-tabs">
                 <button
                   type="button"
+                  className={`ws-tab-btn ${activeTab === 'repositories' ? 'active' : ''}`}
                   onClick={() => setActiveTab('repositories')}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.375rem',
-                    padding: '0.45rem 0.875rem',
-                    borderRadius: '8px',
-                    border: 'none',
-                    fontSize: '0.8125rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    background: activeTab === 'repositories' ? 'rgba(255, 255, 255, 0.12)' : 'transparent',
-                    color: activeTab === 'repositories' ? '#f8fafc' : '#94a3b8',
-                  }}
                 >
                   <FolderGit2 size={14} />
-                  Saved Repositories ({repositories.length})
+                  Repositories ({repositories.length})
                 </button>
                 <button
                   type="button"
+                  className={`ws-tab-btn ${activeTab === 'activity' ? 'active' : ''}`}
                   onClick={() => setActiveTab('activity')}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.375rem',
-                    padding: '0.45rem 0.875rem',
-                    borderRadius: '8px',
-                    border: 'none',
-                    fontSize: '0.8125rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    background: activeTab === 'activity' ? 'rgba(255, 255, 255, 0.12)' : 'transparent',
-                    color: activeTab === 'activity' ? '#f8fafc' : '#94a3b8',
-                  }}
                 >
                   <Activity size={14} />
                   Recent Activity
                 </button>
               </div>
 
-              {/* Tag Controls */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <div style={{ position: 'relative' }}>
+              {activeTab === 'repositories' && (
+                <div style={{ position: 'relative', minWidth: '220px' }}>
+                  <Search
+                    size={14}
+                    style={{
+                      position: 'absolute',
+                      left: '0.75rem',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      color: '#436488',
+                    }}
+                  />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search saved repos..."
+                    placeholder="Filter saved repositories..."
                     style={{
-                      padding: '0.375rem 0.75rem 0.375rem 2rem',
+                      padding: '0.45rem 0.75rem 0.45rem 2rem',
                       borderRadius: '8px',
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      color: '#f8fafc',
+                      background: 'rgba(255, 255, 255, 0.65)',
+                      border: '1px solid rgba(255, 255, 255, 0.8)',
+                      color: '#183350',
                       fontSize: '0.8125rem',
+                      fontWeight: 500,
                       outline: 'none',
-                      width: '180px',
-                    }}
-                  />
-                  <Search
-                    size={13}
-                    style={{
-                      position: 'absolute',
-                      left: '0.625rem',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      color: '#64748b',
+                      width: '100%',
+                      boxSizing: 'border-box',
                     }}
                   />
                 </div>
+              )}
+            </div>
 
+            {/* Tags Strip */}
+            {activeTab === 'repositories' && (
+              <div className="ws-tags-strip">
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#2e4d70', marginRight: '0.25rem' }}>
+                  Tags:
+                </span>
+                <button
+                  type="button"
+                  className={`ws-tag-pill ${selectedTagId === null ? 'active' : ''}`}
+                  onClick={() => setSelectedTagId(null)}
+                >
+                  All ({repositories.length})
+                </button>
+                {tags.map((tag) => (
+                  <button
+                    key={tag.id}
+                    type="button"
+                    className={`ws-tag-pill ${selectedTagId === tag.id ? 'active' : ''}`}
+                    onClick={() => setSelectedTagId(selectedTagId === tag.id ? null : tag.id)}
+                  >
+                    <span
+                      style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        backgroundColor: tag.color,
+                        display: 'inline-block',
+                      }}
+                    />
+                    <span>{tag.name}</span>
+                    <span
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteTag(tag.id, tag.name);
+                      }}
+                      className="ws-tag-del"
+                      style={{ marginLeft: '4px', opacity: 0.7, cursor: 'pointer' }}
+                      title="Delete tag"
+                    >
+                      ×
+                    </span>
+                  </button>
+                ))}
                 <button
                   type="button"
                   onClick={() => setShowTagModal(true)}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '0.375rem',
-                    padding: '0.375rem 0.75rem',
-                    borderRadius: '8px',
-                    background: 'rgba(255, 255, 255, 0.06)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    color: '#e2e8f0',
-                    fontSize: '0.8125rem',
-                    fontWeight: 500,
+                    gap: '0.25rem',
+                    padding: '0.25rem 0.65rem',
+                    borderRadius: '9999px',
+                    border: '1px dashed rgba(35, 70, 108, 0.3)',
+                    background: 'transparent',
+                    color: '#245691',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
                     cursor: 'pointer',
                   }}
                 >
-                  <Plus size={13} />
+                  <Plus size={12} />
                   New Tag
                 </button>
               </div>
-            </div>
-
-            {/* Tag Pills Filter Bar */}
-            {tags.length > 0 && (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  flexWrap: 'wrap',
-                  marginBottom: '1.5rem',
-                  padding: '0.75rem 1rem',
-                  borderRadius: '12px',
-                  background: 'rgba(255, 255, 255, 0.02)',
-                  border: '1px solid rgba(255, 255, 255, 0.06)',
-                }}
-              >
-                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', marginRight: '0.25rem' }}>
-                  Tags:
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setSelectedTagId(null)}
-                  style={{
-                    padding: '0.25rem 0.625rem',
-                    borderRadius: '9999px',
-                    border: selectedTagId === null ? '1px solid rgba(59, 130, 246, 0.5)' : '1px solid rgba(255, 255, 255, 0.1)',
-                    background: selectedTagId === null ? 'rgba(59, 130, 246, 0.15)' : 'rgba(255, 255, 255, 0.04)',
-                    color: selectedTagId === null ? '#93c5fd' : '#94a3b8',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  All ({repositories.length})
-                </button>
-                {tags.map((tag) => {
-                  const count = repositories.filter((r) =>
-                    r.repositoryTags?.some((rt) => rt.tag.id === tag.id)
-                  ).length;
-                  const isSelected = selectedTagId === tag.id;
-
-                  return (
-                    <div
-                      key={tag.id}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.375rem',
-                        padding: '0.25rem 0.625rem',
-                        borderRadius: '9999px',
-                        border: isSelected ? `1px solid ${tag.color}` : '1px solid rgba(255, 255, 255, 0.1)',
-                        background: isSelected ? `${tag.color}22` : 'rgba(255, 255, 255, 0.04)',
-                        color: isSelected ? '#f8fafc' : '#cbd5e1',
-                        fontSize: '0.75rem',
-                        fontWeight: 500,
-                        cursor: 'pointer',
-                      }}
-                      onClick={() => setSelectedTagId(isSelected ? null : tag.id)}
-                    >
-                      <span
-                        style={{
-                          width: '6px',
-                          height: '6px',
-                          borderRadius: '50%',
-                          background: tag.color,
-                        }}
-                      />
-                      <span>{tag.name}</span>
-                      <span style={{ opacity: 0.6, fontSize: '0.6875rem' }}>({count})</span>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteTag(tag.id, tag.name);
-                        }}
-                        style={{
-                          background: 'transparent',
-                          border: 'none',
-                          color: '#94a3b8',
-                          cursor: 'pointer',
-                          padding: 0,
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          marginLeft: '0.25rem',
-                        }}
-                        title="Delete tag"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
             )}
 
-            {/* Main Content View */}
-            {activeTab === 'repositories' ? (
-              <div>
-                {isLoading ? (
-                  <div style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
-                    Loading workspace repositories...
+            {/* Main Content Area */}
+            {isLoading && repositories.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '3rem 0', color: '#2e4d70', fontStyle: 'italic' }}>
+                Loading workspace intelligence...
+              </div>
+            ) : activeTab === 'repositories' ? (
+              filteredRepositories.length === 0 ? (
+                <div className="ws-empty-state">
+                  <div className="ws-empty-icon">
+                    <FolderGit2 size={24} />
                   </div>
-                ) : filteredRepositories.length === 0 ? (
-                  <div
-                    style={{
-                      textAlign: 'center',
-                      padding: '4rem 2rem',
-                      borderRadius: '16px',
-                      background: 'rgba(15, 23, 42, 0.4)',
-                      border: '1px dashed rgba(255, 255, 255, 0.12)',
-                    }}
-                  >
-                    <FolderGit2 size={36} style={{ color: '#64748b', marginBottom: '1rem' }} />
-                    <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#f8fafc', marginBottom: '0.5rem' }}>
-                      {repositories.length === 0 ? 'No repositories saved yet' : 'No matching repositories'}
-                    </h3>
-                    <p style={{ fontSize: '0.875rem', color: '#94a3b8', maxWidth: '400px', margin: '0 auto 1.5rem auto' }}>
-                      {repositories.length === 0
-                        ? 'Add open-source repositories to your workspace to track commit DAGs, branch comparisons, and code annotations.'
-                        : 'Try adjusting your search query or selected tag filter.'}
-                    </p>
-                  </div>
-                ) : (
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
-                      gap: '1.25rem',
-                    }}
-                  >
-                    {filteredRepositories.map((repo) => (
-                      <motion.div
-                        key={repo.id}
-                        layout
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.98 }}
-                        style={{
-                          borderRadius: '16px',
-                          background: 'rgba(15, 23, 42, 0.65)',
-                          border: '1px solid rgba(255, 255, 255, 0.08)',
-                          backdropFilter: 'blur(12px)',
-                          padding: '1.25rem',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'space-between',
-                          gap: '1rem',
-                        }}
-                      >
-                        <div>
-                          {/* Repo Title and Action Links */}
-                          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                            <Link
-                              to={`/profile/${repo.owner}`}
-                              style={{
-                                color: '#60a5fa',
-                                fontWeight: 700,
-                                fontSize: '1.0625rem',
-                                textDecoration: 'none',
-                                wordBreak: 'break-word',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '0.375rem',
-                              }}
+                  <h3 className="ws-empty-title">
+                    {searchQuery || selectedTagId ? 'No matching repositories' : 'No repositories saved yet'}
+                  </h3>
+                  <p className="ws-empty-desc">
+                    {searchQuery || selectedTagId
+                      ? 'Try adjusting your search query or tag filter to see saved repositories.'
+                      : 'Save repositories using the input above or bookmark them directly while exploring profiles.'}
+                  </p>
+                </div>
+              ) : (
+                <div className="ws-grid">
+                  {filteredRepositories.map((repo) => (
+                    <motion.div
+                      key={repo.id}
+                      className="ws-repo-card"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <div>
+                        {/* Card Header */}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                          <Link
+                            to={`/profile/${repo.owner}?repo=${encodeURIComponent(repo.fullName)}`}
+                            className="ws-repo-title"
+                          >
+                            <span>{repo.fullName}</span>
+                            <ArrowUpRight size={14} style={{ opacity: 0.6 }} />
+                          </Link>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <a
+                              href={`https://github.com/${repo.fullName}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="ws-icon-btn"
+                              title="Open on GitHub"
                             >
-                              {repo.fullName}
-                              <ArrowUpRight size={14} style={{ opacity: 0.7 }} />
-                            </Link>
+                              <ExternalLink size={13} />
+                            </a>
                             <button
                               type="button"
                               onClick={() => handleDeleteRepository(repo.id, repo.fullName)}
-                              style={{
-                                background: 'transparent',
-                                border: 'none',
-                                color: '#64748b',
-                                cursor: 'pointer',
-                                padding: '0.25rem',
-                                borderRadius: '4px',
-                                transition: 'color 0.2s',
-                              }}
-                              onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
-                              onMouseLeave={(e) => (e.currentTarget.style.color = '#64748b')}
-                              title="Remove repository"
+                              className="ws-icon-btn danger"
+                              title="Remove from workspace"
                             >
-                              <Trash2 size={15} />
+                              <Trash2 size={13} />
                             </button>
                           </div>
+                        </div>
 
-                          {repo.description && (
-                            <p
+                        {/* Description */}
+                        {repo.description ? (
+                          <p className="ws-repo-desc">{repo.description}</p>
+                        ) : (
+                          <p className="ws-repo-desc" style={{ fontStyle: 'italic', opacity: 0.7 }}>
+                            No repository description provided.
+                          </p>
+                        )}
+
+                        {/* Tags on Card */}
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginBottom: '0.875rem' }}>
+                          {repo.repositoryTags?.map((rt) => (
+                            <span
+                              key={rt.tag.id}
                               style={{
-                                fontSize: '0.8125rem',
-                                color: '#94a3b8',
-                                margin: '0 0 0.875rem 0',
-                                lineClamp: 2,
-                                display: '-webkit-box',
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: 'vertical',
-                                overflow: 'hidden',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.25rem',
+                                padding: '0.15rem 0.5rem',
+                                borderRadius: '9999px',
+                                background: `${rt.tag.color}15`,
+                                border: `1px solid ${rt.tag.color}35`,
+                                color: rt.tag.color,
+                                fontSize: '0.6875rem',
+                                fontWeight: 700,
                               }}
                             >
-                              {repo.description}
-                            </p>
-                          )}
-
-                          {/* Tags assigned to this repo */}
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem', marginBottom: '0.875rem' }}>
-                            {repo.repositoryTags?.map(({ tag }) => (
                               <span
-                                key={tag.id}
                                 style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.25rem',
-                                  padding: '0.15rem 0.5rem',
-                                  borderRadius: '6px',
-                                  background: `${tag.color}20`,
-                                  border: `1px solid ${tag.color}40`,
-                                  color: '#f1f5f9',
-                                  fontSize: '0.6875rem',
-                                  fontWeight: 500,
+                                  width: '6px',
+                                  height: '6px',
+                                  borderRadius: '50%',
+                                  backgroundColor: rt.tag.color,
                                 }}
+                              />
+                              {rt.tag.name}
+                              <span
+                                onClick={() => handleRemoveTag(repo.id, rt.tag.id)}
+                                style={{ cursor: 'pointer', marginLeft: '2px', opacity: 0.8 }}
+                                title="Remove tag from repository"
                               >
-                                <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: tag.color }} />
-                                {tag.name}
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveTag(repo.id, tag.id)}
-                                  style={{
-                                    background: 'transparent',
-                                    border: 'none',
-                                    color: '#94a3b8',
-                                    cursor: 'pointer',
-                                    padding: 0,
-                                    fontSize: '0.75rem',
-                                    marginLeft: '0.125rem',
-                                  }}
-                                  title="Unlink tag"
-                                >
-                                  ×
-                                </button>
+                                ×
                               </span>
-                            ))}
+                            </span>
+                          ))}
 
-                            {/* Add Tag Dropdown / Trigger */}
-                            <div style={{ position: 'relative' }}>
-                              <button
-                                type="button"
-                                onClick={() => setTagAssignRepoId(tagAssignRepoId === repo.id ? null : repo.id)}
+                          {/* Tag Assignment Trigger */}
+                          <div style={{ position: 'relative' }}>
+                            <button
+                              type="button"
+                              onClick={() => setTagAssignRepoId(tagAssignRepoId === repo.id ? null : repo.id)}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.2rem',
+                                padding: '0.15rem 0.45rem',
+                                borderRadius: '9999px',
+                                border: '1px dashed rgba(35, 70, 108, 0.25)',
+                                background: 'transparent',
+                                color: '#436488',
+                                fontSize: '0.6875rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                              }}
+                            >
+                              <TagIcon size={10} />
+                              Tag
+                            </button>
+
+                            {/* Tag Assign Popover Menu */}
+                            {tagAssignRepoId === repo.id && (
+                              <div
                                 style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.25rem',
-                                  padding: '0.15rem 0.45rem',
-                                  borderRadius: '6px',
-                                  background: 'rgba(255, 255, 255, 0.05)',
-                                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                                  color: '#94a3b8',
-                                  fontSize: '0.6875rem',
-                                  cursor: 'pointer',
+                                  position: 'absolute',
+                                  top: '100%',
+                                  left: 0,
+                                  marginTop: '4px',
+                                  zIndex: 100,
+                                  minWidth: '150px',
+                                  padding: '0.35rem',
+                                  borderRadius: '8px',
+                                  background: 'rgba(255, 255, 255, 0.96)',
+                                  border: '1px solid rgba(35, 70, 108, 0.2)',
+                                  boxShadow: '0 8px 20px rgba(25, 45, 70, 0.15)',
+                                  backdropFilter: 'blur(10px)',
                                 }}
                               >
-                                <TagIcon size={10} />
-                                + Tag
-                              </button>
-
-                              {tagAssignRepoId === repo.id && (
-                                <div
-                                  style={{
-                                    position: 'absolute',
-                                    top: '100%',
-                                    left: 0,
-                                    marginTop: '0.25rem',
-                                    zIndex: 20,
-                                    background: '#0f172a',
-                                    border: '1px solid rgba(255, 255, 255, 0.15)',
-                                    borderRadius: '8px',
-                                    padding: '0.5rem',
-                                    boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-                                    minWidth: '140px',
-                                  }}
-                                >
-                                  {tags.length === 0 ? (
-                                    <div style={{ fontSize: '0.6875rem', color: '#64748b' }}>
-                                      No tags created yet.
-                                    </div>
-                                  ) : (
-                                    tags.map((t) => {
-                                      const isAlreadyAssigned = repo.repositoryTags?.some((rt) => rt.tag.id === t.id);
-                                      if (isAlreadyAssigned) return null;
-                                      return (
-                                        <button
-                                          key={t.id}
-                                          type="button"
-                                          onClick={() => handleAssignTag(repo.id, t.id)}
-                                          style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '0.375rem',
-                                            width: '100%',
-                                            padding: '0.25rem 0.5rem',
-                                            borderRadius: '4px',
-                                            border: 'none',
-                                            background: 'transparent',
-                                            color: '#e2e8f0',
-                                            fontSize: '0.75rem',
-                                            cursor: 'pointer',
-                                            textAlign: 'left',
-                                          }}
-                                          onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
-                                          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                                        >
-                                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: t.color }} />
+                                {tags.length === 0 ? (
+                                  <div style={{ padding: '0.35rem', fontSize: '0.6875rem', color: '#64748b' }}>
+                                    No tags created yet.
+                                  </div>
+                                ) : (
+                                  tags.map((t) => {
+                                    const isAssigned = repo.repositoryTags?.some((rt) => rt.tag.id === t.id);
+                                    return (
+                                      <button
+                                        key={t.id}
+                                        type="button"
+                                        onClick={() =>
+                                          isAssigned
+                                            ? handleRemoveTag(repo.id, t.id)
+                                            : handleAssignTag(repo.id, t.id)
+                                        }
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'space-between',
+                                          width: '100%',
+                                          padding: '0.3rem 0.5rem',
+                                          borderRadius: '4px',
+                                          border: 'none',
+                                          background: isAssigned ? 'rgba(36, 86, 145, 0.1)' : 'transparent',
+                                          color: '#183350',
+                                          fontSize: '0.75rem',
+                                          fontWeight: 600,
+                                          cursor: 'pointer',
+                                          textAlign: 'left',
+                                        }}
+                                      >
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                                          <span
+                                            style={{
+                                              width: '6px',
+                                              height: '6px',
+                                              borderRadius: '50%',
+                                              backgroundColor: t.color,
+                                            }}
+                                          />
                                           {t.name}
-                                        </button>
-                                      );
-                                    })
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Card Footer Metrics */}
-                        <div
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            paddingTop: '0.75rem',
-                            borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-                            fontSize: '0.75rem',
-                            color: '#94a3b8',
-                          }}
-                        >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            {repo.language && (
-                              <span style={{ color: '#cbd5e1', fontWeight: 600 }}>{repo.language}</span>
+                                        </span>
+                                        {isAssigned && <span style={{ color: '#245691', fontSize: '0.6875rem' }}>✓</span>}
+                                      </button>
+                                    );
+                                  })
+                                )}
+                              </div>
                             )}
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                              <Star size={12} style={{ color: '#fbbf24' }} />
-                              {repo.stars.toLocaleString()}
-                            </span>
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                              <GitFork size={12} />
-                              {repo.forks.toLocaleString()}
-                            </span>
                           </div>
-
-                          <a
-                            href={`https://github.com/${repo.fullName}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              color: '#94a3b8',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '0.25rem',
-                              textDecoration: 'none',
-                            }}
-                          >
-                            <ExternalLink size={12} />
-                            GitHub
-                          </a>
                         </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : (
-              /* Recent Activity Feed */
-              <div
-                style={{
-                  borderRadius: '16px',
-                  background: 'rgba(15, 23, 42, 0.65)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  backdropFilter: 'blur(12px)',
-                  padding: '1.5rem',
-                }}
-              >
-                <h3 style={{ fontSize: '1.0625rem', fontWeight: 600, color: '#f8fafc', marginBottom: '1rem' }}>
-                  Chronological Workspace Activity
-                </h3>
-                {!overview?.recentActivity || overview.recentActivity.length === 0 ? (
-                  <div style={{ color: '#64748b', fontSize: '0.875rem' }}>No recent workspace events recorded.</div>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {overview.recentActivity.map((act, index) => (
-                      <div
-                        key={`${act.id}-${index}`}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.75rem',
-                          padding: '0.75rem',
-                          borderRadius: '10px',
-                          background: 'rgba(255, 255, 255, 0.03)',
-                          border: '1px solid rgba(255, 255, 255, 0.06)',
-                        }}
-                      >
-                        <div
+                      </div>
+
+                      {/* Card Footer Metadata */}
+                      <div className="ws-repo-footer">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          {repo.language && (
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontWeight: 600, color: '#183350' }}>
+                              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#245691' }} />
+                              {repo.language}
+                            </span>
+                          )}
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                            <Star size={12} style={{ color: '#d97706' }} />
+                            {repo.stars}
+                          </span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                            <GitFork size={12} />
+                            {repo.forks}
+                          </span>
+                        </div>
+                        <Link
+                          to={`/profile/${repo.owner}?repo=${encodeURIComponent(repo.fullName)}`}
                           style={{
-                            padding: '0.4rem',
-                            borderRadius: '8px',
-                            background:
-                              act.type === 'repository_saved'
-                                ? 'rgba(59, 130, 246, 0.15)'
-                                : act.type === 'investigation_updated'
-                                ? 'rgba(139, 92, 246, 0.15)'
-                                : 'rgba(16, 185, 129, 0.15)',
-                            color:
-                              act.type === 'repository_saved'
-                                ? '#60a5fa'
-                                : act.type === 'investigation_updated'
-                                ? '#a78bfa'
-                                : '#34d399',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
+                            color: '#245691',
+                            fontWeight: 700,
+                            textDecoration: 'none',
                           }}
                         >
-                          {act.type === 'repository_saved' && <FolderGit2 size={16} />}
-                          {act.type === 'investigation_updated' && <Layers size={16} />}
-                          {act.type === 'note_created' && <FileCode2 size={16} />}
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#f8fafc' }}>
-                            {act.title}
+                          <Compass size={12} />
+                          Explore
+                        </Link>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )
+            ) : (
+              /* Activity Tab */
+              <div className="ws-activity-card">
+                {overview?.recentActivity && overview.recentActivity.length > 0 ? (
+                  <div>
+                    {overview.recentActivity.map((act) => (
+                      <div key={act.id} className="ws-activity-item">
+                        <div>
+                          <div className="ws-activity-title">{act.title}</div>
+                          <div style={{ fontSize: '0.75rem', color: '#436488', marginTop: '2px', textTransform: 'capitalize' }}>
+                            Type: {act.type.replace('_', ' ')}
                           </div>
-                          <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                            {act.type === 'repository_saved'
-                              ? 'Saved repository'
-                              : act.type === 'investigation_updated'
-                              ? 'Investigation update'
-                              : 'Annotation created'}
-                          </div>
                         </div>
-                        <div style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                          <Clock size={12} />
+                        <div className="ws-activity-time">
                           {new Date(act.timestamp).toLocaleDateString(undefined, {
                             month: 'short',
                             day: 'numeric',
@@ -1444,6 +1060,16 @@ export function Workspace() {
                       </div>
                     ))}
                   </div>
+                ) : (
+                  <div className="ws-empty-state">
+                    <div className="ws-empty-icon">
+                      <Activity size={24} />
+                    </div>
+                    <h3 className="ws-empty-title">No recent workspace activity</h3>
+                    <p className="ws-empty-desc">
+                      Activity logs are automatically recorded as you save repositories, link tags, and run investigations.
+                    </p>
+                  </div>
                 )}
               </div>
             )}
@@ -1451,68 +1077,67 @@ export function Workspace() {
         )}
       </div>
 
-      {/* New Tag Modal */}
+      {/* Tag Creation Modal */}
       <AnimatePresence>
         {showTagModal && (
-          <div
-            style={{
-              position: 'fixed',
-              inset: 0,
-              zIndex: 50,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'rgba(0, 0, 0, 0.7)',
-              backdropFilter: 'blur(8px)',
-              padding: '1rem',
-            }}
-            onClick={() => setShowTagModal(false)}
-          >
+          <div className="ws-modal-backdrop" onClick={() => setShowTagModal(false)}>
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+              className="ws-modal"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              style={{
-                width: '100%',
-                maxWidth: '400px',
-                borderRadius: '16px',
-                background: '#0f172a',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                padding: '1.5rem',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
-              }}
             >
-              <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#f8fafc', marginBottom: '1rem' }}>
-                Create Workspace Tag
-              </h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                <h3 className="ws-modal-title">
+                  <TagIcon size={18} style={{ color: '#245691' }} />
+                  Create New Tag
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setShowTagModal(false)}
+                  className="ws-icon-btn"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+
               <form onSubmit={handleCreateTag} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.375rem' }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      color: '#2e4d70',
+                      textTransform: 'uppercase',
+                      marginBottom: '0.375rem',
+                    }}
+                  >
                     Tag Name
                   </label>
                   <input
                     type="text"
                     value={newTagName}
                     onChange={(e) => setNewTagName(e.target.value)}
-                    placeholder="e.g. Critical, Architecture, Frontend"
+                    placeholder="e.g. Production, Backend, Core, Fast"
                     required
-                    style={{
-                      width: '100%',
-                      padding: '0.625rem 0.875rem',
-                      borderRadius: '8px',
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      color: '#f8fafc',
-                      fontSize: '0.875rem',
-                      outline: 'none',
-                    }}
+                    className="ws-auth-input"
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.375rem' }}>
-                    Badge Color
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      color: '#2e4d70',
+                      textTransform: 'uppercase',
+                      marginBottom: '0.375rem',
+                    }}
+                  >
+                    Color Accent
                   </label>
                   <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                     {PRESET_COLORS.map((c) => (
@@ -1520,15 +1145,9 @@ export function Workspace() {
                         key={c}
                         type="button"
                         onClick={() => setNewTagColor(c)}
-                        style={{
-                          width: '28px',
-                          height: '28px',
-                          borderRadius: '50%',
-                          background: c,
-                          border: newTagColor === c ? '2px solid #ffffff' : '2px solid transparent',
-                          cursor: 'pointer',
-                          boxShadow: newTagColor === c ? '0 0 10px ' + c : 'none',
-                        }}
+                        className={`ws-color-dot ${newTagColor === c ? 'active' : ''}`}
+                        style={{ backgroundColor: c }}
+                        title={c}
                       />
                     ))}
                   </div>
@@ -1542,9 +1161,10 @@ export function Workspace() {
                       padding: '0.5rem 1rem',
                       borderRadius: '8px',
                       background: 'transparent',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      color: '#94a3b8',
+                      border: '1px solid rgba(35, 70, 108, 0.2)',
+                      color: '#436488',
                       fontSize: '0.8125rem',
+                      fontWeight: 600,
                       cursor: 'pointer',
                     }}
                   >
@@ -1553,16 +1173,7 @@ export function Workspace() {
                   <button
                     type="submit"
                     disabled={isCreatingTag || !newTagName.trim()}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      borderRadius: '8px',
-                      background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                      border: 'none',
-                      color: '#ffffff',
-                      fontSize: '0.8125rem',
-                      fontWeight: 600,
-                      cursor: isCreatingTag || !newTagName.trim() ? 'not-allowed' : 'pointer',
-                    }}
+                    className="ws-save-btn"
                   >
                     {isCreatingTag ? 'Creating...' : 'Create Tag'}
                   </button>

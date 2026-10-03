@@ -219,23 +219,24 @@ See `docs/PRD.md` for full product requirements and `docs/ARCHITECTURE.md` for s
 | AI Secret Key | `GEMINI_API_KEY` | Server-side only environment variable in backend `.env` |
 | AI Architecture | `AIProvider` abstraction boundary | Strict interface separating business logic from vendor SDK, enabling zero-friction provider replacement |
 | AI Response Validation | Zod schema validation | Every AI output is parsed and verified against strict schemas before caching or returning |
+| AI Endpoint Access | Public with DB caching & rate limits | Allows instant repository exploration without forced login walls while supporting user workspace association |
 
 ### UNDECIDED
 
 | Decision | Options | Notes |
 | :--- | :--- | :--- |
-| AI auth requirement | AI endpoints public with rate limits vs. auth-required | To be resolved in D6-P6. |
+| (None currently) | — | All architectural decisions through Day 6 have been decided and verified |
 
 ---
 
 ## Current Task
 
 ```
-Current Day:    6 (In Progress)
-Current Push:   5 (D6-P5: AI Caching)
-Current Objective: Implement AI response caching using contextHash in AIAnalysis table
+Current Day:    6 (Completed)
+Current Push:   6 (D6-P6: AI API Foundation)
+Current Objective: Create AI analysis routes, controller, full pipeline wiring, and error handling
 Current Status: Completed
-Next Task:      D6-P6: AI API Foundation (Create AI analysis routes, controller, and full pipeline wiring)
+Next Task:      D7-P1: AI Repository Overview (End-to-end implementation and validation of repository overview AI analysis)
 ```
 
 
@@ -298,6 +299,7 @@ Next Task:      D6-P6: AI API Foundation (Create AI analysis routes, controller,
 | 2026-10-03 | Implemented AI Prompt System (D6-P3) | Created versioned prompt templates with grounding rules for all analysis types in `src/ai/prompts/` |
 | 2026-10-03 | Implemented Structured Response Validation (D6-P4) | Added Zod validation schemas for all analysis types and `validateAIResponse` boundary |
 | 2026-10-03 | Implemented AI Cache Layer (D6-P5) | Deterministic SHA-256 context hashing, AIAnalysis table caching, TTL management, and withAICache wrapper |
+| 2026-10-03 | Implemented AI API Foundation (D6-P6) | Created `aiRouter`, `aiController`, universal `/analyze` dispatcher, dedicated endpoints, status check, and full pipeline wiring |
 
 ---
 
@@ -344,6 +346,8 @@ Next Task:      D6-P6: AI API Foundation (Create AI analysis routes, controller,
 | 2026-10-03 | Implemented AI Prompt System (D6-P3) | Added versioned prompt modules in `backend/src/ai/prompts/`, grounding rules, resolver, and 9 tests |
 | 2026-10-03 | Implemented Structured Response Validation (D6-P4) | Added Zod validation schemas in `backend/src/ai/schemas/`, markdown fence sanitization, and 18 tests |
 | 2026-10-03 | Implemented AI Caching (D6-P5) | Added `cache.ts`, `aiAnalysisRepository.ts`, deterministic SHA-256 context hashing, and 19 new tests |
+| 2026-10-03 | Implemented AI API Foundation (D6-P6) | Added `ai.ts` routes, `aiController.ts`, universal pipeline orchestrator, dedicated endpoints, status check, and 17 tests |
+
 
 
 

@@ -9,6 +9,7 @@ import { workspaceRouter } from './routes/workspace.js';
 import { investigationsRouter } from './routes/investigations.js';
 import { notesRouter } from './routes/notes.js';
 import { bookmarksRouter } from './routes/bookmarks.js';
+import { aiRouter } from './routes/ai.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 
 export function createApp(): Express {
@@ -42,6 +43,8 @@ export function createApp(): Express {
   app.use('/notes', notesRouter);
   app.use('/api/bookmarks', bookmarksRouter);
   app.use('/bookmarks', bookmarksRouter);
+  app.use('/api/ai', aiRouter);
+  app.use('/ai', aiRouter);
 
 
   // Root fallback

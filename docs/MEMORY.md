@@ -287,6 +287,7 @@ Next Task:      D5-P4: Investigations (Create CRUD endpoints for investigations 
 | 2026-10-02 | Implemented Saved Repositories API (D5-P3) | GET /api/workspace/repositories, POST save repository with duplicate prevention, DELETE saved repo |
 | 2026-10-02 | Implemented Investigations CRUD API (D5-P4) | CRUD endpoints with context snapshot storage and ownership enforcement |
 | 2026-10-02 | Implemented Notes and Bookmarks API (D5-P5) | CRUD endpoints for notes and bookmarks with polymorphic TargetType references and filtering |
+| 2026-10-03 | Implemented Tags & Frontend Workspace Page (D5-P6) | Tag CRUD, repo tag assignment, frontend Workspace.tsx page, /workspace route, and ApiClient extensions |
 
 ---
 
@@ -327,6 +328,7 @@ Next Task:      D5-P4: Investigations (Create CRUD endpoints for investigations 
 | 2026-10-02 | Implemented Saved Repositories API (D5-P3) | Added saved repositories list, save, and delete handlers with duplicate checks and auth |
 | 2026-10-02 | Implemented Investigations CRUD API (D5-P4) | Added investigationsRouter, investigationController, investigationRepository, context JSON snapshot |
 | 2026-10-02 | Implemented Notes and Bookmarks API (D5-P5) | Added notesRouter, bookmarksRouter, controllers, repositories, TargetType support, and 45 new tests |
+| 2026-10-03 | Implemented Tags & Frontend Workspace (D5-P6) | Added Tag CRUD, tag assignments, Workspace page, /workspace route, and ApiClient workspace methods |
 
 
 

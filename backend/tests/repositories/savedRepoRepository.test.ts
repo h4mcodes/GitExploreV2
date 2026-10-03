@@ -66,6 +66,13 @@ describe('savedRepoRepository', () => {
       expect(prisma.savedRepository.findMany).toHaveBeenCalledWith({
         where: { userId: 'user-1' },
         orderBy: { savedAt: 'desc' },
+        include: {
+          repositoryTags: {
+            include: {
+              tag: true,
+            },
+          },
+        },
       });
       expect(result).toEqual(mockRepos);
     });
@@ -94,6 +101,13 @@ describe('savedRepoRepository', () => {
 
       expect(prisma.savedRepository.findUnique).toHaveBeenCalledWith({
         where: { id: 'repo-1' },
+        include: {
+          repositoryTags: {
+            include: {
+              tag: true,
+            },
+          },
+        },
       });
       expect(result).toEqual(mockRepo);
     });
@@ -105,6 +119,13 @@ describe('savedRepoRepository', () => {
 
       expect(prisma.savedRepository.findUnique).toHaveBeenCalledWith({
         where: { id: 'nonexistent-repo' },
+        include: {
+          repositoryTags: {
+            include: {
+              tag: true,
+            },
+          },
+        },
       });
       expect(result).toBeNull();
     });

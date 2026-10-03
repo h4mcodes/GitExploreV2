@@ -28,6 +28,13 @@ export async function findSavedReposByUserId(userId: string): Promise<SavedRepos
   return prisma.savedRepository.findMany({
     where: { userId },
     orderBy: { savedAt: 'desc' },
+    include: {
+      repositoryTags: {
+        include: {
+          tag: true,
+        },
+      },
+    },
   });
 }
 
@@ -37,6 +44,13 @@ export async function findSavedReposByUserId(userId: string): Promise<SavedRepos
 export async function findSavedRepoById(id: string): Promise<SavedRepository | null> {
   return prisma.savedRepository.findUnique({
     where: { id },
+    include: {
+      repositoryTags: {
+        include: {
+          tag: true,
+        },
+      },
+    },
   });
 }
 

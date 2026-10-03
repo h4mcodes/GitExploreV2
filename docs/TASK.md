@@ -1697,12 +1697,12 @@ Tags provide organizational structure for saved repositories. The Workspace page
 **Browser Testing Required:** Yes — verify workspace page end-to-end
 
 **Completion Criteria**
-- [ ] Tag CRUD endpoints functional
-- [ ] RepositoryTag assignment working
-- [ ] `Workspace.tsx` renders saved repositories
-- [ ] `/workspace` route added to `App.tsx`
-- [ ] `api.ts` extended with workspace calls
-- [ ] Both frontend and backend build
+- [x] Tag CRUD endpoints functional
+- [x] RepositoryTag assignment working
+- [x] `Workspace.tsx` renders saved repositories
+- [x] `/workspace` route added to `App.tsx`
+- [x] `api.ts` extended with workspace calls
+- [x] Both frontend and backend build
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -1713,7 +1713,7 @@ Tags provide organizational structure for saved repositories. The Workspace page
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

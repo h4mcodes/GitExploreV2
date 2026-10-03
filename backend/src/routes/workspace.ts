@@ -6,6 +6,11 @@ import {
   getSavedRepositories,
   saveRepository,
   deleteSavedRepository,
+  listTags,
+  createTag,
+  deleteTag,
+  assignTagToRepository,
+  removeTagFromRepository,
 } from '../controllers/workspaceController.js';
 
 export const workspaceRouter: Router = Router();
@@ -77,6 +82,76 @@ const deleteRepoValidation = validateRequest({
   },
 });
 
+const createTagValidation = validateRequest({
+  body: {
+    name: {
+      required: true,
+      type: 'string',
+      minLength: 1,
+      maxLength: 50,
+      description: 'Custom tag label',
+    },
+    color: {
+      type: 'string',
+      minLength: 1,
+      maxLength: 30,
+      description: 'Hex or CSS color string for tag badge',
+    },
+  },
+});
+
+const deleteTagValidation = validateRequest({
+  params: {
+    id: {
+      required: true,
+      type: 'string',
+      minLength: 1,
+      maxLength: 100,
+      description: 'Tag UUID identifier',
+    },
+  },
+});
+
+const assignTagValidation = validateRequest({
+  params: {
+    id: {
+      required: true,
+      type: 'string',
+      minLength: 1,
+      maxLength: 100,
+      description: 'Saved repository UUID',
+    },
+  },
+  body: {
+    tagId: {
+      required: true,
+      type: 'string',
+      minLength: 1,
+      maxLength: 100,
+      description: 'Tag UUID identifier',
+    },
+  },
+});
+
+const removeTagValidation = validateRequest({
+  params: {
+    id: {
+      required: true,
+      type: 'string',
+      minLength: 1,
+      maxLength: 100,
+      description: 'Saved repository UUID',
+    },
+    tagId: {
+      required: true,
+      type: 'string',
+      minLength: 1,
+      maxLength: 100,
+      description: 'Tag UUID identifier',
+    },
+  },
+});
+
 /**
  * GET /api/workspace
  * Returns workspace metrics, recent saved repos, and activity summary.
@@ -100,3 +175,33 @@ workspaceRouter.post('/repositories', saveRepoValidation, saveRepository);
  * Removes a saved repository by ID from workspace.
  */
 workspaceRouter.delete('/repositories/:id', deleteRepoValidation, deleteSavedRepository);
+
+/**
+ * GET /api/workspace/tags
+ * Lists all tags created by user.
+ */
+workspaceRouter.get('/tags', listTags);
+
+/**
+ * POST /api/workspace/tags
+ * Creates a new tag.
+ */
+workspaceRouter.post('/tags', createTagValidation, createTag);
+
+/**
+ * DELETE /api/workspace/tags/:id
+ * Deletes a tag by UUID.
+ */
+workspaceRouter.delete('/tags/:id', deleteTagValidation, deleteTag);
+
+/**
+ * POST /api/workspace/repositories/:id/tags
+ * Assigns a tag to a saved repository.
+ */
+workspaceRouter.post('/repositories/:id/tags', assignTagValidation, assignTagToRepository);
+
+/**
+ * DELETE /api/workspace/repositories/:id/tags/:tagId
+ * Removes a tag from a saved repository.
+ */
+workspaceRouter.delete('/repositories/:id/tags/:tagId', removeTagValidation, removeTagFromRepository);

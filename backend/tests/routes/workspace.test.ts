@@ -27,6 +27,17 @@ vi.mock('../../src/config/database.js', () => ({
     bookmark: {
       count: vi.fn(),
     },
+    tag: {
+      findUnique: vi.fn(),
+      findFirst: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      delete: vi.fn(),
+    },
+    repositoryTag: {
+      upsert: vi.fn(),
+      delete: vi.fn(),
+    },
   },
 }));
 
@@ -149,6 +160,13 @@ describe('Workspace & Saved Repositories Routes', () => {
       expect(prisma.savedRepository.findMany).toHaveBeenCalledWith({
         where: { userId: userA.userId },
         orderBy: { savedAt: 'desc' },
+        include: {
+          repositoryTags: {
+            include: {
+              tag: true,
+            },
+          },
+        },
       });
     });
   });
@@ -316,6 +334,163 @@ describe('Workspace & Saved Repositories Routes', () => {
       expect(response.status).toBe(403);
       expect(response.body.code).toBe('FORBIDDEN');
       expect(prisma.savedRepository.delete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Tag Management Endpoints', () => {
+    describe('GET /api/workspace/tags', () => {
+      it('returns user tags list', async () => {
+        const mockTags = [
+          { id: 'tag-1', userId: userA.userId, name: 'Frontend', color: '#3b82f6', createdAt: new Date() },
+          { id: 'tag-2', userId: userA.userId, name: 'AI', color: '#10b981', createdAt: new Date() },
+        ];
+
+        vi.mocked(prisma.tag.findMany).mockResolvedValueOnce(mockTags as any);
+
+        const response = await request(app)
+          .get('/api/workspace/tags')
+          .set('Authorization', `Bearer ${tokenA}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveLength(2);
+        expect(response.body[0]?.name).toBe('Frontend');
+      });
+    });
+
+    describe('POST /api/workspace/tags', () => {
+      it('creates new tag for user', async () => {
+        vi.mocked(prisma.tag.findFirst).mockResolvedValueOnce(null);
+
+        const newTag = {
+          id: 'tag-new',
+          userId: userA.userId,
+          name: 'Backend',
+          color: '#8b5cf6',
+          createdAt: new Date(),
+        };
+        vi.mocked(prisma.tag.create).mockResolvedValueOnce(newTag as any);
+
+        const response = await request(app)
+          .post('/api/workspace/tags')
+          .set('Authorization', `Bearer ${tokenA}`)
+          .send({ name: 'Backend', color: '#8b5cf6' });
+
+        expect(response.status).toBe(201);
+        expect(response.body.name).toBe('Backend');
+      });
+
+      it('returns HTTP 409 when tag with same name already exists', async () => {
+        const existingTag = {
+          id: 'tag-1',
+          userId: userA.userId,
+          name: 'Backend',
+          color: '#8b5cf6',
+          createdAt: new Date(),
+        };
+        vi.mocked(prisma.tag.findFirst).mockResolvedValueOnce(existingTag as any);
+
+        const response = await request(app)
+          .post('/api/workspace/tags')
+          .set('Authorization', `Bearer ${tokenA}`)
+          .send({ name: 'Backend' });
+
+        expect(response.status).toBe(409);
+        expect(response.body.code).toBe('TAG_ALREADY_EXISTS');
+      });
+    });
+
+    describe('DELETE /api/workspace/tags/:id', () => {
+      it('deletes tag when owned by user', async () => {
+        const tagToDelete = {
+          id: 'tag-1',
+          userId: userA.userId,
+          name: 'Backend',
+          color: '#8b5cf6',
+          createdAt: new Date(),
+        };
+
+        vi.mocked(prisma.tag.findUnique).mockResolvedValueOnce(tagToDelete as any);
+        vi.mocked(prisma.tag.delete).mockResolvedValueOnce(tagToDelete as any);
+
+        const response = await request(app)
+          .delete('/api/workspace/tags/tag-1')
+          .set('Authorization', `Bearer ${tokenA}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body.id).toBe('tag-1');
+      });
+
+      it('returns HTTP 403 when deleting another user tag', async () => {
+        const otherUserTag = {
+          id: 'tag-1',
+          userId: userB.userId,
+          name: 'Secrets',
+          color: '#000000',
+          createdAt: new Date(),
+        };
+
+        vi.mocked(prisma.tag.findUnique).mockResolvedValueOnce(otherUserTag as any);
+
+        const response = await request(app)
+          .delete('/api/workspace/tags/tag-1')
+          .set('Authorization', `Bearer ${tokenA}`);
+
+        expect(response.status).toBe(403);
+        expect(response.body.code).toBe('FORBIDDEN');
+      });
+    });
+
+    describe('POST & DELETE /api/workspace/repositories/:id/tags', () => {
+      it('assigns tag to repository when user owns both', async () => {
+        const userRepo = {
+          id: 'repo-1',
+          userId: userA.userId,
+          owner: 'facebook',
+          name: 'react',
+        };
+        const userTag = {
+          id: 'tag-1',
+          userId: userA.userId,
+          name: 'Core',
+        };
+
+        vi.mocked(prisma.savedRepository.findUnique).mockResolvedValueOnce(userRepo as any);
+        vi.mocked(prisma.tag.findUnique).mockResolvedValueOnce(userTag as any);
+        vi.mocked(prisma.repositoryTag.upsert).mockResolvedValueOnce({
+          repositoryId: 'repo-1',
+          tagId: 'tag-1',
+        } as any);
+
+        const response = await request(app)
+          .post('/api/workspace/repositories/repo-1/tags')
+          .set('Authorization', `Bearer ${tokenA}`)
+          .send({ tagId: 'tag-1' });
+
+        expect(response.status).toBe(200);
+        expect(prisma.repositoryTag.upsert).toHaveBeenCalled();
+      });
+
+      it('removes tag from repository', async () => {
+        const userRepo = {
+          id: 'repo-1',
+          userId: userA.userId,
+          owner: 'facebook',
+          name: 'react',
+        };
+
+        vi.mocked(prisma.savedRepository.findUnique).mockResolvedValueOnce(userRepo as any);
+        vi.mocked(prisma.repositoryTag.delete).mockResolvedValueOnce({
+          repositoryId: 'repo-1',
+          tagId: 'tag-1',
+        } as any);
+
+        const response = await request(app)
+          .delete('/api/workspace/repositories/repo-1/tags/tag-1')
+          .set('Authorization', `Bearer ${tokenA}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body.tagId).toBe('tag-1');
+      });
     });
   });
 });

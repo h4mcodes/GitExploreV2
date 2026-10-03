@@ -176,35 +176,45 @@ export async function withAICache<T = Record<string, unknown>>(
   const contextHash = computeContextHash(type, context, promptVersion);
 
   if (!bypassCache) {
-    const cached = await getCachedAnalysis<T>(contextHash);
-    if (cached) {
-      return {
-        data: cached.data,
-        cached: true,
-        contextHash,
-        provider: cached.provider,
-        modelId: cached.modelId,
-        tokenUsage: cached.tokenUsage,
-        analysisId: cached.id,
-      };
+    try {
+      const cached = await getCachedAnalysis<T>(contextHash);
+      if (cached) {
+        return {
+          data: cached.data,
+          cached: true,
+          contextHash,
+          provider: cached.provider,
+          modelId: cached.modelId,
+          tokenUsage: cached.tokenUsage,
+          analysisId: cached.id,
+        };
+      }
+    } catch (cacheErr) {
+      console.warn('[AI Cache] DB cache lookup failed (falling back to direct inference):', cacheErr instanceof Error ? cacheErr.message : cacheErr);
     }
   }
 
   // Cache miss: execute provider call
   const result = await fetcher();
 
-  // Cache store
-  const saved = await storeCachedAnalysis<T>({
-    type,
-    contextHash,
-    prompt,
-    data: result.data,
-    provider: result.provider,
-    modelId: result.modelId,
-    tokenUsage: result.tokenUsage,
-    repositoryId,
-    ttlMs,
-  });
+  // Cache store (resilient to DB errors)
+  let savedId: string | undefined;
+  try {
+    const saved = await storeCachedAnalysis<T>({
+      type,
+      contextHash,
+      prompt,
+      data: result.data,
+      provider: result.provider,
+      modelId: result.modelId,
+      tokenUsage: result.tokenUsage,
+      repositoryId,
+      ttlMs,
+    });
+    savedId = saved.id;
+  } catch (storeErr) {
+    console.warn('[AI Cache] DB cache store failed (continuing without persistence):', storeErr instanceof Error ? storeErr.message : storeErr);
+  }
 
   return {
     data: result.data,
@@ -213,6 +223,6 @@ export async function withAICache<T = Record<string, unknown>>(
     provider: result.provider,
     modelId: result.modelId,
     tokenUsage: result.tokenUsage,
-    analysisId: saved.id,
+    analysisId: savedId,
   };
 }

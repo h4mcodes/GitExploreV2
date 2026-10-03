@@ -22,43 +22,17 @@ export function Navbar({ showLabel = true }: NavbarProps) {
         <span className="brand-name">Git<span>Explore</span></span>
       </Link>
 
-      <nav style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', marginLeft: 'auto', marginRight: '1rem' }}>
+      <nav className="nav-links">
         <Link
           to="/"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.375rem',
-            padding: '0.35rem 0.75rem',
-            borderRadius: '9999px',
-            fontSize: '0.8125rem',
-            fontWeight: 500,
-            textDecoration: 'none',
-            color: !isWorkspace ? '#f8fafc' : '#94a3b8',
-            background: !isWorkspace ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
-            border: !isWorkspace ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid transparent',
-            transition: 'all 0.2s ease',
-          }}
+          className={`nav-link-btn ${!isWorkspace ? 'active' : ''}`}
         >
           <Compass size={14} />
           Explore
         </Link>
         <Link
           to="/workspace"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.375rem',
-            padding: '0.35rem 0.75rem',
-            borderRadius: '9999px',
-            fontSize: '0.8125rem',
-            fontWeight: 500,
-            textDecoration: 'none',
-            color: isWorkspace ? '#f8fafc' : '#94a3b8',
-            background: isWorkspace ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
-            border: isWorkspace ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid transparent',
-            transition: 'all 0.2s ease',
-          }}
+          className={`nav-link-btn ${isWorkspace ? 'active' : ''}`}
         >
           <LayoutGrid size={14} />
           Workspace

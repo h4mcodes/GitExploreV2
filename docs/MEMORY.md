@@ -285,6 +285,8 @@ Next Task:      D5-P4: Investigations (Create CRUD endpoints for investigations 
 | 2026-10-02 | Implemented Authentication Foundation (D5-P1) | User registration, login, logout, salted scrypt password hashing, and JWT auth middleware |
 | 2026-10-02 | Implemented User Workspace Overview (D5-P2) | GET /api/workspace endpoint returning aggregated metrics and chronological activity feed |
 | 2026-10-02 | Implemented Saved Repositories API (D5-P3) | GET /api/workspace/repositories, POST save repository with duplicate prevention, DELETE saved repo |
+| 2026-10-02 | Implemented Investigations CRUD API (D5-P4) | CRUD endpoints with context snapshot storage and ownership enforcement |
+| 2026-10-02 | Implemented Notes and Bookmarks API (D5-P5) | CRUD endpoints for notes and bookmarks with polymorphic TargetType references and filtering |
 
 ---
 
@@ -323,6 +325,8 @@ Next Task:      D5-P4: Investigations (Create CRUD endpoints for investigations 
 | 2026-10-02 | Implemented Authentication Foundation (D5-P1) | Added authRouter, authController, authService, scrypt hashing, JWT tokens, and route protection |
 | 2026-10-02 | Implemented User Workspace Overview (D5-P2) | Added workspaceRouter, workspaceController, aggregate metrics, and activity feed |
 | 2026-10-02 | Implemented Saved Repositories API (D5-P3) | Added saved repositories list, save, and delete handlers with duplicate checks and auth |
+| 2026-10-02 | Implemented Investigations CRUD API (D5-P4) | Added investigationsRouter, investigationController, investigationRepository, context JSON snapshot |
+| 2026-10-02 | Implemented Notes and Bookmarks API (D5-P5) | Added notesRouter, bookmarksRouter, controllers, repositories, TargetType support, and 45 new tests |
 
 
 

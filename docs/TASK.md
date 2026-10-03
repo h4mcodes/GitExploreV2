@@ -1633,11 +1633,11 @@ Notes let developers annotate their investigation findings. Bookmarks let them m
 - Backend builds
 
 **Completion Criteria**
-- [ ] Notes CRUD functional with targetType/targetRef
-- [ ] Bookmarks CRUD functional with targetType/targetRef
-- [ ] Linked to correct parent entities
-- [ ] Authorization enforced
-- [ ] Backend builds
+- [x] Notes CRUD functional with targetType/targetRef
+- [x] Bookmarks CRUD functional with targetType/targetRef
+- [x] Linked to correct parent entities
+- [x] Authorization enforced
+- [x] Backend builds
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -1648,7 +1648,7 @@ Notes let developers annotate their investigation findings. Bookmarks let them m
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

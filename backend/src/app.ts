@@ -7,6 +7,8 @@ import { repositoriesRouter } from './routes/repositories.js';
 import { authRouter } from './routes/auth.js';
 import { workspaceRouter } from './routes/workspace.js';
 import { investigationsRouter } from './routes/investigations.js';
+import { notesRouter } from './routes/notes.js';
+import { bookmarksRouter } from './routes/bookmarks.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 
 export function createApp(): Express {
@@ -36,6 +38,10 @@ export function createApp(): Express {
   app.use('/workspace', workspaceRouter);
   app.use('/api/investigations', investigationsRouter);
   app.use('/investigations', investigationsRouter);
+  app.use('/api/notes', notesRouter);
+  app.use('/notes', notesRouter);
+  app.use('/api/bookmarks', bookmarksRouter);
+  app.use('/bookmarks', bookmarksRouter);
 
 
   // Root fallback

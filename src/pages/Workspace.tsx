@@ -349,7 +349,12 @@ export function Workspace() {
 
       <Navbar showLabel={false} />
 
-      <div className="ws-container">
+      <motion.div
+        className="ws-container"
+        initial={{ opacity: 0, y: 14, filter: 'blur(3px)' }}
+        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+        transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
+      >
         {/* Notification Banners */}
         <AnimatePresence>
           {successMessage && (
@@ -1075,7 +1080,7 @@ export function Workspace() {
             )}
           </div>
         )}
-      </div>
+      </motion.div>
 
       {/* Tag Creation Modal */}
       <AnimatePresence>

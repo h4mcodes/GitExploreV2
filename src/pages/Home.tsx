@@ -13,9 +13,9 @@ export function Home() {
       <section className="hero">
         <motion.div
           className="hero-copy"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: 'easeOut' }}
+          initial={{ opacity: 0, y: 14, filter: 'blur(3px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
         >
           <div className="glass-badge">
             <span className="badge-pulse" />Explore GitHub developers <ArrowDownRight size={14} />

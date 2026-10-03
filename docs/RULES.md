@@ -78,16 +78,19 @@ This document defines mandatory engineering constraints for all agents and devel
 
 This section is critical. AI misuse is the highest-risk area in V2.
 
-- **AI is not the source of truth.** Repository data from the GitHub API is the source of truth. AI interprets this data — it does not generate repository facts.
-- **AI must receive structured repository evidence.** Every AI call includes a context payload assembled by the context builder from actual repository data. AI must not query GitHub or any external source independently.
-- **Never fabricate repository facts.** Prompts must instruct the AI to base its analysis on the provided evidence only. AI should state uncertainty rather than invent details.
-- **Validate AI outputs.** Every AI response must be parsed and validated against a typed schema (Zod or equivalent). Invalid responses are rejected.
-- **Limit context size.** Context payloads must respect token limits. Large diffs must be truncated. The context builder is responsible for staying within bounds.
-- **Version prompts.** Each prompt template has a version identifier. When prompts change, the version increments, invalidating cached results.
-- **Cache repeated analyses.** If the same input data (same contextHash) has already been analyzed, return the cached result instead of calling the AI provider again.
-- **Handle AI failure gracefully.** If the AI provider is down, slow, or returns garbage, the application must continue working. Show a clear "AI unavailable" message. Deterministic analysis is always available.
-- **Never expose AI provider secrets.** API keys for AI providers live in server-side environment variables only.
-- **Clearly separate AI inference from deterministic metrics.** In the UI, AI-generated content must be visually distinct from deterministic data. Users should know what is computed and what is interpreted.
+- **Official AI Provider Decision**: Google Gemini API via Google AI Studio (Free Tier, Flash-class model) is the locked provider.
+- **Server-side secrets only**: `GEMINI_API_KEY` lives strictly in the backend `.env` file and must never be committed, logged, or exposed in client bundles or API responses.
+- **Frontend separation**: The frontend must NEVER directly call Google Gemini API. All AI interactions route through GitExplore backend endpoints.
+- **Provider abstraction is a mandatory boundary**: All services and controllers must interact with AI solely via the `AIProvider` interface. The provider implementation must be swappable without changing application business logic or frontend code.
+- **AI is not the source of truth**: Repository data from the GitHub API is the source of truth. AI interprets this data — it does not generate repository facts.
+- **Structured evidence only**: AI must receive structured GitExplore evidence/context payloads assembled by the `contextBuilder` from deterministic intelligence outputs, not arbitrary raw repository files by default.
+- **Never fabricate repository facts**: Prompts must instruct the AI to base its analysis on the provided evidence only. AI should state uncertainty rather than invent details.
+- **Mandatory structured response validation**: Every AI response must be validated against a typed Zod schema. Invalid responses are immediately rejected with safe fallbacks.
+- **Limit context size**: Context payloads must respect token limits. Large diffs must be truncated. The context builder is responsible for staying within bounds.
+- **Version prompts**: Each prompt template has a version identifier. When prompts change, the version increments, invalidating cached results.
+- **Cache repeated analyses**: If the same input data (same contextHash) has already been analyzed, return the cached result instead of calling the AI provider again.
+- **Handle AI failure gracefully**: If the AI provider is down, rate-limited, or returns unparseable content, the application must continue working. Show a clear "AI unavailable" message. Deterministic analysis is always available.
+- **Clearly separate AI inference from deterministic metrics**: In the UI, AI-generated content must be visually distinct from deterministic data. Users should know what is computed and what is interpreted.
 
 ---
 

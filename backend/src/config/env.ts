@@ -11,8 +11,10 @@ export interface EnvironmentConfig {
   readonly githubToken?: string;
   readonly databaseUrl?: string;
   readonly jwtSecret: string;
-  readonly aiProvider?: string;
+  readonly aiProvider: string;
   readonly aiApiKey?: string;
+  readonly geminiApiKey?: string;
+  readonly geminiModel: string;
 }
 
 function parsePort(rawPort: string | undefined, defaultPort: number): number {
@@ -41,8 +43,10 @@ export function loadEnvironmentConfig(): EnvironmentConfig {
   const githubToken = process.env['GITHUB_TOKEN'] || undefined;
   const databaseUrl = process.env['DATABASE_URL'] || undefined;
   const jwtSecret = process.env['JWT_SECRET'] || 'gitexplore-v2-jwt-secret-key-32-chars-minimum-token';
-  const aiProvider = process.env['AI_PROVIDER'] || undefined;
-  const aiApiKey = process.env['AI_API_KEY'] || undefined;
+  const aiProvider = process.env['AI_PROVIDER'] || 'gemini';
+  const geminiApiKey = process.env['GEMINI_API_KEY'] || process.env['AI_API_KEY'] || undefined;
+  const aiApiKey = geminiApiKey;
+  const geminiModel = process.env['GEMINI_MODEL'] || 'gemini-1.5-flash';
 
   return {
     port,
@@ -53,8 +57,11 @@ export function loadEnvironmentConfig(): EnvironmentConfig {
     jwtSecret,
     aiProvider,
     aiApiKey,
+    geminiApiKey,
+    geminiModel,
   };
 }
+
 
 
 export const env: EnvironmentConfig = loadEnvironmentConfig();

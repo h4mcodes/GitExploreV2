@@ -214,27 +214,31 @@ See `docs/PRD.md` for full product requirements and `docs/ARCHITECTURE.md` for s
 | API data validation | Type guard functions (existing pattern) | V1 uses runtime type guards for all GitHub responses |
 | Frontend routing | React Router DOM 7 (existing) | Already configured |
 | Authentication method | HMAC-SHA256 JWT with salted scrypt hashing | Stateless Bearer tokens ideal for serverless/Vercel scaling, standard expiration and in-memory revocation |
+| AI Provider | Google Gemini API | Access via Google AI Studio, Free Tier, low latency, high token allowance, strict JSON schema mode |
+| AI Model | Gemini Flash-class model | High performance, fast inference, optimized for code reasoning and JSON payload output |
+| AI Secret Key | `GEMINI_API_KEY` | Server-side only environment variable in backend `.env` |
+| AI Architecture | `AIProvider` abstraction boundary | Strict interface separating business logic from vendor SDK, enabling zero-friction provider replacement |
+| AI Response Validation | Zod schema validation | Every AI output is parsed and verified against strict schemas before caching or returning |
 
 ### UNDECIDED
 
 | Decision | Options | Notes |
 | :--- | :--- | :--- |
-| AI provider | OpenAI, Anthropic, Google, other | Provider abstraction means this can be swapped. Initial implementation TBD. |
-| AI model | GPT-4, Claude, Gemini, etc. | Depends on provider choice. Configurable via env. |
-| Schema validation library | Zod, io-ts, ArkType | Zod is most popular in TypeScript ecosystem. Likely choice but not locked. |
-| AI auth requirement | AI endpoints public with rate limits vs. auth-required | Deferred to D6-P6. |
+| AI auth requirement | AI endpoints public with rate limits vs. auth-required | To be resolved in D6-P6. |
 
 ---
 
 ## Current Task
 
 ```
-Current Day:    5 (In Progress)
-Current Push:   3 (D5-P3: Saved Repositories)
-Current Objective: Create endpoints for saving, listing, and removing repositories from a user's workspace
+Current Day:    6 (In Progress)
+Current Push:   1 (D6-P1: AI Provider Abstraction)
+Current Objective: Define the AIProvider interface and implement GeminiProvider adapter with GEMINI_API_KEY config
 Current Status: Completed
-Next Task:      D5-P4: Investigations (Create CRUD endpoints for investigations with context snapshots)
+Next Task:      D6-P2: Context Builders (Assemble structured evidence payloads from intelligence engine output)
 ```
+
+
 
 
 
@@ -288,6 +292,8 @@ Next Task:      D5-P4: Investigations (Create CRUD endpoints for investigations 
 | 2026-10-02 | Implemented Investigations CRUD API (D5-P4) | CRUD endpoints with context snapshot storage and ownership enforcement |
 | 2026-10-02 | Implemented Notes and Bookmarks API (D5-P5) | CRUD endpoints for notes and bookmarks with polymorphic TargetType references and filtering |
 | 2026-10-03 | Implemented Tags & Frontend Workspace Page (D5-P6) | Tag CRUD, repo tag assignment, frontend Workspace.tsx page, /workspace route, and ApiClient extensions |
+| 2026-10-03 | Locked Google Gemini API (Google AI Studio Free Tier) as official AI Provider | Standardized Flash-class model, server-side GEMINI_API_KEY, AIProvider abstraction boundary, and Zod response validation |
+
 
 ---
 

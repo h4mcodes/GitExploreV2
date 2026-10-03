@@ -390,17 +390,32 @@ The intelligence engine computes deterministic analysis from GitHub data. It run
 
 ## 8. AI Architecture
 
+### Final AI Decision:
+- **Official AI Provider**: Google Gemini API
+- **Access / Platform**: Google AI Studio
+- **Plan**: Free tier
+- **Initial Model**: Gemini Flash-class model (`gemini-1.5-flash` / `gemini-2.0-flash`)
+- **Secret Key**: `GEMINI_API_KEY` (stored strictly server-side in backend `.env`)
+- **Architecture**: Pluggable `AIProvider` abstraction layer on Node.js / Express + TypeScript backend
+
+### Architectural Boundaries & Security:
+1. **Server-Side Only**: The frontend never directly accesses Gemini APIs or the `GEMINI_API_KEY`. All AI requests route through authenticated backend endpoints.
+2. **Provider Abstraction**: The `AIProvider` interface is a strict architectural boundary. All controllers, services, and prompt builders interact only with `AIProvider`. The concrete implementation (`GeminiProvider`) can be replaced or augmented with other LLMs in the future without modifying any business logic or frontend code.
+3. **Structured Context Payloads**: The AI is never fed arbitrary raw repository data. The `contextBuilder` extracts and structures deterministic evidence from the Repository Intelligence Engine.
+4. **Separation of Concerns**: Deterministic repository analysis (commit DAGs, statistics, divergence, churn) remains 100% functional even if the AI provider is degraded, rate-limited, or unavailable.
+5. **Structured Response Validation**: Every AI response must pass Zod schema validation before being cached or transmitted to the client.
+
 ### Data flow:
 
 ```
 GitHub data (fetched by githubService)
   → deterministic analysis (intelligence engine)
-  → context builder (assembles structured prompt)
+  → context builder (assembles structured evidence payload)
   → prompt template (versioned, per-analysis-type)
-  → AI provider (sends to LLM, receives raw response)
-  → schema validation (Zod or equivalent)
-  → caching (store by contextHash)
-  → typed response to frontend
+  → AI provider abstraction (GeminiProvider via GEMINI_API_KEY)
+  → schema validation (Zod schema verification)
+  → database caching (stored in AIAnalysis table by contextHash)
+  → typed JSON response to frontend
 ```
 
 ### Provider abstraction:
@@ -408,6 +423,7 @@ GitHub data (fetched by githubService)
 ```typescript
 interface AIProvider {
   readonly name: string;
+  readonly model: string;
   analyze(request: AIAnalysisRequest): Promise<AIRawResponse>;
 }
 
@@ -417,6 +433,7 @@ interface AIAnalysisRequest {
   prompt: string;
   responseSchema: ZodSchema;
   maxTokens?: number;
+  temperature?: number;
 }
 
 interface AIRawResponse {
@@ -427,12 +444,17 @@ interface AIRawResponse {
 }
 ```
 
+### Concrete Implementation (`GeminiProvider`):
+- Connects to Google Gemini API via official Google Gen AI SDK / REST client using `GEMINI_API_KEY`.
+- Uses Gemini Flash-class model optimized for high speed, low latency, and structured JSON generation.
+- Enforces strict JSON mode / schema output matching the requested analysis type.
+
 ### Context builder:
 
 Each analysis type has a context builder function that:
 
-1. Accepts intelligence engine output.
-2. Selects relevant data fields.
+1. Accepts intelligence engine output (deterministic evidence).
+2. Selects relevant data fields without dumping arbitrary raw files.
 3. Truncates large payloads to fit within token limits.
 4. Returns a structured context object and formatted prompt string.
 

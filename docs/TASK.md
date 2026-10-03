@@ -1724,56 +1724,57 @@ Tags provide organizational structure for saved repositories. The Workspace page
 ### D6-P1 — AI Provider Abstraction
 
 **Objective**
-Define the `AIProvider` interface and create the first concrete provider implementation. Configure API key loading from environment.
+Define the `AIProvider` interface and implement the concrete `GeminiProvider` adapter using Google Gemini API (via Google AI Studio Free Tier, Flash-class model). Configure `GEMINI_API_KEY` loading strictly from server-side environment.
 
 **Why**
-The provider abstraction ensures GitExplore is not locked to a single AI vendor. The interface must be defined before any AI features can be built.
+The provider abstraction ensures GitExplore is not hard-locked to a single AI vendor while providing a production-grade, fast, low-latency Flash model integration for repository intelligence analysis.
 
 **Scope**
 - Create `backend/src/ai/provider.ts` — `AIProvider` interface definition
-- Create `backend/src/ai/providers/` — first implementation for chosen provider
-- Create `backend/src/ai/types.ts` — AI request/response types
-- Load AI API key from env config
-- Resolve the UNDECIDED AI provider choice
+- Create `backend/src/ai/providers/geminiProvider.ts` — concrete Google Gemini implementation
+- Create `backend/src/ai/types.ts` — AI request/response types and schemas
+- Load `GEMINI_API_KEY` from backend environment config (`backend/src/config/env.ts`)
+- Update `backend/.env.example` with `GEMINI_API_KEY` placeholder (do not expose active key)
 
 **Required Skills**
 - `api-and-interface-design` — provider interface design
 - `security-and-hardening` — API key management, never expose in logs or responses
 - `documentation-and-adrs` — record the provider choice decision
-- `source-driven-development` — verify provider SDK/API usage against official docs
+- `source-driven-development` — verify Google GenAI SDK/REST usage against official docs
 
 **Files / Modules**
 - `backend/src/ai/provider.ts`
-- `backend/src/ai/providers/*.ts`
+- `backend/src/ai/providers/geminiProvider.ts`
 - `backend/src/ai/types.ts`
-- `backend/src/config/env.ts` (add AI config)
-- `backend/.env.example` (add AI vars)
+- `backend/src/config/env.ts` (add GEMINI_API_KEY validation)
+- `backend/.env.example` (add GEMINI_API_KEY)
 
 **Dependencies**
 - D1-P4 (API infrastructure)
 
 **Implementation Guidance**
-- Interface should define: `analyze(request) → Promise<response>`.
-- Request type includes: analysis type, context, prompt, response schema, max tokens.
-- First provider implementation connects to the chosen LLM API.
-- API key must never appear in logs, responses, or error messages.
+- Interface should define: `analyze(request: AIAnalysisRequest) → Promise<AIRawResponse>`.
+- Request type includes: `type: AnalysisType`, `context: Record<string, unknown>`, `prompt: string`, `responseSchema: ZodSchema`, `maxTokens?: number`, `temperature?: number`.
+- `GeminiProvider` connects to Google Gemini API (Google AI Studio Free Tier, Flash-class model).
+- API key must never appear in logs, responses, error messages, or client-side bundles.
+- Frontend must never call Gemini directly.
 
 **Validation**
-- Provider interface defined with strict types
-- First implementation connects to AI provider and returns a response
-- API key loaded from env, never exposed
-- Backend builds
+- `AIProvider` interface defined with strict types
+- `GeminiProvider` connects to Google Gemini API and returns structured JSON responses
+- `GEMINI_API_KEY` loaded from server-side env, never exposed
+- Backend builds with zero errors
 
 **Completion Criteria**
-- [ ] `AIProvider` interface defined
-- [ ] First provider implementation functional
-- [ ] API key management secure
-- [ ] AI types defined
-- [ ] Provider choice documented in MEMORY.md
-- [ ] Backend builds
+- [x] `AIProvider` interface defined
+- [x] `GeminiProvider` implementation functional
+- [x] `GEMINI_API_KEY` management secure (server-side only)
+- [x] AI request and response types defined
+- [x] Provider choice documented in MEMORY.md
+- [x] Backend builds
 
 **Documentation Updates**
-- Update `docs/MEMORY.md` — move AI provider from UNDECIDED to DECIDED, Current Task section
+- Update `docs/MEMORY.md` — Current Task section
 
 **Git**
 - Implementation only.
@@ -1781,7 +1782,9 @@ The provider abstraction ensures GitExplore is not locked to a single AI vendor.
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
+
+
 
 ---
 

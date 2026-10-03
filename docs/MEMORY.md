@@ -293,7 +293,8 @@ Next Task:      D6-P2: Context Builders (Assemble structured evidence payloads f
 | 2026-10-02 | Implemented Notes and Bookmarks API (D5-P5) | CRUD endpoints for notes and bookmarks with polymorphic TargetType references and filtering |
 | 2026-10-03 | Implemented Tags & Frontend Workspace Page (D5-P6) | Tag CRUD, repo tag assignment, frontend Workspace.tsx page, /workspace route, and ApiClient extensions |
 | 2026-10-03 | Locked Google Gemini API (Google AI Studio Free Tier) as official AI Provider | Standardized Flash-class model, server-side GEMINI_API_KEY, AIProvider abstraction boundary, and Zod response validation |
-
+| 2026-10-03 | Implemented AI Provider Abstraction & Gemini Provider Adapter (D6-P1) | Built `AIProvider` interface, `GeminiProvider`, `MockAIProvider`, error hierarchy, and key redaction |
+| 2026-10-03 | Implemented AI Context Builders (D6-P2) | Built deterministic, bounded context builders for all 6 analysis types consuming structured repository intelligence |
 
 ---
 
@@ -335,6 +336,9 @@ Next Task:      D6-P2: Context Builders (Assemble structured evidence payloads f
 | 2026-10-02 | Implemented Investigations CRUD API (D5-P4) | Added investigationsRouter, investigationController, investigationRepository, context JSON snapshot |
 | 2026-10-02 | Implemented Notes and Bookmarks API (D5-P5) | Added notesRouter, bookmarksRouter, controllers, repositories, TargetType support, and 45 new tests |
 | 2026-10-03 | Implemented Tags & Frontend Workspace (D5-P6) | Added Tag CRUD, tag assignments, Workspace page, /workspace route, and ApiClient workspace methods |
+| 2026-10-03 | Implemented AI Provider Abstraction (D6-P1) | Added `AIProvider` interface, `GeminiProvider` adapter, `MockAIProvider`, test suite, and env handling |
+| 2026-10-03 | Implemented AI Context Builders (D6-P2) | Added `contextBuilder.ts`, analysis-specific context constructors, token safety bounds, and 14 tests |
+
 
 
 

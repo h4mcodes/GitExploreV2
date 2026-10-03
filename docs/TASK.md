@@ -1932,11 +1932,11 @@ AI responses are unpredictable. Schema validation ensures that invalid or malfor
 - Backend builds
 
 **Completion Criteria**
-- [ ] 5 response schemas created
-- [ ] Valid sample data passes validation
-- [ ] Invalid data rejected with clear errors
-- [ ] Schema library choice documented in MEMORY.md
-- [ ] Backend builds
+- [x] 5+ response schemas created
+- [x] Valid sample data passes validation
+- [x] Invalid data rejected with clear errors
+- [x] Schema library choice documented in MEMORY.md
+- [x] Backend builds
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — move schema validation library from UNDECIDED to DECIDED
@@ -1947,7 +1947,7 @@ AI responses are unpredictable. Schema validation ensures that invalid or malfor
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

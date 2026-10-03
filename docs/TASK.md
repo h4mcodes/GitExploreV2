@@ -1879,11 +1879,11 @@ Prompts must be versioned so cached AI results are invalidated when the prompt c
 - Backend builds
 
 **Completion Criteria**
-- [ ] 5 prompt template files created
-- [ ] Each has a version identifier
-- [ ] Each produces a formatted prompt from context
-- [ ] AI grounding instructions included in each prompt
-- [ ] Backend builds
+- [x] 5+ prompt template files created
+- [x] Each has a version identifier
+- [x] Each produces a formatted prompt from context
+- [x] AI grounding instructions included in each prompt
+- [x] Backend builds
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -1894,7 +1894,7 @@ Prompts must be versioned so cached AI results are invalidated when the prompt c
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

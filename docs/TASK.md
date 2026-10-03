@@ -1983,11 +1983,11 @@ AI provider calls are slow and expensive. Caching prevents redundant calls when 
 - Backend builds
 
 **Completion Criteria**
-- [ ] contextHash computation deterministic for same input
-- [ ] Cache lookup by contextHash works
-- [ ] Expired entries re-fetched
-- [ ] Cache entries stored in AIAnalysis table
-- [ ] Backend builds
+- [x] contextHash computation deterministic for same input
+- [x] Cache lookup by contextHash works
+- [x] Expired entries re-fetched
+- [x] Cache entries stored in AIAnalysis table
+- [x] Backend builds
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -1998,7 +1998,7 @@ AI provider calls are slow and expensive. Caching prevents redundant calls when 
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

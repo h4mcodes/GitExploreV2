@@ -232,10 +232,10 @@ See `docs/PRD.md` for full product requirements and `docs/ARCHITECTURE.md` for s
 
 ```
 Current Day:    6 (In Progress)
-Current Push:   4 (D6-P4: Structured Response Validation)
-Current Objective: Create validation schemas for each AI analysis response type with Zod
+Current Push:   5 (D6-P5: AI Caching)
+Current Objective: Implement AI response caching using contextHash in AIAnalysis table
 Current Status: Completed
-Next Task:      D6-P5: AI Caching (Implement AI response caching using contextHash in AIAnalysis table)
+Next Task:      D6-P6: AI API Foundation (Create AI analysis routes, controller, and full pipeline wiring)
 ```
 
 
@@ -297,6 +297,7 @@ Next Task:      D6-P5: AI Caching (Implement AI response caching using contextHa
 | 2026-10-03 | Implemented AI Context Builders (D6-P2) | Built deterministic, bounded context builders for all 6 analysis types consuming structured repository intelligence |
 | 2026-10-03 | Implemented AI Prompt System (D6-P3) | Created versioned prompt templates with grounding rules for all analysis types in `src/ai/prompts/` |
 | 2026-10-03 | Implemented Structured Response Validation (D6-P4) | Added Zod validation schemas for all analysis types and `validateAIResponse` boundary |
+| 2026-10-03 | Implemented AI Cache Layer (D6-P5) | Deterministic SHA-256 context hashing, AIAnalysis table caching, TTL management, and withAICache wrapper |
 
 ---
 
@@ -342,6 +343,8 @@ Next Task:      D6-P5: AI Caching (Implement AI response caching using contextHa
 | 2026-10-03 | Implemented AI Context Builders (D6-P2) | Added `contextBuilder.ts`, analysis-specific context constructors, token safety bounds, and 14 tests |
 | 2026-10-03 | Implemented AI Prompt System (D6-P3) | Added versioned prompt modules in `backend/src/ai/prompts/`, grounding rules, resolver, and 9 tests |
 | 2026-10-03 | Implemented Structured Response Validation (D6-P4) | Added Zod validation schemas in `backend/src/ai/schemas/`, markdown fence sanitization, and 18 tests |
+| 2026-10-03 | Implemented AI Caching (D6-P5) | Added `cache.ts`, `aiAnalysisRepository.ts`, deterministic SHA-256 context hashing, and 19 new tests |
+
 
 
 

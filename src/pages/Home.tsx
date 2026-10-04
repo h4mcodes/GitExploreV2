@@ -17,12 +17,7 @@ export function Home() {
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 0.68, ease: [0.16, 1, 0.3, 1] }}
         >
-          <motion.div
-            className="glass-badge"
-            whileHover={{ scale: 1.025, y: -1 }}
-            whileTap={{ scale: 0.98 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          >
+          <div className="glass-badge">
             <div className="liquid-capsule-refract" aria-hidden="true" />
             <div className="liquid-capsule-surface" aria-hidden="true" />
             <div className="liquid-capsule-content">
@@ -30,7 +25,7 @@ export function Home() {
               <span>Explore GitHub developers</span>
               <ArrowDownRight size={14} className="liquid-capsule-arrow" />
             </div>
-          </motion.div>
+          </div>
           <GlassFilter />
           <h1>
             Understand the <span>&lt;code&gt;</span>

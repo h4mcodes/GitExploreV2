@@ -9,6 +9,13 @@ import {
 } from '../ai/contextBuilder.js';
 import type { AnalysisType, TokenUsage } from '../ai/types.js';
 import { BadRequestError } from '../types/api.js';
+import { githubClient } from '../github/client.js';
+import {
+  computeCommitStatistics,
+  computeRepositoryEvolution,
+  computeFileChurn,
+} from '../intelligence/index.js';
+import type { GithubApiCommitDetail } from '../github/types.js';
 
 export interface AIAnalysisResponse<T> {
   readonly type: AnalysisType;
@@ -193,13 +200,71 @@ export async function postRepositoryOverview(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { context, repo, statistics, fileAnalysis, evolution, repositoryId, bypassCache, ttlMs } =
-      req.body;
+    const {
+      context,
+      repo,
+      owner,
+      branch,
+      statistics: userStatistics,
+      fileAnalysis: userFileAnalysis,
+      evolution: userEvolution,
+      repositoryId,
+      bypassCache,
+      ttlMs,
+    } = req.body;
 
-    const contextInput =
-      repo !== undefined
-        ? { repo, statistics, fileAnalysis, evolution }
-        : undefined;
+    let contextInput: ContextBuilderInputMap['REPOSITORY_OVERVIEW'] | undefined;
+
+    if (repo && typeof repo === 'object') {
+      contextInput = {
+        repo,
+        statistics: userStatistics,
+        fileAnalysis: userFileAnalysis,
+        evolution: userEvolution,
+      };
+    } else if (typeof owner === 'string' && typeof repo === 'string') {
+      // Dynamic repository fetch from GitHub
+      const repoMeta = await githubClient.getRepo(owner, repo);
+      const targetBranch = branch || repoMeta.default_branch || 'main';
+
+      let stats = userStatistics;
+      let evol = userEvolution;
+      let churn = userFileAnalysis;
+
+      if (!stats || !evol || !churn) {
+        try {
+          const commits = await githubClient.getCommits(owner, repo, {
+            sha: targetBranch,
+            per_page: 50,
+          });
+
+          if (commits && commits.length > 0) {
+            stats = stats || computeCommitStatistics(commits);
+            evol = evol || computeRepositoryEvolution(commits);
+
+            const detailsSettled = await Promise.allSettled(
+              commits.slice(0, 10).map((c) => githubClient.getCommit(owner, repo, c.sha))
+            );
+            const validDetails = detailsSettled
+              .filter((d): d is PromiseFulfilledResult<GithubApiCommitDetail> => d.status === 'fulfilled')
+              .map((d) => d.value);
+
+            if (validDetails.length > 0) {
+              churn = churn || computeFileChurn(validDetails);
+            }
+          }
+        } catch (fetchErr) {
+          console.warn('[AI Overview] Could not compute full commit intelligence:', fetchErr);
+        }
+      }
+
+      contextInput = {
+        repo: repoMeta,
+        statistics: stats,
+        fileAnalysis: churn,
+        evolution: evol,
+      };
+    }
 
     const result = await executeAIPipeline({
       type: 'REPOSITORY_OVERVIEW',

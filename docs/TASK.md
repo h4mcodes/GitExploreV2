@@ -2091,11 +2091,11 @@ The repository overview is the most impactful AI feature — it gives developers
 - Provider failure returns graceful error
 
 **Completion Criteria**
-- [ ] Repository overview endpoint returns valid structured response
-- [ ] Response grounded in actual repository data
-- [ ] Schema validation passes
-- [ ] Caching works
-- [ ] Backend builds
+- [x] Repository overview endpoint returns valid structured response
+- [x] Response grounded in actual repository data
+- [x] Schema validation passes
+- [x] Caching works
+- [x] Backend builds
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -2106,7 +2106,7 @@ The repository overview is the most impactful AI feature — it gives developers
 - Antigravity MUST NOT push.
 - User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

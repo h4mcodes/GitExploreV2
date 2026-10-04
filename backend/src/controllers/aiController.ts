@@ -299,13 +299,41 @@ export async function postCommitExplanation(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { context, commit, repositoryCoordinates, parentMessages, repositoryId, bypassCache, ttlMs } =
-      req.body;
+    const {
+      context,
+      commit,
+      owner,
+      repo,
+      sha,
+      ref,
+      repositoryCoordinates: userRepoCoords,
+      parentMessages,
+      repositoryId,
+      bypassCache,
+      ttlMs,
+    } = req.body;
 
-    const contextInput =
-      commit !== undefined
-        ? { commit, repositoryCoordinates, parentMessages }
-        : undefined;
+    let contextInput: ContextBuilderInputMap['COMMIT_EXPLANATION'] | undefined;
+
+    if (commit !== undefined) {
+      contextInput = {
+        commit,
+        repositoryCoordinates: userRepoCoords || (owner && repo ? { owner, repo } : undefined),
+        parentMessages,
+      };
+    } else if (
+      typeof owner === 'string' &&
+      typeof repo === 'string' &&
+      (typeof sha === 'string' || typeof ref === 'string')
+    ) {
+      const targetSha = sha || ref;
+      const commitDetail = await githubClient.getCommit(owner, repo, targetSha);
+      contextInput = {
+        commit: commitDetail,
+        repositoryCoordinates: { owner, repo },
+        parentMessages,
+      };
+    }
 
     const result = await executeAIPipeline({
       type: 'COMMIT_EXPLANATION',
@@ -315,6 +343,7 @@ export async function postCommitExplanation(
       bypassCache,
       ttlMs,
     });
+
 
     res.status(200).json({
       type: 'COMMIT_EXPLANATION',

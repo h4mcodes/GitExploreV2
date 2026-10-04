@@ -19,11 +19,37 @@ export function buildCommitExplanationPrompt(context: Record<string, unknown>): 
 ${contextJson}
 \`\`\`
 
-Your explanation should include:
+Your explanation should evaluate:
 - Summary of the primary intent and motivation behind this commit
 - Breakdown of notable file changes and key code logic modifications
-- Technical scope and potential blast radius / side-effects
-- Clarification on whether this is a merge commit, breaking change, or routine maintenance`;
+- Technical scope, complexity, and potential blast radius / side-effects
+- Clarification on whether this is a merge commit, breaking change, or routine maintenance
+
+Return a valid JSON object adhering strictly to this schema:
+{
+  "intent": "FEATURE" | "BUGFIX" | "REFACTOR" | "PERFORMANCE" | "DOCUMENTATION" | "DEPENDENCY" | "CHORE" | "MERGE" | "OTHER",
+  "summary": "Concise summary of the commit and what it accomplishes",
+  "motivation": "Why this commit was created, underlying problem or requirement solved",
+  "technicalImpact": "Technical consequences, architectural shifts, or downstream impacts",
+  "complexity": "LOW" | "MEDIUM" | "HIGH",
+  "changesPerFile": [
+    {
+      "filename": "path/to/file.ext",
+      "summary": "Specific changes made in this file",
+      "riskLevel": "LOW" | "MEDIUM" | "HIGH"
+    }
+  ],
+  "modifiedComponents": [
+    {
+      "filename": "path/to/file.ext",
+      "summary": "Specific changes made in this file",
+      "riskLevel": "LOW" | "MEDIUM" | "HIGH"
+    }
+  ],
+  "potentialRisks": ["Potential risks, regression vectors, or edge cases to test"],
+  "isBreakingChange": false,
+  "keyChanges": ["Bullet list of key logic or configuration modifications"]
+}`;
 
   return {
     prompt,
@@ -31,3 +57,4 @@ Your explanation should include:
     version: COMMIT_EXPLANATION_PROMPT_VERSION,
   };
 }
+

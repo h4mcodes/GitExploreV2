@@ -88,6 +88,31 @@ export function Workspace() {
     }
   }, [successMessage]);
 
+  // Keyboard shortcut: Escape to dismiss popover menu and tag modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showTagModal) setShowTagModal(false);
+        if (tagAssignRepoId) setTagAssignRepoId(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showTagModal, tagAssignRepoId]);
+
+  // Click outside to dismiss tag assignment popover
+  useEffect(() => {
+    if (!tagAssignRepoId) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.ws-tag-menu') && !target.closest('.ws-repo-tag-add-btn')) {
+        setTagAssignRepoId(null);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [tagAssignRepoId]);
+
   // Load workspace data when session is active
   const loadWorkspaceData = useCallback(async () => {
     if (!session) return;
@@ -663,6 +688,17 @@ export function Workspace() {
                     placeholder="Filter saved repositories..."
                     className="ws-search-input"
                   />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="ws-search-clear-btn"
+                      title="Clear search"
+                      aria-label="Clear search"
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
                 </div>
               )}
             </div>

@@ -2407,7 +2407,7 @@ body {
 
 .ws-search-input {
   width: 100%;
-  padding: 0.5rem 0.85rem 0.5rem 2.25rem;
+  padding: 0.5rem 2rem 0.5rem 2.25rem;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.65);
   border: 1px solid rgba(255, 255, 255, 0.85);
@@ -2429,6 +2429,28 @@ body {
   color: #5a7b9f;
 }
 
+.ws-search-clear-btn {
+  position: absolute;
+  right: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #436488;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.ws-search-clear-btn:hover {
+  color: #183350;
+  background: rgba(36, 86, 145, 0.1);
+}
+
 /* Tags Strip & Filters */
 .ws-tags-strip {
   display: flex;
@@ -2442,6 +2464,8 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.6);
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), 0 4px 14px rgba(35, 65, 95, 0.04);
   backdrop-filter: blur(12px);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(36, 86, 145, 0.25) transparent;
 }
 
 .ws-tags-label {
@@ -2666,6 +2690,17 @@ body {
   background: rgba(36, 86, 145, 0.06);
 }
 
+@keyframes wsMenuFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .ws-tag-menu {
   position: absolute;
   top: 100%;
@@ -2679,6 +2714,7 @@ body {
   border: 1px solid rgba(35, 70, 108, 0.2);
   box-shadow: 0 10px 25px rgba(25, 45, 70, 0.15);
   backdrop-filter: blur(12px);
+  animation: wsMenuFadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .ws-tag-menu-item {
@@ -3152,6 +3188,56 @@ body {
   background: rgba(239, 68, 68, 0.15);
   color: #dc2626;
   border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* Accessibility Focus-Visible Rings */
+.ws-tab-btn:focus-visible,
+.ws-save-btn:focus-visible,
+.ws-logout-btn:focus-visible,
+.ws-tag-pill:focus-visible,
+.ws-tag-new-btn:focus-visible,
+.ws-icon-btn:focus-visible,
+.ws-repo-explore:focus-visible,
+.ws-auth-tab:focus-visible,
+.ws-auth-submit-btn:focus-visible,
+.ws-auth-demo-btn:focus-visible,
+.ws-modal-cancel-btn:focus-visible,
+.ws-repo-tag-add-btn:focus-visible,
+.ws-search-clear-btn:focus-visible {
+  outline: 2px solid #245691;
+  outline-offset: 2px;
+}
+
+/* Tactile Active Feedback */
+.ws-save-btn:active:not(:disabled),
+.ws-auth-submit-btn:active:not(:disabled),
+.ws-auth-demo-btn:active:not(:disabled),
+.ws-modal-cancel-btn:active {
+  transform: scale(0.98);
+}
+
+.ws-tab-btn:active,
+.ws-tag-pill:active,
+.ws-tag-new-btn:active,
+.ws-logout-btn:active {
+  transform: scale(0.97);
+}
+
+.ws-icon-btn:active,
+.ws-search-clear-btn:active {
+  transform: scale(0.93);
+}
+
+/* User Selection Ergonomics */
+.ws-tab-btn,
+.ws-tag-pill,
+.ws-tag-new-btn,
+.ws-icon-btn,
+.ws-save-btn,
+.ws-logout-btn,
+.ws-auth-tab {
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* Responsive Spatial Adaptation */

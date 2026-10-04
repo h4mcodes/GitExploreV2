@@ -14,6 +14,7 @@ import {
   computeCommitStatistics,
   computeRepositoryEvolution,
   computeFileChurn,
+  computeDivergence,
 } from '../intelligence/index.js';
 import type { GithubApiCommitDetail } from '../github/types.js';
 
@@ -453,10 +454,48 @@ export async function postBranchAnalysis(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { context, divergence, comparison, repositoryId, bypassCache, ttlMs } = req.body;
+    const {
+      context,
+      divergence: userDivergence,
+      comparison: userComparison,
+      owner,
+      repo,
+      base,
+      baseRef,
+      head,
+      headRef,
+      repositoryId,
+      bypassCache,
+      ttlMs,
+    } = req.body;
 
-    const contextInput =
-      divergence !== undefined ? { divergence, comparison } : undefined;
+    let contextInput: ContextBuilderInputMap['BRANCH_ANALYSIS'] | undefined;
+
+    if (userDivergence !== undefined) {
+      contextInput = {
+        divergence: userDivergence,
+        comparison: userComparison,
+      };
+    } else if (typeof owner === 'string' && typeof repo === 'string') {
+      const effectiveBase = base || baseRef;
+      const effectiveHead = head || headRef;
+
+      if (typeof effectiveBase === 'string' && typeof effectiveHead === 'string') {
+        const comparison = await githubClient.compareCommits(owner, repo, effectiveBase, effectiveHead);
+        const divergence = computeDivergence(effectiveBase, effectiveHead, comparison);
+        contextInput = {
+          divergence,
+          comparison,
+        };
+      }
+    }
+
+    if (!context && !contextInput) {
+      throw new BadRequestError(
+        'Either prebuilt context, divergence object, or repository coordinates with base and head branches are required',
+        'MISSING_BRANCH_ANALYSIS_INPUT'
+      );
+    }
 
     const result = await executeAIPipeline({
       type: 'BRANCH_ANALYSIS',

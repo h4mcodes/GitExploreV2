@@ -300,13 +300,11 @@ Next Task:      D7-P4: AI Branch Analysis (End-to-end implementation and validat
 | 2026-10-03 | Implemented AI Context Builders (D6-P2) | Built deterministic, bounded context builders for all 6 analysis types consuming structured repository intelligence |
 | 2026-10-03 | Implemented AI Prompt System (D6-P3) | Created versioned prompt templates with grounding rules for all analysis types in `src/ai/prompts/` |
 | 2026-10-03 | Implemented Structured Response Validation (D6-P4) | Added Zod validation schemas for all analysis types and `validateAIResponse` boundary |
-| 2026-10-03 | Implemented AI Cache Layer (D6-P5) | Deterministic SHA-256 context hashing, AIAnalysis table caching, TTL management, and withAICache wrapper |
 | 2026-10-03 | Implemented AI API Foundation (D6-P6) | Created `aiRouter`, `aiController`, universal `/analyze` dispatcher, dedicated endpoints, status check, and full pipeline wiring |
 | 2026-10-04 | Implemented AI Repository Overview (D7-P1) | Built prompt with strict JSON schema instructions, extended schema with purpose/techStack/notablePatterns, dynamic GitHub coordinates fetch, and 14 tests |
 | 2026-10-04 | Implemented AI Commit Explainer (D7-P2) | Added JSON schema guidance to prompt, extended Zod schema with motivation/complexity/changesPerFile, dynamic commit resolution in aiController, and 17 tests |
 | 2026-10-04 | Implemented AI Diff Review (D7-P3) | Added observations with severity/category to prompt and Zod schema, dynamic GitHub comparison/diff in aiController, and 17 tests |
-
-
+| 2026-10-04 | Implemented AI Branch Analysis (D7-P4) | Added structured JSON output guidance to prompt, enhanced Zod schema with mergeRisk/notableChanges, dynamic GitHub comparison resolution in aiController, and 13 tests |
 
 ---
 
@@ -357,6 +355,7 @@ Next Task:      D7-P4: AI Branch Analysis (End-to-end implementation and validat
 | 2026-10-04 | Implemented AI Repository Overview (D7-P1) | Enhanced repositoryOverview prompt and schema, updated aiController with dynamic repo fetch, and added 14 new tests |
 | 2026-10-04 | Implemented AI Commit Explainer (D7-P2) | Enhanced commit explanation prompt and schema, updated aiController with dynamic commit fetch, and added 17 new tests |
 | 2026-10-04 | Implemented AI Diff Review (D7-P3) | Enhanced diffReview prompt and schema, updated aiController with dynamic comparison/commit fetch, and added 17 new tests |
+| 2026-10-04 | Implemented AI Branch Analysis (D7-P4) | Enhanced branchAnalysis prompt and schema, updated aiController with dynamic GitHub branch comparison fetch, and added 13 new tests |
 
 
 

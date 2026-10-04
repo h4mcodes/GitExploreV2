@@ -19,11 +19,24 @@ export function buildBranchAnalysisPrompt(context: Record<string, unknown>): Pro
 ${contextJson}
 \`\`\`
 
-Your analysis should include:
+Your analysis should evaluate:
 - Divergence status summary (ahead/behind counts, common ancestor merge base)
 - Key features, fixes, or commits introduced on the head branch
 - Author contribution breakdown and primary file changes
-- PR readiness assessment & potential merge conflicts or integration risk factors`;
+- PR readiness assessment & potential merge conflicts or integration risk factors
+
+Return a valid JSON object adhering strictly to this schema:
+{
+  "divergenceSummary": "Clear summary of branch divergence, ahead/behind counts, and common ancestor",
+  "syncStatus": "SYNCED" | "AHEAD" | "BEHIND" | "DIVERGED",
+  "mergeReadiness": "READY" | "NEEDS_REBASE" | "CONFLICT_RISK" | "NOT_READY",
+  "mergeRisk": "LOW" | "MEDIUM" | "HIGH",
+  "keyContributions": ["List of key features, fixes, or refactors introduced on the head branch"],
+  "notableChanges": ["Notable file or architectural changes introduced"],
+  "mainAuthors": ["Names or handles of primary contributors to the delta"],
+  "riskFactors": ["Identified risks, potential conflicts with base branch, or testing needs"],
+  "recommendations": ["Actionable next steps before merging (e.g. rebase, review critical files, run integration tests)"]
+}`;
 
   return {
     prompt,

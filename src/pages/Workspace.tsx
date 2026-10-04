@@ -443,35 +443,14 @@ export function Workspace() {
             </div>
 
             {authError && (
-              <div
-                style={{
-                  padding: '0.75rem',
-                  borderRadius: '8px',
-                  background: 'rgba(239, 68, 68, 0.12)',
-                  border: '1px solid rgba(239, 68, 68, 0.25)',
-                  color: '#b91c1c',
-                  fontSize: '0.8125rem',
-                  fontWeight: 600,
-                  marginBottom: '1.25rem',
-                }}
-              >
+              <div className="ws-auth-error">
                 {authError}
               </div>
             )}
 
-            <form onSubmit={handleAuthSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label
-                  style={{
-                    display: 'block',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    color: '#2e4d70',
-                    textTransform: 'uppercase',
-                    marginBottom: '0.375rem',
-                    letterSpacing: '0.04em',
-                  }}
-                >
+            <form onSubmit={handleAuthSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
+              <div className="ws-auth-field">
+                <label className="ws-auth-label">
                   Username
                 </label>
                 <input
@@ -485,18 +464,8 @@ export function Workspace() {
               </div>
 
               {authMode === 'register' && (
-                <div>
-                  <label
-                    style={{
-                      display: 'block',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      color: '#2e4d70',
-                      textTransform: 'uppercase',
-                      marginBottom: '0.375rem',
-                      letterSpacing: '0.04em',
-                    }}
-                  >
+                <div className="ws-auth-field">
+                  <label className="ws-auth-label">
                     Email (Optional)
                   </label>
                   <input
@@ -509,18 +478,8 @@ export function Workspace() {
                 </div>
               )}
 
-              <div>
-                <label
-                  style={{
-                    display: 'block',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    color: '#2e4d70',
-                    textTransform: 'uppercase',
-                    marginBottom: '0.375rem',
-                    letterSpacing: '0.04em',
-                  }}
-                >
+              <div className="ws-auth-field">
+                <label className="ws-auth-label">
                   Password
                 </label>
                 <input
@@ -547,15 +506,8 @@ export function Workspace() {
               </button>
             </form>
 
-            <div
-              style={{
-                textAlign: 'center',
-                marginTop: '1.5rem',
-                paddingTop: '1.25rem',
-                borderTop: '1px solid rgba(35, 70, 108, 0.1)',
-              }}
-            >
-              <p style={{ fontSize: '0.75rem', color: '#436488', marginBottom: '0.75rem', fontWeight: 500 }}>
+            <div className="ws-auth-demo-section">
+              <p className="ws-auth-demo-text">
                 Want to explore workspace features immediately?
               </p>
               <button
@@ -600,12 +552,14 @@ export function Workspace() {
               </div>
             </div>
 
-            {/* Overview Metrics */}
+            {/* Overview Metrics — Asymmetric Primary & Secondary Hierarchy */}
             <div className="ws-stats-grid">
-              <div className="ws-stat-card">
+              <div className="ws-stat-card primary">
                 <div className="ws-stat-header">
                   <span>Saved Repositories</span>
-                  <FolderGit2 size={16} style={{ color: '#2563eb' }} />
+                  <span className="ws-stat-icon-wrap">
+                    <FolderGit2 size={16} style={{ color: '#2563eb' }} />
+                  </span>
                 </div>
                 <div className="ws-stat-value">
                   {overview?.metrics.savedReposCount ?? repositories.length}
@@ -615,7 +569,9 @@ export function Workspace() {
               <div className="ws-stat-card">
                 <div className="ws-stat-header">
                   <span>Investigations</span>
-                  <Layers size={16} style={{ color: '#7c3aed' }} />
+                  <span className="ws-stat-icon-wrap">
+                    <Layers size={16} style={{ color: '#7c3aed' }} />
+                  </span>
                 </div>
                 <div className="ws-stat-value">
                   {overview?.metrics.investigationsCount ?? 0}
@@ -625,7 +581,9 @@ export function Workspace() {
               <div className="ws-stat-card">
                 <div className="ws-stat-header">
                   <span>Research Notes</span>
-                  <FileCode2 size={16} style={{ color: '#059669' }} />
+                  <span className="ws-stat-icon-wrap">
+                    <FileCode2 size={16} style={{ color: '#059669' }} />
+                  </span>
                 </div>
                 <div className="ws-stat-value">
                   {overview?.metrics.notesCount ?? 0}
@@ -635,7 +593,9 @@ export function Workspace() {
               <div className="ws-stat-card">
                 <div className="ws-stat-header">
                   <span>Bookmarks</span>
-                  <Bookmark size={16} style={{ color: '#d97706' }} />
+                  <span className="ws-stat-icon-wrap">
+                    <Bookmark size={16} style={{ color: '#d97706' }} />
+                  </span>
                 </div>
                 <div className="ws-stat-value">
                   {overview?.metrics.bookmarksCount ?? 0}
@@ -647,16 +607,7 @@ export function Workspace() {
             <div className="ws-save-card">
               <form onSubmit={handleSaveRepository} className="ws-save-form">
                 <div className="ws-save-input-wrap">
-                  <FolderGit2
-                    size={16}
-                    style={{
-                      position: 'absolute',
-                      left: '0.85rem',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      color: '#436488',
-                    }}
-                  />
+                  <FolderGit2 size={16} className="ws-save-icon" />
                   <input
                     type="text"
                     value={repoInput}
@@ -675,7 +626,7 @@ export function Workspace() {
                 </button>
               </form>
               {saveRepoError && (
-                <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#b91c1c', fontWeight: 600 }}>
+                <div className="ws-save-error">
                   {saveRepoError}
                 </div>
               )}
@@ -703,34 +654,14 @@ export function Workspace() {
               </div>
 
               {activeTab === 'repositories' && (
-                <div style={{ position: 'relative', minWidth: '220px' }}>
-                  <Search
-                    size={14}
-                    style={{
-                      position: 'absolute',
-                      left: '0.75rem',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      color: '#436488',
-                    }}
-                  />
+                <div className="ws-search-wrap">
+                  <Search size={14} className="ws-search-icon" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Filter saved repositories..."
-                    style={{
-                      padding: '0.45rem 0.75rem 0.45rem 2rem',
-                      borderRadius: '8px',
-                      background: 'rgba(255, 255, 255, 0.65)',
-                      border: '1px solid rgba(255, 255, 255, 0.8)',
-                      color: '#183350',
-                      fontSize: '0.8125rem',
-                      fontWeight: 500,
-                      outline: 'none',
-                      width: '100%',
-                      boxSizing: 'border-box',
-                    }}
+                    className="ws-search-input"
                   />
                 </div>
               )}
@@ -739,7 +670,7 @@ export function Workspace() {
             {/* Tags Strip */}
             {activeTab === 'repositories' && (
               <div className="ws-tags-strip">
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#2e4d70', marginRight: '0.25rem' }}>
+                <span className="ws-tags-label">
                   Tags:
                 </span>
                 <button
@@ -772,7 +703,6 @@ export function Workspace() {
                         handleDeleteTag(tag.id, tag.name);
                       }}
                       className="ws-tag-del"
-                      style={{ marginLeft: '4px', opacity: 0.7, cursor: 'pointer' }}
                       title="Delete tag"
                     >
                       ×
@@ -782,19 +712,7 @@ export function Workspace() {
                 <button
                   type="button"
                   onClick={() => setShowTagModal(true)}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.25rem',
-                    padding: '0.25rem 0.65rem',
-                    borderRadius: '9999px',
-                    border: '1px dashed rgba(35, 70, 108, 0.3)',
-                    background: 'transparent',
-                    color: '#245691',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                  }}
+                  className="ws-tag-new-btn"
                 >
                   <Plus size={12} />
                   New Tag
@@ -834,15 +752,15 @@ export function Workspace() {
                     >
                       <div>
                         {/* Card Header */}
-                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                        <div className="ws-repo-header">
                           <Link
                             to={`/profile/${repo.owner}?repo=${encodeURIComponent(repo.fullName)}`}
                             className="ws-repo-title"
                           >
                             <span>{repo.fullName}</span>
-                            <ArrowUpRight size={14} style={{ opacity: 0.6 }} />
+                            <ArrowUpRight size={14} />
                           </Link>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <div className="ws-repo-actions">
                             <a
                               href={`https://github.com/${repo.fullName}`}
                               target="_blank"
@@ -867,41 +785,31 @@ export function Workspace() {
                         {repo.description ? (
                           <p className="ws-repo-desc">{repo.description}</p>
                         ) : (
-                          <p className="ws-repo-desc" style={{ fontStyle: 'italic', opacity: 0.7 }}>
+                          <p className="ws-repo-desc fallback">
                             No repository description provided.
                           </p>
                         )}
 
                         {/* Tags on Card */}
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginBottom: '0.875rem' }}>
+                        <div className="ws-repo-tags">
                           {repo.repositoryTags?.map((rt) => (
                             <span
                               key={rt.tag.id}
+                              className="ws-repo-tag-pill"
                               style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '0.25rem',
-                                padding: '0.15rem 0.5rem',
-                                borderRadius: '9999px',
                                 background: `${rt.tag.color}15`,
                                 border: `1px solid ${rt.tag.color}35`,
                                 color: rt.tag.color,
-                                fontSize: '0.6875rem',
-                                fontWeight: 700,
                               }}
                             >
                               <span
-                                style={{
-                                  width: '6px',
-                                  height: '6px',
-                                  borderRadius: '50%',
-                                  backgroundColor: rt.tag.color,
-                                }}
+                                className="ws-repo-tag-dot"
+                                style={{ backgroundColor: rt.tag.color }}
                               />
                               {rt.tag.name}
                               <span
                                 onClick={() => handleRemoveTag(repo.id, rt.tag.id)}
-                                style={{ cursor: 'pointer', marginLeft: '2px', opacity: 0.8 }}
+                                className="ws-repo-tag-del"
                                 title="Remove tag from repository"
                               >
                                 ×
@@ -914,19 +822,7 @@ export function Workspace() {
                             <button
                               type="button"
                               onClick={() => setTagAssignRepoId(tagAssignRepoId === repo.id ? null : repo.id)}
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '0.2rem',
-                                padding: '0.15rem 0.45rem',
-                                borderRadius: '9999px',
-                                border: '1px dashed rgba(35, 70, 108, 0.25)',
-                                background: 'transparent',
-                                color: '#436488',
-                                fontSize: '0.6875rem',
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                              }}
+                              className="ws-repo-tag-add-btn"
                             >
                               <TagIcon size={10} />
                               Tag
@@ -934,22 +830,7 @@ export function Workspace() {
 
                             {/* Tag Assign Popover Menu */}
                             {tagAssignRepoId === repo.id && (
-                              <div
-                                style={{
-                                  position: 'absolute',
-                                  top: '100%',
-                                  left: 0,
-                                  marginTop: '4px',
-                                  zIndex: 100,
-                                  minWidth: '150px',
-                                  padding: '0.35rem',
-                                  borderRadius: '8px',
-                                  background: 'rgba(255, 255, 255, 0.96)',
-                                  border: '1px solid rgba(35, 70, 108, 0.2)',
-                                  boxShadow: '0 8px 20px rgba(25, 45, 70, 0.15)',
-                                  backdropFilter: 'blur(10px)',
-                                }}
-                              >
+                              <div className="ws-tag-menu">
                                 {tags.length === 0 ? (
                                   <div style={{ padding: '0.35rem', fontSize: '0.6875rem', color: '#64748b' }}>
                                     No tags created yet.
@@ -966,30 +847,12 @@ export function Workspace() {
                                             ? handleRemoveTag(repo.id, t.id)
                                             : handleAssignTag(repo.id, t.id)
                                         }
-                                        style={{
-                                          display: 'flex',
-                                          alignItems: 'center',
-                                          justifyContent: 'space-between',
-                                          width: '100%',
-                                          padding: '0.3rem 0.5rem',
-                                          borderRadius: '4px',
-                                          border: 'none',
-                                          background: isAssigned ? 'rgba(36, 86, 145, 0.1)' : 'transparent',
-                                          color: '#183350',
-                                          fontSize: '0.75rem',
-                                          fontWeight: 600,
-                                          cursor: 'pointer',
-                                          textAlign: 'left',
-                                        }}
+                                        className={`ws-tag-menu-item ${isAssigned ? 'assigned' : ''}`}
                                       >
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                                           <span
-                                            style={{
-                                              width: '6px',
-                                              height: '6px',
-                                              borderRadius: '50%',
-                                              backgroundColor: t.color,
-                                            }}
+                                            className="ws-repo-tag-dot"
+                                            style={{ backgroundColor: t.color }}
                                           />
                                           {t.name}
                                         </span>
@@ -1006,32 +869,25 @@ export function Workspace() {
 
                       {/* Card Footer Metadata */}
                       <div className="ws-repo-footer">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div className="ws-repo-meta">
                           {repo.language && (
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontWeight: 600, color: '#183350' }}>
-                              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#245691' }} />
+                            <span className="ws-repo-meta-item lang">
+                              <span className="ws-repo-lang-dot" />
                               {repo.language}
                             </span>
                           )}
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <span className="ws-repo-meta-item">
                             <Star size={12} style={{ color: '#d97706' }} />
                             {repo.stars}
                           </span>
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <span className="ws-repo-meta-item">
                             <GitFork size={12} />
                             {repo.forks}
                           </span>
                         </div>
                         <Link
                           to={`/profile/${repo.owner}?repo=${encodeURIComponent(repo.fullName)}`}
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.25rem',
-                            color: '#245691',
-                            fontWeight: 700,
-                            textDecoration: 'none',
-                          }}
+                          className="ws-repo-explore"
                         >
                           <Compass size={12} />
                           Explore
@@ -1109,16 +965,7 @@ export function Workspace() {
 
               <form onSubmit={handleCreateTag} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>
-                  <label
-                    style={{
-                      display: 'block',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      color: '#2e4d70',
-                      textTransform: 'uppercase',
-                      marginBottom: '0.375rem',
-                    }}
-                  >
+                  <label className="ws-modal-label">
                     Tag Name
                   </label>
                   <input
@@ -1132,16 +979,7 @@ export function Workspace() {
                 </div>
 
                 <div>
-                  <label
-                    style={{
-                      display: 'block',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      color: '#2e4d70',
-                      textTransform: 'uppercase',
-                      marginBottom: '0.375rem',
-                    }}
-                  >
+                  <label className="ws-modal-label">
                     Color Accent
                   </label>
                   <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -1158,20 +996,11 @@ export function Workspace() {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '0.5rem' }}>
+                <div className="ws-modal-actions">
                   <button
                     type="button"
                     onClick={() => setShowTagModal(false)}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      borderRadius: '8px',
-                      background: 'transparent',
-                      border: '1px solid rgba(35, 70, 108, 0.2)',
-                      color: '#436488',
-                      fontSize: '0.8125rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                    }}
+                    className="ws-modal-cancel-btn"
                   >
                     Cancel
                   </button>

@@ -369,12 +369,55 @@ export async function postDiffReview(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { context, title, files, baseRef, headRef, repositoryId, bypassCache, ttlMs } = req.body;
+    const {
+      context,
+      title,
+      files,
+      baseRef,
+      headRef,
+      owner,
+      repo,
+      base,
+      head,
+      sha,
+      ref,
+      repositoryId,
+      bypassCache,
+      ttlMs,
+    } = req.body;
 
-    const contextInput =
-      files !== undefined
-        ? { title: title || 'Diff Review', files, baseRef, headRef }
-        : undefined;
+    let contextInput: ContextBuilderInputMap['DIFF_REVIEW'] | undefined;
+
+    if (files !== undefined && Array.isArray(files)) {
+      contextInput = {
+        title: title || 'Diff Review',
+        files,
+        baseRef,
+        headRef,
+      };
+    } else if (typeof owner === 'string' && typeof repo === 'string') {
+      const effectiveBase = base || baseRef;
+      const effectiveHead = head || headRef;
+
+      if (typeof effectiveBase === 'string' && typeof effectiveHead === 'string') {
+        const comparison = await githubClient.compareCommits(owner, repo, effectiveBase, effectiveHead);
+        contextInput = {
+          title: title || `Comparison: ${effectiveBase}...${effectiveHead}`,
+          files: comparison.files || [],
+          baseRef: effectiveBase,
+          headRef: effectiveHead,
+        };
+      } else if (typeof sha === 'string' || typeof ref === 'string') {
+        const targetRef = sha || ref;
+        const commitDetail = await githubClient.getCommit(owner, repo, targetRef);
+        contextInput = {
+          title: title || `Commit Diff: ${commitDetail.sha?.slice(0, 7) || targetRef}`,
+          files: commitDetail.files || [],
+          baseRef: commitDetail.parents?.[0]?.sha,
+          headRef: commitDetail.sha,
+        };
+      }
+    }
 
     const result = await executeAIPipeline({
       type: 'DIFF_REVIEW',
@@ -384,6 +427,7 @@ export async function postDiffReview(
       bypassCache,
       ttlMs,
     });
+
 
     res.status(200).json({
       type: 'DIFF_REVIEW',

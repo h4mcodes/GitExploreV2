@@ -19,11 +19,44 @@ export function buildDiffReviewPrompt(context: Record<string, unknown>): PromptR
 ${contextJson}
 \`\`\`
 
-Your review should deliver:
+Your review should evaluate:
 - Executive change summary (overall purpose and net lines modified)
-- File-by-file review findings highlighting critical additions, deletions, or structural shifts
+- File-by-file review findings with structured observations including severity and category
 - Risk assessment (security considerations, edge cases, missing null/error checks)
-- Recommendations or approval assessment with clear actionable advice`;
+- Recommendations or approval assessment with clear actionable advice
+
+Return a valid JSON object adhering strictly to this schema:
+{
+  "overallAssessment": "APPROVED" | "CHANGES_REQUESTED" | "NEUTRAL" | "HIGH_RISK",
+  "summary": "Concise executive review summary of the diff",
+  "netChangesSummary": "Summary of additions/deletions and net impact (e.g. +120 / -30 lines across 4 files)",
+  "fileReviews": [
+    {
+      "filename": "path/to/file.ext",
+      "status": "modified" | "added" | "deleted",
+      "feedback": "Concise review of changes in this file",
+      "issuesFound": ["List of potential issues found in this file"],
+      "observations": [
+        {
+          "message": "Specific observation or issue description",
+          "severity": "CRITICAL" | "WARNING" | "INFO",
+          "category": "BUG" | "SECURITY" | "PERFORMANCE" | "CODE_QUALITY" | "MAINTAINABILITY" | "ARCHITECTURE" | "OTHER",
+          "lineNumber": 42,
+          "suggestion": "Optional suggestion or remediation advice"
+        }
+      ]
+    }
+  ],
+  "riskFactors": ["Identified risk factors, regressions, or security vectors"],
+  "recommendations": ["Actionable recommendations for the author or reviewer"],
+  "keyObservations": [
+    {
+      "message": "Key high-level observation across the entire diff",
+      "severity": "CRITICAL" | "WARNING" | "INFO",
+      "category": "BUG" | "SECURITY" | "PERFORMANCE" | "CODE_QUALITY" | "MAINTAINABILITY" | "ARCHITECTURE" | "OTHER"
+    }
+  ]
+}`;
 
   return {
     prompt,
@@ -31,3 +64,4 @@ Your review should deliver:
     version: DIFF_REVIEW_PROMPT_VERSION,
   };
 }
+

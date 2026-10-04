@@ -376,17 +376,18 @@ export function Workspace() {
 
       <motion.div
         className="ws-container"
-        initial={{ opacity: 0, y: 14, filter: 'blur(3px)' }}
+        initial={{ opacity: 0, y: 22, filter: 'blur(6px)' }}
         animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-        transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
       >
         {/* Notification Banners */}
         <AnimatePresence>
           {successMessage && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: -12, scale: 0.985 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.985 }}
+              transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
               className="ws-alert ws-alert-success"
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
@@ -405,9 +406,10 @@ export function Workspace() {
 
           {error && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: -12, scale: 0.985 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.985 }}
+              transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
               className="ws-alert ws-alert-error"
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
@@ -424,6 +426,7 @@ export function Workspace() {
             </motion.div>
           )}
         </AnimatePresence>
+
 
         {/* Unauthenticated State */}
         {!session ? (

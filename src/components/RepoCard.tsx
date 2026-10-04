@@ -42,9 +42,10 @@ export const RepoCard = memo(function RepoCard(props: RepoCardProps) {
         id={`repo-card-${repository.name.toLowerCase()}`}
         data-repo-name={repository.full_name.toLowerCase()}
         className={`repository-card ${showBranches ? 'branches-expanded' : ''}`}
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25, delay: Math.min(index * 0.03, 0.18), ease: 'easeOut' }}
+        transition={{ duration: 0.38, delay: Math.min(index * 0.025, 0.16), ease: [0.16, 1, 0.3, 1] }}
+
       >
         <div className="repository-card-heading">
           <div className="repository-name">
@@ -98,11 +99,13 @@ export const RepoCard = memo(function RepoCard(props: RepoCardProps) {
         <AnimatePresence>
           {showBranches && (
             <motion.div
-              initial={{ opacity: 0, y: -6, scale: 0.98 }}
+              initial={{ opacity: 0, y: -8, scale: 0.985 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -6, scale: 0.98 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
+              exit={{ opacity: 0, y: -6, scale: 0.985 }}
+              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
             >
+
+
               <ErrorBoundary
                 fallbackTitle="Branch Explorer Error"
                 fallbackMessage={`Failed to render branch graph for ${repository.name}.`}

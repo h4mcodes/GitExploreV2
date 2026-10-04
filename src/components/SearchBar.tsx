@@ -26,14 +26,27 @@ export function SearchBar() {
     <motion.form
       className={`search-card${error ? ' has-error' : ''}`}
       onSubmit={handleSubmit}
-      initial={{ opacity: 0, y: 18 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, delay: 0.2, ease: 'easeOut' }}
+      transition={{ duration: 0.58, delay: 0.14, ease: [0.16, 1, 0.3, 1] }}
     >
       <Search className="search-icon" size={20} />
-      <input aria-label="GitHub username" value={username} onChange={(event) => { setUsername(event.target.value); if (error) setError(''); }} placeholder="Search GitHub username..." />
-      <button type="submit">Explore <ArrowUpRight size={16} /></button>
+      <input
+        aria-label="GitHub username"
+        value={username}
+        onChange={(event) => { setUsername(event.target.value); if (error) setError(''); }}
+        placeholder="Search GitHub username..."
+      />
+      <motion.button
+        type="submit"
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.96 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 24 }}
+      >
+        Explore <ArrowUpRight size={16} />
+      </motion.button>
       {error && <span className="search-error" role="alert">{error}</span>}
     </motion.form>
+
   );
 }

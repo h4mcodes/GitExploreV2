@@ -13,13 +13,18 @@ export function Home() {
       <section className="hero">
         <motion.div
           className="hero-copy"
-          initial={{ opacity: 0, y: 14, filter: 'blur(3px)' }}
+          initial={{ opacity: 0, y: 24, filter: 'blur(8px)' }}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.68, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="glass-badge">
+          <motion.div
+            className="glass-badge"
+            whileHover={{ scale: 1.025, y: -1 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+          >
             <span className="badge-pulse" />Explore GitHub developers <ArrowDownRight size={14} />
-          </div>
+          </motion.div>
           <h1>
             Understand the <span>&lt;code&gt;</span>
             <br />
@@ -31,6 +36,7 @@ export function Home() {
             <span className="trust-dot" />Built for curious minds <span className="note-divider" /> Private by design
           </div>
         </motion.div>
+
       </section>
       <footer>
         <span>GitExplore <b>·</b> Developer intelligence, made clear.</span>

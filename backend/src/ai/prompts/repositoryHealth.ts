@@ -23,7 +23,21 @@ Your assessment should provide:
 - Repository Vitality Verdict (current active state, release cadence, and momentum)
 - Trajectory Analysis (trajectory pattern, velocity changes between historical and recent periods)
 - Code Stability & Hotspot Risk (concentration of churn in critical files)
-- Actionable recommendations to improve maintainability, reduce churn risks, and ensure project longevity`;
+- Actionable recommendations to improve maintainability, reduce churn risks, and ensure project longevity
+
+Return a valid JSON object adhering strictly to this schema:
+{
+  "healthGrade": "A" | "B" | "C" | "D" | "F",
+  "healthScore": 85,
+  "vitalityStatus": "THRIVING" | "HEALTHY" | "MAINTENANCE" | "STAGNANT" | "AT_RISK",
+  "summary": "Concise executive health and maintainability summary",
+  "trajectoryAssessment": "Trajectory analysis comparing historical vs recent velocity and momentum",
+  "activityAssessment": "Assessment of commit cadence, active days, and recency of updates",
+  "maintenanceSignals": ["List of positive or negative maintenance vitality signals"],
+  "maintenanceRisks": ["Specific maintenance risks, technical debt, or stagnation flags"],
+  "codeChurnHotspots": ["Files or components undergoing excessive volatile churn"],
+  "actionableRecommendations": ["Actionable, prioritized recommendations for maintainers"]
+}`;
 
   return {
     prompt,

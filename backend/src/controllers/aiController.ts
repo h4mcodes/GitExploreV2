@@ -530,13 +530,79 @@ export async function postRepositoryHealth(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { context, repo, statistics, evolution, fileAnalysis, repositoryId, bypassCache, ttlMs } =
-      req.body;
+    const {
+      context,
+      repo,
+      owner,
+      branch,
+      statistics: userStatistics,
+      evolution: userEvolution,
+      fileAnalysis: userFileAnalysis,
+      repositoryId,
+      bypassCache,
+      ttlMs,
+    } = req.body;
 
-    const contextInput =
-      repo !== undefined && statistics !== undefined && evolution !== undefined
-        ? { repo, statistics, evolution, fileAnalysis }
-        : undefined;
+    let contextInput: ContextBuilderInputMap['REPOSITORY_HEALTH'] | undefined;
+
+    if (repo && typeof repo === 'object' && userStatistics && userEvolution) {
+      contextInput = {
+        repo,
+        statistics: userStatistics,
+        evolution: userEvolution,
+        fileAnalysis: userFileAnalysis,
+      };
+    } else if (typeof owner === 'string' && typeof repo === 'string') {
+      const repoMeta = await githubClient.getRepo(owner, repo);
+      const targetBranch = branch || repoMeta.default_branch || 'main';
+
+      let stats = userStatistics;
+      let evol = userEvolution;
+      let churn = userFileAnalysis;
+
+      if (!stats || !evol || !churn) {
+        try {
+          const commits = await githubClient.getCommits(owner, repo, {
+            sha: targetBranch,
+            per_page: 50,
+          });
+
+          if (commits && commits.length > 0) {
+            stats = stats || computeCommitStatistics(commits);
+            evol = evol || computeRepositoryEvolution(commits);
+
+            const detailsSettled = await Promise.allSettled(
+              commits.slice(0, 10).map((c) => githubClient.getCommit(owner, repo, c.sha))
+            );
+            const validDetails = detailsSettled
+              .filter((d): d is PromiseFulfilledResult<GithubApiCommitDetail> => d.status === 'fulfilled')
+              .map((d) => d.value);
+
+            if (validDetails.length > 0) {
+              churn = churn || computeFileChurn(validDetails);
+            }
+          }
+        } catch (fetchErr) {
+          console.warn('[AI Health] Could not compute full commit telemetry:', fetchErr);
+        }
+      }
+
+      if (stats && evol) {
+        contextInput = {
+          repo: repoMeta,
+          statistics: stats,
+          evolution: evol,
+          fileAnalysis: churn,
+        };
+      }
+    }
+
+    if (!context && !contextInput) {
+      throw new BadRequestError(
+        'Either prebuilt context, repository objects (repo, statistics, evolution), or repository coordinates (owner, repo) are required',
+        'MISSING_REPOSITORY_HEALTH_INPUT'
+      );
+    }
 
     const result = await executeAIPipeline({
       type: 'REPOSITORY_HEALTH',

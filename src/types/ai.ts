@@ -115,3 +115,12 @@ export interface RepositoryHealthData {
   actionableRecommendations: string[];
   recommendations?: string[];
 }
+
+// 6. Repository Q&A (D8-P2 / D8-P3)
+export interface RepositoryQAData {
+  answer: string;
+  confidence: 'HIGH' | 'MEDIUM' | 'LOW';
+  supportingEvidence: string[];
+  limitations?: string | null;
+  suggestedFollowUps: string[];
+}

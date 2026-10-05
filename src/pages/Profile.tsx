@@ -1,5 +1,5 @@
-import { ArrowLeft, Building2, ExternalLink, FolderGit2, Link2, MapPin, RotateCw, Search, Users, X } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ArrowLeft, Building2, ExternalLink, FolderGit2, Link2, MapPin, RotateCw, Search, Users, X, MessageSquareCode } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ContributionGraph } from '../components/ContributionGraph';
@@ -7,6 +7,7 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 import { GlassDropdown, type DropdownOption } from '../components/GlassDropdown';
 import { Navbar } from '../components/Navbar';
 import { RepoCard } from '../components/RepoCard';
+import { RepositoryQA } from '../components/RepositoryQA';
 import { StatsCard } from '../components/StatsCard';
 import { fetchGithubRepositories, fetchGithubUser, GithubApiError } from '../services/githubApi';
 import { sanitizeUrl } from '../services/security';
@@ -43,6 +44,23 @@ export function Profile() {
   const [selectedLanguage, setSelectedLanguage] = useState('all');
   const [repositorySort, setRepositorySort] = useState<RepositorySort>('updated');
   const [visibleRepositoryCount, setVisibleRepositoryCount] = useState(REPOSITORIES_PER_PAGE);
+  const [showRepoQA, setShowRepoQA] = useState(false);
+  const [qaSelectedRepoName, setQaSelectedRepoName] = useState<string>('');
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showRepoQA) {
+        setShowRepoQA(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showRepoQA]);
+
+  const selectedQARepo = useMemo(() => {
+    if (!repositories || repositories.length === 0) return null;
+    return repositories.find((r) => r.name === qaSelectedRepoName) || repositories[0];
+  }, [repositories, qaSelectedRepoName]);
 
   const languages = useMemo(() => {
     const set = new Set<string>();
@@ -420,6 +438,21 @@ export function Profile() {
                       }}
                       ariaLabel="Sort repositories"
                     />
+                    <button
+                      type="button"
+                      className="repo-qa-trigger-btn"
+                      onClick={() => {
+                        if (!qaSelectedRepoName && repositories.length > 0) {
+                          setQaSelectedRepoName(filteredRepositories[0]?.name || repositories[0]?.name);
+                        }
+                        setShowRepoQA(true);
+                      }}
+                      title="Ask natural-language questions about repositories"
+                      aria-label="Ask AI about repositories"
+                    >
+                      <MessageSquareCode size={14} />
+                      <span>Ask AI</span>
+                    </button>
                     {(repositoryQuery || selectedLanguage !== 'all' || repositorySort !== 'updated') && (
                       <button type="button" className="clear-repository-filters" onClick={resetRepositoryFilters}>
                         <X size={14} />
@@ -491,6 +524,66 @@ export function Profile() {
           </motion.div>
         )}
       </div>
+
+      <AnimatePresence>
+        {showRepoQA && profile && repositories.length > 0 && selectedQARepo && (
+          <motion.div
+            className="repo-qa-modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowRepoQA(false)}
+          >
+            <motion.div
+              className="repo-qa-modal-content"
+              initial={{ opacity: 0, scale: 0.96, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 8 }}
+              transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="repo-qa-modal-header">
+                <div className="repo-qa-modal-title">
+                  <MessageSquareCode size={16} />
+                  <span>Repository Intelligence Q&A</span>
+                </div>
+                <div className="repo-qa-modal-repo-picker">
+                  <label htmlFor="repo-qa-select" className="sr-only">
+                    Select repository
+                  </label>
+                  <select
+                    id="repo-qa-select"
+                    className="repo-qa-select-dropdown"
+                    value={selectedQARepo.name}
+                    onChange={(e) => setQaSelectedRepoName(e.target.value)}
+                  >
+                    {repositories.map((r) => (
+                      <option key={r.id} value={r.name}>
+                        {r.name} {r.stargazers_count ? `(★ ${r.stargazers_count})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  type="button"
+                  className="ai-close-btn"
+                  onClick={() => setShowRepoQA(false)}
+                  aria-label="Close Q&A dialog"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+
+              <RepositoryQA
+                owner={profile.login}
+                repo={selectedQARepo.name}
+                branch={selectedQARepo.default_branch}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <footer>
         <span>
           GitExplore <b>·</b> Developer intelligence, made clear.

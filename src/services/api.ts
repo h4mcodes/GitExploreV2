@@ -16,6 +16,7 @@ import type {
   DiffReviewData,
   BranchAnalysisData,
   RepositoryHealthData,
+  RepositoryQAData,
 } from '../types/ai';
 
 /**
@@ -529,6 +530,26 @@ export class ApiClient {
     return this.post<AIAnalysisEnvelope<RepositoryHealthData>>(
       '/api/ai/repository-health',
       { owner, repo, branch, bypassCache: options?.bypassCache },
+      options
+    );
+  }
+
+  public async askRepositoryQA(
+    owner: string,
+    repo: string,
+    question: string,
+    options?: BackendRequestOptions & { branch?: string; focusedContext?: Record<string, unknown> }
+  ): Promise<AIAnalysisEnvelope<RepositoryQAData>> {
+    return this.post<AIAnalysisEnvelope<RepositoryQAData>>(
+      '/api/ai/repository-qa',
+      {
+        owner,
+        repo,
+        question,
+        branch: options?.branch,
+        focusedContext: options?.focusedContext,
+        bypassCache: options?.bypassCache,
+      },
       options
     );
   }

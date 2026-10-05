@@ -1,10 +1,11 @@
 import { memo, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CircleDot, Clock3, ExternalLink, GitBranch, GitFork, Globe2, Star, Sparkles, Layers, HeartPulse } from 'lucide-react';
+import { CircleDot, Clock3, ExternalLink, GitBranch, GitFork, Globe2, Star, Sparkles, Layers, HeartPulse, MessageSquareCode } from 'lucide-react';
 import type { GithubRepository } from '../types/github';
 import { BranchExplorer } from './BranchExplorer';
 import { AIOverview } from './AIOverview';
 import { AIHealthAnalysis } from './AIHealthAnalysis';
+import { RepositoryQA } from './RepositoryQA';
 import { ErrorBoundary } from './ErrorBoundary';
 import { sanitizeUrl } from '../services/security';
 
@@ -27,7 +28,7 @@ function normaliseHomepage(homepage: string) {
 export const RepoCard = memo(function RepoCard(props: RepoCardProps) {
   const [showBranches, setShowBranches] = useState(false);
   const [showAI, setShowAI] = useState(false);
-  const [aiTab, setAiTab] = useState<'overview' | 'health'>('overview');
+  const [aiTab, setAiTab] = useState<'overview' | 'health' | 'qa'>('overview');
 
   if ('repository' in props) {
     const { repository, index, targetState } = props;
@@ -142,6 +143,14 @@ export const RepoCard = memo(function RepoCard(props: RepoCardProps) {
                   <HeartPulse size={12} />
                   <span>Health & Vitality</span>
                 </button>
+                <button
+                  type="button"
+                  className={`repo-ai-tab ${aiTab === 'qa' ? 'active' : ''}`}
+                  onClick={() => setAiTab('qa')}
+                >
+                  <MessageSquareCode size={12} />
+                  <span>Ask AI (Q&A)</span>
+                </button>
               </div>
 
               <ErrorBoundary
@@ -149,18 +158,28 @@ export const RepoCard = memo(function RepoCard(props: RepoCardProps) {
                 fallbackMessage={`Failed to render AI analysis for ${repository.name}.`}
                 isCompact
               >
-                {aiTab === 'overview' ? (
+                {aiTab === 'overview' && (
                   <AIOverview
                     owner={owner}
                     repo={repoName}
                     branch={repository.default_branch}
                     onClose={() => setShowAI(false)}
                   />
-                ) : (
+                )}
+                {aiTab === 'health' && (
                   <AIHealthAnalysis
                     owner={owner}
                     repo={repoName}
                     branch={repository.default_branch}
+                    onClose={() => setShowAI(false)}
+                  />
+                )}
+                {aiTab === 'qa' && (
+                  <RepositoryQA
+                    owner={owner}
+                    repo={repoName}
+                    branch={repository.default_branch}
+                    isCompact
                     onClose={() => setShowAI(false)}
                   />
                 )}

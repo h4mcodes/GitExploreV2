@@ -17,10 +17,15 @@ import {
   RotateCw,
   User,
   X,
+  Sparkles,
+  Scale,
 } from 'lucide-react';
 import { fetchGithubCommitDetail, GithubApiError } from '../services/githubApi';
 import type { GithubCommitDetail, CommitRelationshipGraph } from '../types/github';
 import { DiffViewer } from './DiffViewer';
+import { AICommitExplainer } from './AICommitExplainer';
+import { AIDiffReview } from './AIDiffReview';
+import { ErrorBoundary } from './ErrorBoundary';
 
 interface CommitInspectionProps {
   owner: string;
@@ -74,6 +79,7 @@ export function CommitInspection({
   const [rateLimitTime, setRateLimitTime] = useState<string | null>(null);
   const [copiedSha, setCopiedSha] = useState(false);
   const [showCodeModal, setShowCodeModal] = useState(false);
+  const [aiMode, setAiMode] = useState<'off' | 'explainer' | 'review'>('off');
 
   const loadCommitDetail = (targetSha: string, bypassCache = false) => {
     setStatus('loading');
@@ -183,6 +189,28 @@ export function CommitInspection({
         </div>
 
         <div className="commit-inspect-nav-right">
+          <button
+            type="button"
+            onClick={() => setAiMode((prev) => (prev === 'explainer' ? 'off' : 'explainer'))}
+            className={`commit-ai-btn ${aiMode === 'explainer' ? 'active' : ''}`}
+            title="AI Forensics & Intent Analysis"
+          >
+            <Sparkles size={11} />
+            <span>AI Forensics</span>
+          </button>
+
+          {parentShas.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setAiMode((prev) => (prev === 'review' ? 'off' : 'review'))}
+              className={`commit-ai-btn ${aiMode === 'review' ? 'active' : ''}`}
+              title="AI Code Review against parent commit"
+            >
+              <Scale size={11} />
+              <span>AI Review</span>
+            </button>
+          )}
+
           {files.length > 0 && (
             <button
               type="button"
@@ -219,6 +247,33 @@ export function CommitInspection({
           )}
         </div>
       </div>
+
+      {aiMode === 'explainer' && (
+        <div style={{ padding: '0 16px' }}>
+          <ErrorBoundary fallbackTitle="AI Commit Explainer Error" isCompact>
+            <AICommitExplainer
+              owner={owner}
+              repo={repo}
+              sha={sha}
+              onClose={() => setAiMode('off')}
+            />
+          </ErrorBoundary>
+        </div>
+      )}
+
+      {aiMode === 'review' && parentShas.length > 0 && (
+        <div style={{ padding: '0 16px' }}>
+          <ErrorBoundary fallbackTitle="AI Diff Review Error" isCompact>
+            <AIDiffReview
+              owner={owner}
+              repo={repo}
+              base={parentShas[0]}
+              head={sha}
+              onClose={() => setAiMode('off')}
+            />
+          </ErrorBoundary>
+        </div>
+      )}
 
       {status === 'loading' && (
         <div className="commit-inspect-skeleton" aria-label="Loading commit details">

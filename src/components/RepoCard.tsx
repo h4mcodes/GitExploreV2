@@ -1,8 +1,10 @@
 import { memo, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CircleDot, Clock3, ExternalLink, GitBranch, GitFork, Globe2, Star } from 'lucide-react';
+import { CircleDot, Clock3, ExternalLink, GitBranch, GitFork, Globe2, Star, Sparkles, Layers, HeartPulse } from 'lucide-react';
 import type { GithubRepository } from '../types/github';
 import { BranchExplorer } from './BranchExplorer';
+import { AIOverview } from './AIOverview';
+import { AIHealthAnalysis } from './AIHealthAnalysis';
 import { ErrorBoundary } from './ErrorBoundary';
 import { sanitizeUrl } from '../services/security';
 
@@ -24,6 +26,8 @@ function normaliseHomepage(homepage: string) {
 
 export const RepoCard = memo(function RepoCard(props: RepoCardProps) {
   const [showBranches, setShowBranches] = useState(false);
+  const [showAI, setShowAI] = useState(false);
+  const [aiTab, setAiTab] = useState<'overview' | 'health'>('overview');
 
   if ('repository' in props) {
     const { repository, index, targetState } = props;
@@ -73,12 +77,29 @@ export const RepoCard = memo(function RepoCard(props: RepoCardProps) {
             <button
               type="button"
               className={`repo-branches-btn ${showBranches ? 'active' : ''}`}
-              onClick={() => setShowBranches((prev) => !prev)}
+              onClick={() => {
+                setShowBranches((prev) => !prev);
+                if (!showBranches) setShowAI(false);
+              }}
               aria-expanded={showBranches}
               aria-label={`Toggle branch explorer for ${repository.name}`}
             >
               <GitBranch size={13} />
               <span>Branches</span>
+            </button>
+
+            <button
+              type="button"
+              className={`repo-ai-btn ${showAI ? 'active' : ''}`}
+              onClick={() => {
+                setShowAI((prev) => !prev);
+                if (!showAI) setShowBranches(false);
+              }}
+              aria-expanded={showAI}
+              aria-label={`Toggle AI insights for ${repository.name}`}
+            >
+              <Sparkles size={13} />
+              <span>AI Insights</span>
             </button>
 
             <div className="repository-links">
@@ -97,6 +118,56 @@ export const RepoCard = memo(function RepoCard(props: RepoCardProps) {
         </div>
 
         <AnimatePresence>
+          {showAI && (
+            <motion.div
+              initial={{ opacity: 0, y: -8, scale: 0.985 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -6, scale: 0.985 }}
+              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div className="repo-ai-tabs">
+                <button
+                  type="button"
+                  className={`repo-ai-tab ${aiTab === 'overview' ? 'active' : ''}`}
+                  onClick={() => setAiTab('overview')}
+                >
+                  <Layers size={12} />
+                  <span>Architecture Overview</span>
+                </button>
+                <button
+                  type="button"
+                  className={`repo-ai-tab ${aiTab === 'health' ? 'active' : ''}`}
+                  onClick={() => setAiTab('health')}
+                >
+                  <HeartPulse size={12} />
+                  <span>Health & Vitality</span>
+                </button>
+              </div>
+
+              <ErrorBoundary
+                fallbackTitle="AI Analysis Error"
+                fallbackMessage={`Failed to render AI analysis for ${repository.name}.`}
+                isCompact
+              >
+                {aiTab === 'overview' ? (
+                  <AIOverview
+                    owner={owner}
+                    repo={repoName}
+                    branch={repository.default_branch}
+                    onClose={() => setShowAI(false)}
+                  />
+                ) : (
+                  <AIHealthAnalysis
+                    owner={owner}
+                    repo={repoName}
+                    branch={repository.default_branch}
+                    onClose={() => setShowAI(false)}
+                  />
+                )}
+              </ErrorBoundary>
+            </motion.div>
+          )}
+
           {showBranches && (
             <motion.div
               initial={{ opacity: 0, y: -8, scale: 0.985 }}
@@ -104,8 +175,6 @@ export const RepoCard = memo(function RepoCard(props: RepoCardProps) {
               exit={{ opacity: 0, y: -6, scale: 0.985 }}
               transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
             >
-
-
               <ErrorBoundary
                 fallbackTitle="Branch Explorer Error"
                 fallbackMessage={`Failed to render branch graph for ${repository.name}.`}

@@ -16,11 +16,16 @@ import {
   GitCommit,
   RotateCw,
   X,
+  Sparkles,
+  Scale,
 } from 'lucide-react';
 import { fetchGithubCompare, GithubApiError } from '../services/githubApi';
 import type { GithubBranch, GithubComparisonResult } from '../types/github';
 import { DiffViewer } from './DiffViewer';
 import { GlassDropdown, type DropdownOption } from './GlassDropdown';
+import { AIBranchAnalysis } from './AIBranchAnalysis';
+import { AIDiffReview } from './AIDiffReview';
+import { ErrorBoundary } from './ErrorBoundary';
 
 interface BranchCompareProps {
   owner: string;
@@ -75,6 +80,7 @@ export function BranchCompare({
   const [status, setStatus] = useState<'loading' | 'ready' | 'rate-limit' | 'error'>('loading');
   const [rateLimitTime, setRateLimitTime] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'commits' | 'files'>('commits');
+  const [aiTab, setAiTab] = useState<'none' | 'divergence' | 'review'>('none');
   const [showCodeModal, setShowCodeModal] = useState(false);
   const [copiedSha, setCopiedSha] = useState<string | null>(null);
 
@@ -257,6 +263,61 @@ export function BranchCompare({
           </div>
         </div>
       </div>
+
+      <div className="compare-ai-tabs">
+        <button
+          type="button"
+          className={`compare-ai-tab ${aiTab === 'none' ? 'active' : ''}`}
+          onClick={() => setAiTab('none')}
+        >
+          <FileCode size={13} />
+          <span>Git Compare</span>
+        </button>
+        <button
+          type="button"
+          className={`compare-ai-tab ${aiTab === 'divergence' ? 'active' : ''}`}
+          onClick={() => setAiTab('divergence')}
+        >
+          <Sparkles size={13} />
+          <span>AI Divergence Analysis</span>
+        </button>
+        <button
+          type="button"
+          className={`compare-ai-tab ${aiTab === 'review' ? 'active' : ''}`}
+          onClick={() => setAiTab('review')}
+        >
+          <Scale size={13} />
+          <span>AI Code Review & Audit</span>
+        </button>
+      </div>
+
+      {aiTab === 'divergence' && (
+        <div style={{ padding: '0 16px' }}>
+          <ErrorBoundary fallbackTitle="AI Branch Divergence Error" isCompact>
+            <AIBranchAnalysis
+              owner={owner}
+              repo={repo}
+              base={base}
+              head={head}
+              onClose={() => setAiTab('none')}
+            />
+          </ErrorBoundary>
+        </div>
+      )}
+
+      {aiTab === 'review' && (
+        <div style={{ padding: '0 16px' }}>
+          <ErrorBoundary fallbackTitle="AI Code Review Error" isCompact>
+            <AIDiffReview
+              owner={owner}
+              repo={repo}
+              base={base}
+              head={head}
+              onClose={() => setAiTab('none')}
+            />
+          </ErrorBoundary>
+        </div>
+      )}
 
       {/* Loading Skeleton */}
       {status === 'loading' && (

@@ -9,6 +9,14 @@ import type {
   NoteItem,
   BookmarkItem,
 } from '../types/workspace';
+import type {
+  AIAnalysisEnvelope,
+  RepositoryOverviewData,
+  CommitExplanationData,
+  DiffReviewData,
+  BranchAnalysisData,
+  RepositoryHealthData,
+} from '../types/ai';
 
 /**
  * Configuration options for backend API requests.
@@ -452,6 +460,77 @@ export class ApiClient {
     options?: BackendRequestOptions
   ): Promise<{ message: string; id: string }> {
     return this.delete<{ message: string; id: string }>(`/api/bookmarks/${id}`, options);
+  }
+
+  // ==========================================
+  // AI Analysis Endpoints (D7-P1 to D7-P5)
+  // ==========================================
+
+  public async fetchRepositoryOverview(
+    owner: string,
+    repo: string,
+    branch?: string,
+    options?: BackendRequestOptions
+  ): Promise<AIAnalysisEnvelope<RepositoryOverviewData>> {
+    return this.post<AIAnalysisEnvelope<RepositoryOverviewData>>(
+      '/api/ai/repository-overview',
+      { owner, repo, branch, bypassCache: options?.bypassCache },
+      options
+    );
+  }
+
+  public async fetchCommitExplanation(
+    owner: string,
+    repo: string,
+    sha: string,
+    options?: BackendRequestOptions
+  ): Promise<AIAnalysisEnvelope<CommitExplanationData>> {
+    return this.post<AIAnalysisEnvelope<CommitExplanationData>>(
+      '/api/ai/commit-explanation',
+      { owner, repo, sha, bypassCache: options?.bypassCache },
+      options
+    );
+  }
+
+  public async fetchDiffReview(
+    owner: string,
+    repo: string,
+    base: string,
+    head: string,
+    options?: BackendRequestOptions
+  ): Promise<AIAnalysisEnvelope<DiffReviewData>> {
+    return this.post<AIAnalysisEnvelope<DiffReviewData>>(
+      '/api/ai/diff-review',
+      { owner, repo, base, head, bypassCache: options?.bypassCache },
+      options
+    );
+  }
+
+  public async fetchBranchAnalysis(
+    owner: string,
+    repo: string,
+    base: string,
+    head: string,
+    options?: BackendRequestOptions
+  ): Promise<AIAnalysisEnvelope<BranchAnalysisData>> {
+    return this.post<AIAnalysisEnvelope<BranchAnalysisData>>(
+      '/api/ai/branch-analysis',
+      { owner, repo, base, head, bypassCache: options?.bypassCache },
+      options
+    );
+  }
+
+  public async fetchRepositoryHealth(
+    owner: string,
+    repo: string,
+    branch?: string,
+    options?: BackendRequestOptions
+  ): Promise<AIAnalysisEnvelope<RepositoryHealthData>> {
+    return this.post<AIAnalysisEnvelope<RepositoryHealthData>>(
+      '/api/ai/repository-health',
+      { owner, repo, branch, bypassCache: options?.bypassCache },
+      options
+    );
   }
 }
 

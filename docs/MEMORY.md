@@ -308,6 +308,7 @@ Next Task:      D8-P2: Repository Q&A API (Create POST /api/ai/repository-qa end
 | 2026-10-05 | Implemented AI Repository Health (D7-P5) | Added structured health JSON prompt directives, enhanced Zod schema with healthScore/activityAssessment, dynamic GitHub telemetry fetch in aiController, and 13 tests |
 | 2026-10-05 | Implemented AI UI Integration (D7-P6) | Created 5 frontend AI components, strict TypeScript types, ApiClient methods, workbench integrations (RepoCard, CommitInspection, BranchCompare), and Linear/Vercel AI styling |
 | 2026-10-05 | Implemented Investigation Context Engine (D8-P1) | Built `buildRepositoryInvestigationContext`, combining graph, stats, churn, trajectory, divergence, and bounded recent commits with token limits and estimation utility |
+| 2026-10-05 | Implemented Repository Q&A API (D8-P2) | Added `POST /api/ai/repository-qa` (and `/api/ai/qa` alias), `sanitizeUserQuestion` sanitization, dynamic GitHub coordinates telemetry resolution, schema validation, and 22 tests |
 
 ---
 
@@ -362,6 +363,8 @@ Next Task:      D8-P2: Repository Q&A API (Create POST /api/ai/repository-qa end
 | 2026-10-05 | Implemented AI Repository Health (D7-P5) | Enhanced repositoryHealth prompt and schema, updated aiController with dynamic GitHub repository telemetry fetch, and added 13 new tests |
 | 2026-10-05 | Implemented AI UI Integration (D7-P6) | Created 5 frontend AI components, strict TypeScript types, ApiClient methods, workbench integrations (RepoCard, CommitInspection, BranchCompare), and Linear/Vercel AI styling |
 | 2026-10-05 | Implemented Investigation Context Engine (D8-P1) | Built `buildRepositoryInvestigationContext`, combining graph, stats, churn, trajectory, divergence, and bounded recent commits with token limits and estimation utility |
+| 2026-10-05 | Implemented Repository Q&A API (D8-P2) | Added `POST /api/ai/repository-qa` (and `/api/ai/qa` alias), `sanitizeUserQuestion` sanitization, dynamic GitHub coordinates telemetry resolution, schema validation, and 22 tests |
+
 
 
 

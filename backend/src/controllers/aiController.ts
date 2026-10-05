@@ -6,6 +6,7 @@ import { withAICache, type WithAICacheResult } from '../ai/cache.js';
 import {
   buildAIContext,
   type ContextBuilderInputMap,
+  type InvestigationCommitSummary,
 } from '../ai/contextBuilder.js';
 import type { AnalysisType, TokenUsage } from '../ai/types.js';
 import { BadRequestError } from '../types/api.js';
@@ -15,6 +16,7 @@ import {
   computeRepositoryEvolution,
   computeFileChurn,
   computeDivergence,
+  buildCommitRelationshipGraph,
 } from '../intelligence/index.js';
 import type { GithubApiCommitDetail } from '../github/types.js';
 
@@ -629,7 +631,28 @@ export async function postRepositoryHealth(
 }
 
 /**
- * POST /api/ai/qa
+ * Sanitizes user natural language input for repository Q&A:
+ * - Ensures input is a valid string
+ * - Strips null bytes and ASCII control characters (keeping standard whitespace)
+ * - Rejects empty / whitespace-only questions
+ * - Caches and caps max length to 500 characters
+ */
+export function sanitizeUserQuestion(input: unknown): string {
+  if (typeof input !== 'string') {
+    throw new BadRequestError('Question is required and must be a string', 'INVALID_QUESTION');
+  }
+
+  const stripped = input.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').trim();
+
+  if (stripped.length === 0) {
+    throw new BadRequestError('Question cannot be empty', 'EMPTY_QUESTION');
+  }
+
+  return stripped.slice(0, 500);
+}
+
+/**
+ * POST /api/ai/repository-qa (and /api/ai/qa)
  */
 export async function postRepositoryQA(
   req: Request,
@@ -637,13 +660,126 @@ export async function postRepositoryQA(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { context, question, repo, analysis, focusedContext, repositoryId, bypassCache, ttlMs } =
-      req.body;
+    const {
+      context,
+      question: rawQuestion,
+      repo,
+      owner,
+      branch,
+      analysis: userAnalysis,
+      focusedContext,
+      investigation: userInvestigation,
+      statistics: userStatistics,
+      evolution: userEvolution,
+      fileAnalysis: userFileAnalysis,
+      divergence: userDivergence,
+      repositoryId,
+      bypassCache,
+      ttlMs,
+    } = req.body;
 
-    const contextInput =
-      question !== undefined && repo !== undefined
-        ? { question, repo, analysis, focusedContext }
-        : undefined;
+    let question: string | undefined;
+    if (rawQuestion !== undefined || !context) {
+      question = sanitizeUserQuestion(rawQuestion);
+    }
+
+    let contextInput: ContextBuilderInputMap['REPOSITORY_QA'] | undefined;
+
+    if (repo && typeof repo === 'object' && question) {
+      contextInput = {
+        question,
+        repo,
+        analysis: userAnalysis || (userStatistics || userEvolution ? {
+          statistics: userStatistics,
+          evolution: userEvolution,
+          fileAnalysis: userFileAnalysis,
+          divergence: userDivergence,
+        } : undefined),
+        focusedContext,
+        investigation: userInvestigation || (userStatistics || userEvolution || userFileAnalysis ? {
+          repo,
+          query: question,
+          statistics: userStatistics,
+          evolution: userEvolution,
+          fileAnalysis: userFileAnalysis,
+          divergence: userDivergence,
+        } : undefined),
+      };
+    } else if (typeof owner === 'string' && typeof repo === 'string' && question) {
+      const repoMeta = await githubClient.getRepo(owner, repo);
+      const targetBranch = branch || repoMeta.default_branch || 'main';
+
+      let stats = userStatistics;
+      let evol = userEvolution;
+      let churn = userFileAnalysis;
+      let graph = userInvestigation?.graph;
+      let recentCommitSummaries: InvestigationCommitSummary[] | undefined;
+
+      try {
+        const commits = await githubClient.getCommits(owner, repo, {
+          sha: targetBranch,
+          per_page: 50,
+        });
+
+        if (commits && commits.length > 0) {
+          stats = stats || computeCommitStatistics(commits);
+          evol = evol || computeRepositoryEvolution(commits);
+          graph = graph || buildCommitRelationshipGraph(commits);
+
+          recentCommitSummaries = commits.slice(0, 15).map((c) => ({
+            sha: c.sha,
+            message: c.commit?.message || '',
+            authorName: c.commit?.author?.name || 'Unknown',
+            authorLogin: c.author?.login || null,
+            date: c.commit?.author?.date || '',
+            isMerge: (c.parents || []).length > 1,
+            parentCount: (c.parents || []).length,
+          }));
+
+          if (!churn) {
+            const detailsSettled = await Promise.allSettled(
+              commits.slice(0, 10).map((c) => githubClient.getCommit(owner, repo, c.sha))
+            );
+            const validDetails = detailsSettled
+              .filter((d): d is PromiseFulfilledResult<GithubApiCommitDetail> => d.status === 'fulfilled')
+              .map((d) => d.value);
+
+            if (validDetails.length > 0) {
+              churn = computeFileChurn(validDetails);
+            }
+          }
+        }
+      } catch (fetchErr) {
+        console.warn('[AI QA] Could not compute full telemetry for QA context:', fetchErr);
+      }
+
+      contextInput = {
+        question,
+        repo: repoMeta,
+        analysis: userAnalysis || {
+          statistics: stats,
+          evolution: evol,
+          fileAnalysis: churn,
+        },
+        focusedContext,
+        investigation: userInvestigation || {
+          repo: repoMeta,
+          query: question,
+          graph,
+          statistics: stats,
+          evolution: evol,
+          fileAnalysis: churn,
+          recentCommits: recentCommitSummaries,
+        },
+      };
+    }
+
+    if (!context && !contextInput) {
+      throw new BadRequestError(
+        'Either prebuilt context, or repository data (repo object or owner/repo coordinates) with a question are required',
+        'MISSING_REPOSITORY_QA_INPUT'
+      );
+    }
 
     const result = await executeAIPipeline({
       type: 'REPOSITORY_QA',

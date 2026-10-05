@@ -49,4 +49,5 @@ aiRouter.post('/branch-analysis', postBranchAnalysis);
 aiRouter.post('/branch-comparison', postBranchAnalysis); // Alias
 aiRouter.post('/repository-health', postRepositoryHealth);
 aiRouter.post('/code-health', postRepositoryHealth); // Alias
-aiRouter.post('/qa', postRepositoryQA);
+aiRouter.post('/repository-qa', postRepositoryQA);
+aiRouter.post('/qa', postRepositoryQA); // Alias

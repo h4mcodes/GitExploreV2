@@ -2417,10 +2417,10 @@ Q&A lets developers ask specific questions about a repository and receive eviden
 - Backend builds
 
 **Completion Criteria**
-- [ ] Q&A endpoint functional
-- [ ] Returns structured answer with evidence
-- [ ] Input sanitized
-- [ ] Backend builds
+- [x] Q&A endpoint functional
+- [x] Returns structured answer with evidence
+- [x] Input sanitized
+- [x] Backend builds
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -2428,7 +2428,7 @@ Q&A lets developers ask specific questions about a repository and receive eviden
 **Git**
 - Implementation only. Antigravity MUST NOT commit. Antigravity MUST NOT push. User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

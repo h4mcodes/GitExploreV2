@@ -1515,6 +1515,34 @@ footer b {
   transition-duration: var(--duration-fast);
 }
 
+.repository-card.branches-expanded,
+.repository-card.ai-expanded {
+  border-color: rgba(65, 115, 175, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 16px 36px rgba(45, 75, 110, 0.12);
+}
+
+.repository-card.ai-expanded {
+  border-color: rgba(147, 51, 234, 0.45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 16px 36px rgba(107, 33, 168, 0.1);
+}
+
+.repository-card.branches-expanded:hover,
+.repository-card.ai-expanded:hover {
+  transform: none;
+}
+
+.repo-expandable-drawer {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  will-change: height, opacity;
+}
+
+.repo-expandable-body {
+  width: 100%;
+  padding-top: 2px;
+}
+
 
 .repository-card-heading,
 .repository-card-footer,
@@ -3824,7 +3852,7 @@ footer b {
   border: 1px solid rgba(35, 70, 108, .2);
   border-radius: 12px;
   background: rgba(235, 244, 253, .58);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), 0 4px 12px rgba(45, 75, 105, .05);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7);
   backdrop-filter: blur(8px);
 }
 
@@ -7901,7 +7929,7 @@ footer b {
   flex-direction: column;
   background: rgba(13, 16, 23, 0.88);
   border: 1px solid rgba(168, 85, 247, 0.28);
-  box-shadow: 0 12px 36px -8px rgba(0, 0, 0, 0.55), 0 0 20px -4px rgba(168, 85, 247, 0.12);
+  box-shadow: none;
   border-radius: 12px;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -7909,7 +7937,7 @@ footer b {
   color: #e2e8f0;
   font-size: 13px;
   margin: 14px 0;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease;
 }
 
 .ai-panel:hover {

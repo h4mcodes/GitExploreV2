@@ -55,7 +55,8 @@ Return a valid JSON object adhering strictly to this schema:
       "severity": "CRITICAL" | "WARNING" | "INFO",
       "category": "BUG" | "SECURITY" | "PERFORMANCE" | "CODE_QUALITY" | "MAINTAINABILITY" | "ARCHITECTURE" | "OTHER"
     }
-  ]
+  ],
+  "supportingEvidence": ["Specific file paths and line references evaluated in review"]
 }`;
 
   return {

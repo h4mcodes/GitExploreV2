@@ -48,7 +48,8 @@ Return a valid JSON object adhering strictly to this schema:
   ],
   "potentialRisks": ["Potential risks, regression vectors, or edge cases to test"],
   "isBreakingChange": false,
-  "keyChanges": ["Bullet list of key logic or configuration modifications"]
+  "keyChanges": ["Bullet list of key logic or configuration modifications"],
+  "supportingEvidence": ["Commit SHA and specific modified file paths"]
 }`;
 
   return {

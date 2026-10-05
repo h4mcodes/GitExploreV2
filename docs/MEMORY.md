@@ -310,6 +310,7 @@ Next Task:      D8-P2: Repository Q&A API (Create POST /api/ai/repository-qa end
 | 2026-10-05 | Implemented Investigation Context Engine (D8-P1) | Built `buildRepositoryInvestigationContext`, combining graph, stats, churn, trajectory, divergence, and bounded recent commits with token limits and estimation utility |
 | 2026-10-05 | Implemented Repository Q&A API (D8-P2) | Added `POST /api/ai/repository-qa` (and `/api/ai/qa` alias), `sanitizeUserQuestion` sanitization, dynamic GitHub coordinates telemetry resolution, schema validation, and 22 tests |
 | 2026-10-05 | Implemented Repository Q&A UI (D8-P3) | Created `RepositoryQA.tsx`, integrated into Profile toolbar modal & RepoCard tabs, added `askRepositoryQA` to `api.ts`, and verified via real browser testing |
+| 2026-10-06 | Implemented Evidence References (D8-P4) | Added `supportingEvidence` to all AI prompts and Zod schemas, created `EvidenceReference.tsx`, made commit SHAs, file paths, and branch names clickable links across all AI views, and added dedicated badge CSS |
 
 ---
 
@@ -366,6 +367,7 @@ Next Task:      D8-P2: Repository Q&A API (Create POST /api/ai/repository-qa end
 | 2026-10-05 | Implemented Investigation Context Engine (D8-P1) | Built `buildRepositoryInvestigationContext`, combining graph, stats, churn, trajectory, divergence, and bounded recent commits with token limits and estimation utility |
 | 2026-10-05 | Implemented Repository Q&A API (D8-P2) | Added `POST /api/ai/repository-qa` (and `/api/ai/qa` alias), `sanitizeUserQuestion` sanitization, dynamic GitHub coordinates telemetry resolution, schema validation, and 22 tests |
 | 2026-10-05 | Implemented Repository Q&A UI (D8-P3) | Created `RepositoryQA.tsx`, integrated into Profile toolbar modal & RepoCard tabs, added `askRepositoryQA` to `api.ts`, and verified via real browser testing |
+| 2026-10-06 | Implemented Evidence References (D8-P4) | Added supportingEvidence arrays to schemas & prompts, built EvidenceReference.tsx, added clickable links & badges |
 
 
 

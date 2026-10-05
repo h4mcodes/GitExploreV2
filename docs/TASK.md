@@ -2513,11 +2513,11 @@ Evidence references are what distinguishes GitExplore's AI from a generic chatbo
 - Links navigate to correct repository data
 
 **Completion Criteria**
-- [ ] Prompts request evidence references
-- [ ] Schemas include evidence arrays
-- [ ] UI renders evidence as links
-- [ ] Links navigate correctly
-- [ ] Both builds pass
+- [x] Prompts request evidence references
+- [x] Schemas include evidence arrays
+- [x] UI renders evidence as links
+- [x] Links navigate correctly
+- [x] Both builds pass
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -2525,7 +2525,7 @@ Evidence references are what distinguishes GitExplore's AI from a generic chatbo
 **Git**
 - Implementation only. Antigravity MUST NOT commit. Antigravity MUST NOT push. User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

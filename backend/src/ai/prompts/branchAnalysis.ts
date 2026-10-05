@@ -35,7 +35,8 @@ Return a valid JSON object adhering strictly to this schema:
   "notableChanges": ["Notable file or architectural changes introduced"],
   "mainAuthors": ["Names or handles of primary contributors to the delta"],
   "riskFactors": ["Identified risks, potential conflicts with base branch, or testing needs"],
-  "recommendations": ["Actionable next steps before merging (e.g. rebase, review critical files, run integration tests)"]
+  "recommendations": ["Actionable next steps before merging (e.g. rebase, review critical files, run integration tests)"],
+  "supportingEvidence": ["Branch names, merge base SHA, and diverging commit SHAs"]
 }`;
 
   return {

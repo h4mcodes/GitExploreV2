@@ -21,6 +21,7 @@ export const BaseRepositoryHealthResponseSchema = z.object({
   codeChurnHotspots: z.array(z.string()).default([]),
   actionableRecommendations: z.array(z.string()).default([]),
   recommendations: z.array(z.string()).default([]),
+  supportingEvidence: z.array(z.string()).default([]),
 });
 
 export const RepositoryHealthResponseSchema = BaseRepositoryHealthResponseSchema.refine(
@@ -46,6 +47,7 @@ export const RepositoryHealthResponseSchema = BaseRepositoryHealthResponseSchema
     risks: allRisks,
     actionableRecommendations: allRecs,
     recommendations: allRecs,
+    supportingEvidence: val.supportingEvidence ?? [],
   };
 });
 

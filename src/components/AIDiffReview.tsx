@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { apiClient } from '../services/api';
 import type { AIAnalysisEnvelope, DiffReviewData, DiffObservation } from '../types/ai';
+import { EvidenceList } from './EvidenceReference';
 
 interface AIDiffReviewProps {
   owner: string;
@@ -285,9 +286,15 @@ export function AIDiffReview({ owner, repo, base, head, onClose }: AIDiffReviewP
                     return (
                       <div className="ai-file-review-detail">
                         <div className="ai-file-review-header">
-                          <span className="ai-file-title" title={activeReview.filename}>
+                          <a
+                            href={`https://github.com/${owner}/${repo}/blob/${encodeURIComponent(head)}/${activeReview.filename}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ai-file-title ai-file-title-link"
+                            title={`View ${activeReview.filename} on GitHub`}
+                          >
                             {activeReview.filename}
-                          </span>
+                          </a>
                           <span className={`ai-badge ${statusBadge(activeReview.status)}`}>
                             {activeReview.status.toUpperCase()}
                           </span>
@@ -342,6 +349,18 @@ export function AIDiffReview({ owner, repo, base, head, onClose }: AIDiffReviewP
               </ul>
             </div>
           )}
+
+          {/* Supporting Evidence References */}
+          <EvidenceList
+            evidence={
+              data.data.supportingEvidence && data.data.supportingEvidence.length > 0
+                ? data.data.supportingEvidence
+                : data.data.fileReviews.map((f) => f.filename)
+            }
+            owner={owner}
+            repo={repo}
+            branch={head}
+          />
         </div>
       )}
     </div>

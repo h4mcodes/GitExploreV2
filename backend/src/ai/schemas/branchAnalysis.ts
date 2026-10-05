@@ -12,6 +12,7 @@ export const BaseBranchAnalysisResponseSchema = z.object({
   riskFactors: z.array(z.string()).default([]),
   recommendations: z.array(z.string()).default([]),
   aheadBehindAssessment: z.string().optional(),
+  supportingEvidence: z.array(z.string()).default([]),
 });
 
 export const BranchAnalysisResponseSchema = BaseBranchAnalysisResponseSchema.refine(
@@ -34,6 +35,7 @@ export const BranchAnalysisResponseSchema = BaseBranchAnalysisResponseSchema.ref
     mergeRisk: val.mergeRisk ?? 'LOW',
     keyContributions: contributions,
     notableChanges: changes,
+    supportingEvidence: val.supportingEvidence ?? [],
   };
 });
 

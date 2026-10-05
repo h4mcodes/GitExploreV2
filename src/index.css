@@ -9572,6 +9572,207 @@ footer b {
   flex: none;
 }
 
+/* ==========================================================================
+   AI Evidence References & Clickable Artifacts (D8-P4)
+   ========================================================================== */
+
+.ai-evidence-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(168, 85, 247, 0.16);
+  border-radius: 8px;
+}
+
+.ai-evidence-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ai-evidence-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #a78bfa;
+}
+
+.ai-evidence-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 7px;
+  font-size: 10.5px;
+  font-weight: 600;
+  border-radius: 9999px;
+  background: rgba(168, 85, 247, 0.18);
+  border: 1px solid rgba(168, 85, 247, 0.32);
+  color: #e9d5ff;
+}
+
+.ai-evidence-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.ai-evidence-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  line-height: 1.3;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 1px solid transparent;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ai-evidence-badge-link {
+  cursor: pointer;
+}
+
+.ai-evidence-badge-link:hover {
+  transform: translateY(-1px);
+}
+
+.ai-evidence-badge-link:focus-visible {
+  outline: 2px solid #c084fc;
+  outline-offset: 1px;
+}
+
+/* Badge variants */
+.ai-evidence-commit {
+  background: rgba(147, 51, 234, 0.12);
+  border-color: rgba(168, 85, 247, 0.28);
+  color: #d8b4fe;
+}
+
+.ai-evidence-commit.ai-evidence-badge-link:hover {
+  background: rgba(147, 51, 234, 0.24);
+  border-color: rgba(168, 85, 247, 0.55);
+  color: #f3e8ff;
+}
+
+.ai-evidence-file {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.25);
+  color: #7dd3fc;
+}
+
+.ai-evidence-file.ai-evidence-badge-link:hover {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: rgba(56, 189, 248, 0.5);
+  color: #e0f2fe;
+}
+
+.ai-evidence-branch {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: #6ee7b7;
+}
+
+.ai-evidence-branch.ai-evidence-badge-link:hover {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.5);
+  color: #d1fae5;
+}
+
+.ai-evidence-metric,
+.ai-evidence-text {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+}
+
+.ai-evidence-icon {
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.ai-evidence-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-evidence-ext {
+  flex-shrink: 0;
+  opacity: 0.5;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.ai-evidence-badge-link:hover .ai-evidence-ext {
+  opacity: 0.95;
+  transform: translate(1px, -1px);
+}
+
+/* Clickable code tokens and titles in AI components */
+.ai-file-code-link {
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ai-file-code-link:hover {
+  color: #e0f2fe;
+  background: rgba(56, 189, 248, 0.18);
+  border-color: rgba(56, 189, 248, 0.45);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.ai-file-title-link {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.ai-file-title-link:hover {
+  color: #38bdf8;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.ai-branch-ref-link {
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ai-branch-ref-link:hover {
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.45);
+}
+
+.ai-hotspot-item-link {
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ai-hotspot-item-link:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+  transform: translateY(-1px);
+}
+
 @media (max-width: 640px) {
   .ai-files-split {
     grid-template-columns: 1fr;

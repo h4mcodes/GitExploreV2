@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { apiClient } from '../services/api';
 import type { AIAnalysisEnvelope, RepositoryHealthData } from '../types/ai';
+import { EvidenceList } from './EvidenceReference';
 
 interface AIHealthAnalysisProps {
   owner: string;
@@ -247,10 +248,17 @@ export function AIHealthAnalysis({ owner, repo, branch, onClose }: AIHealthAnaly
               </div>
               <div className="ai-hotspots-grid">
                 {data.data.codeChurnHotspots.map((file: string, idx: number) => (
-                  <div key={idx} className="ai-hotspot-item" title={file}>
+                  <a
+                    key={idx}
+                    href={`https://github.com/${owner}/${repo}/blob/${encodeURIComponent(branch || 'main')}/${file}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ai-hotspot-item ai-hotspot-item-link"
+                    title={`View ${file} on GitHub`}
+                  >
                     <FileWarning size={12} className="ai-hotspot-icon" />
                     <span className="ai-hotspot-path">{file}</span>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>
@@ -276,6 +284,18 @@ export function AIHealthAnalysis({ owner, repo, branch, onClose }: AIHealthAnaly
               </ul>
             </div>
           )}
+
+          {/* Supporting Evidence References */}
+          <EvidenceList
+            evidence={
+              data.data.supportingEvidence && data.data.supportingEvidence.length > 0
+                ? data.data.supportingEvidence
+                : data.data.codeChurnHotspots
+            }
+            owner={owner}
+            repo={repo}
+            branch={branch}
+          />
         </div>
       )}
     </div>

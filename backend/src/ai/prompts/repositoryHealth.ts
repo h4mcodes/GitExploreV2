@@ -36,7 +36,8 @@ Return a valid JSON object adhering strictly to this schema:
   "maintenanceSignals": ["List of positive or negative maintenance vitality signals"],
   "maintenanceRisks": ["Specific maintenance risks, technical debt, or stagnation flags"],
   "codeChurnHotspots": ["Files or components undergoing excessive volatile churn"],
-  "actionableRecommendations": ["Actionable, prioritized recommendations for maintainers"]
+  "actionableRecommendations": ["Actionable, prioritized recommendations for maintainers"],
+  "supportingEvidence": ["Specific churn hotspot file paths and telemetry metrics"]
 }`;
 
   return {

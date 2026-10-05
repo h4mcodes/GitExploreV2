@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { apiClient } from '../services/api';
 import type { AIAnalysisEnvelope, BranchAnalysisData } from '../types/ai';
+import { EvidenceList } from './EvidenceReference';
 
 interface AIBranchAnalysisProps {
   owner: string;
@@ -161,9 +162,25 @@ export function AIBranchAnalysis({ owner, repo, base, head, onClose }: AIBranchA
         <div className="ai-panel-body">
           {/* Branch coordinate breadcrumb */}
           <div className="ai-branch-breadcrumb">
-            <span className="ai-branch-ref ai-badge-zinc">{base}</span>
+            <a
+              href={`https://github.com/${owner}/${repo}/tree/${encodeURIComponent(base)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ai-branch-ref ai-badge-zinc ai-branch-ref-link"
+              title={`View ${base} branch on GitHub`}
+            >
+              {base}
+            </a>
             <ArrowRight size={13} className="ai-branch-arrow" />
-            <span className="ai-branch-ref ai-badge-blue">{head}</span>
+            <a
+              href={`https://github.com/${owner}/${repo}/tree/${encodeURIComponent(head)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ai-branch-ref ai-badge-blue ai-branch-ref-link"
+              title={`View ${head} branch on GitHub`}
+            >
+              {head}
+            </a>
           </div>
 
           {/* Divergence Metrics Grid */}
@@ -274,6 +291,18 @@ export function AIBranchAnalysis({ owner, repo, base, head, onClose }: AIBranchA
               </ul>
             </div>
           )}
+
+          {/* Supporting Evidence References */}
+          <EvidenceList
+            evidence={
+              data.data.supportingEvidence && data.data.supportingEvidence.length > 0
+                ? data.data.supportingEvidence
+                : [`branch: ${head}`, `branch: ${base}`, ...(data.data.notableChanges || [])]
+            }
+            owner={owner}
+            repo={repo}
+            branch={head}
+          />
         </div>
       )}
     </div>

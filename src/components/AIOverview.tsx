@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { apiClient } from '../services/api';
 import type { AIAnalysisEnvelope, RepositoryOverviewData } from '../types/ai';
+import { EvidenceList } from './EvidenceReference';
 
 interface AIOverviewProps {
   owner: string;
@@ -218,14 +219,29 @@ export function AIOverview({ owner, repo, branch, onClose }: AIOverviewProps) {
                 )}
                 <div className="ai-hotspot-files">
                   {data.data.hotspotAnalysis.criticalFiles.map((file, idx) => (
-                    <code key={idx} className="ai-file-code">
+                    <a
+                      key={idx}
+                      href={`https://github.com/${owner}/${repo}/blob/${encodeURIComponent(branch || 'main')}/${file}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ai-file-code ai-file-code-link"
+                      title={`View ${file} on GitHub`}
+                    >
                       {file}
-                    </code>
+                    </a>
                   ))}
                 </div>
               </div>
             </div>
           )}
+
+          {/* Supporting Evidence References */}
+          <EvidenceList
+            evidence={data.data.supportingEvidence}
+            owner={owner}
+            repo={repo}
+            branch={branch}
+          />
         </div>
       )}
     </div>

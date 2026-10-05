@@ -36,6 +36,7 @@ export interface RepositoryOverviewData {
   };
   growthTrajectory?: string;
   keyTakeaways: string[];
+  supportingEvidence?: string[];
 }
 
 // 2. Commit Explainer (D7-P2)
@@ -56,6 +57,7 @@ export interface CommitExplanationData {
   potentialRisks: string[];
   isBreakingChange?: boolean;
   keyChanges?: string[];
+  supportingEvidence?: string[];
 }
 
 // 3. Diff Review (D7-P3)
@@ -83,6 +85,7 @@ export interface DiffReviewData {
   riskFactors?: string[];
   recommendations: string[];
   keyObservations?: DiffObservation[];
+  supportingEvidence?: string[];
 }
 
 // 4. Branch Analysis (D7-P4)
@@ -98,6 +101,7 @@ export interface BranchAnalysisData {
   riskFactors: string[];
   recommendations: string[];
   aheadBehindAssessment?: string;
+  supportingEvidence?: string[];
 }
 
 // 5. Repository Health (D7-P5)
@@ -114,6 +118,7 @@ export interface RepositoryHealthData {
   codeChurnHotspots: string[];
   actionableRecommendations: string[];
   recommendations?: string[];
+  supportingEvidence?: string[];
 }
 
 // 6. Repository Q&A (D8-P2 / D8-P3)

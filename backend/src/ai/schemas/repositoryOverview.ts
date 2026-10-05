@@ -15,6 +15,7 @@ export const RepositoryOverviewResponseSchema = z.object({
   }),
   growthTrajectory: z.string(),
   keyTakeaways: z.array(z.string()).min(1, 'At least one takeaway is required'),
+  supportingEvidence: z.array(z.string()).default([]),
 });
 
 export type RepositoryOverviewResponse = z.infer<typeof RepositoryOverviewResponseSchema>;

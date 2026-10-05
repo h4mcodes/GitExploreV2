@@ -45,7 +45,8 @@ Return a valid JSON object adhering strictly to this schema:
     "observations": "Summary of file change concentration and potential stability hotspots"
   },
   "growthTrajectory": "Trajectory classification (e.g. steady growth, accelerating, stable maintenance, inactive)",
-  "keyTakeaways": ["2-3 key takeaways for a developer investigating this codebase for the first time"]
+  "keyTakeaways": ["2-3 key takeaways for a developer investigating this codebase for the first time"],
+  "supportingEvidence": ["Specific file paths, branches, or commit SHAs referenced as concrete evidence"]
 }`;
 
   return {

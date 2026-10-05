@@ -18,6 +18,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiClient } from '../services/api';
 import type { AIAnalysisEnvelope, RepositoryQAData } from '../types/ai';
+import { EvidenceList } from './EvidenceReference';
 
 export interface RepositoryQAProps {
   owner: string;
@@ -284,22 +285,13 @@ export function RepositoryQA({
           </div>
 
           {/* Supporting Evidence */}
-          {result.data.supportingEvidence && result.data.supportingEvidence.length > 0 && (
-            <div className="ai-qa-evidence-section">
-              <h5 className="ai-qa-evidence-title">
-                <ShieldCheck size={13} />
-                <span>Supporting Repository Evidence</span>
-              </h5>
-              <ul className="ai-qa-evidence-list">
-                {result.data.supportingEvidence.map((evidence, idx) => (
-                  <li key={idx} className="ai-qa-evidence-item">
-                    <span className="ai-qa-evidence-bullet" />
-                    <span>{evidence}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          <EvidenceList
+            evidence={result.data.supportingEvidence}
+            owner={owner}
+            repo={repo}
+            branch={branch}
+            title="Supporting Repository Evidence"
+          />
 
           {/* Limitations (if any) */}
           {result.data.limitations && (

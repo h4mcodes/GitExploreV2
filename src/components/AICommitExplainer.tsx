@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { apiClient } from '../services/api';
 import type { AIAnalysisEnvelope, CommitExplanationData } from '../types/ai';
+import { EvidenceList } from './EvidenceReference';
 
 interface AICommitExplainerProps {
   owner: string;
@@ -202,7 +203,15 @@ export function AICommitExplainer({ owner, repo, sha, onClose }: AICommitExplain
                 {(data.data.changesPerFile || data.data.modifiedComponents).map((item, idx) => (
                   <div key={idx} className="ai-file-item">
                     <div className="ai-file-header">
-                      <code className="ai-file-code">{item.filename}</code>
+                      <a
+                        href={`https://github.com/${owner}/${repo}/blob/${sha}/${item.filename}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ai-file-code ai-file-code-link"
+                        title={`View ${item.filename} at commit ${sha.slice(0, 7)}`}
+                      >
+                        {item.filename}
+                      </a>
                       {item.riskLevel && (
                         <span className={`ai-badge ${complexityColor(item.riskLevel)} text-xs`}>
                           {item.riskLevel} Risk
@@ -233,6 +242,23 @@ export function AICommitExplainer({ owner, repo, sha, onClose }: AICommitExplain
               </ul>
             </div>
           )}
+
+          {/* Supporting Evidence References */}
+          <EvidenceList
+            evidence={
+              data.data.supportingEvidence && data.data.supportingEvidence.length > 0
+                ? data.data.supportingEvidence
+                : [
+                    `Commit ${sha}`,
+                    ...(data.data.changesPerFile || data.data.modifiedComponents || []).map(
+                      (c) => c.filename
+                    ),
+                  ]
+            }
+            owner={owner}
+            repo={repo}
+            branch={sha}
+          />
         </div>
       )}
     </div>

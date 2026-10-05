@@ -40,6 +40,7 @@ export const BaseDiffReviewResponseSchema = z.object({
   riskFactors: z.array(z.string()).default([]),
   recommendations: z.array(z.string()).default([]),
   keyObservations: z.array(DiffObservationSchema).default([]),
+  supportingEvidence: z.array(z.string()).default([]),
 });
 
 export const DiffReviewResponseSchema = BaseDiffReviewResponseSchema.transform((val) => {
@@ -68,6 +69,7 @@ export const DiffReviewResponseSchema = BaseDiffReviewResponseSchema.transform((
     ...val,
     fileReviews: harmonizedFileReviews,
     keyObservations: val.keyObservations ?? [],
+    supportingEvidence: val.supportingEvidence ?? [],
   };
 });
 

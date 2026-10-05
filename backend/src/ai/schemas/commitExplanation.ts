@@ -29,6 +29,7 @@ export const BaseCommitExplanationResponseSchema = z.object({
   potentialRisks: z.array(z.string()).default([]),
   isBreakingChange: z.boolean().default(false),
   keyChanges: z.array(z.string()).default([]),
+  supportingEvidence: z.array(z.string()).default([]),
 });
 
 export const CommitExplanationResponseSchema = BaseCommitExplanationResponseSchema.transform((val) => {
@@ -44,6 +45,7 @@ export const CommitExplanationResponseSchema = BaseCommitExplanationResponseSche
     modifiedComponents: fileChanges,
     changesPerFile: fileChanges,
     keyChanges: val.keyChanges ?? [],
+    supportingEvidence: val.supportingEvidence ?? [],
   };
 });
 

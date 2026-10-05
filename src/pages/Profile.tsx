@@ -250,6 +250,13 @@ export function Profile() {
     { value: 'name', label: 'Name' },
   ], []);
 
+  const qaRepoOptions: DropdownOption[] = useMemo(() => {
+    return repositories.map((r) => ({
+      value: r.name,
+      label: `${r.name}${r.stargazers_count ? ` (★ ${r.stargazers_count})` : ''}`,
+    }));
+  }, [repositories]);
+
   const leftColumnRepos = useMemo(() => visibleRepositories.filter((_, i) => i % 2 === 0), [visibleRepositories]);
   const rightColumnRepos = useMemo(() => visibleRepositories.filter((_, i) => i % 2 !== 0), [visibleRepositories]);
 
@@ -547,31 +554,26 @@ export function Profile() {
                   <MessageSquareCode size={16} />
                   <span>Repository Intelligence Q&A</span>
                 </div>
-                <div className="repo-qa-modal-repo-picker">
-                  <label htmlFor="repo-qa-select" className="sr-only">
-                    Select repository
-                  </label>
-                  <select
-                    id="repo-qa-select"
-                    className="repo-qa-select-dropdown"
-                    value={selectedQARepo.name}
-                    onChange={(e) => setQaSelectedRepoName(e.target.value)}
+                <div className="repo-qa-modal-actions">
+                  {selectedQARepo && (
+                    <div className="repo-qa-modal-repo-picker">
+                      <GlassDropdown
+                        value={selectedQARepo.name}
+                        options={qaRepoOptions}
+                        onChange={(value) => setQaSelectedRepoName(value)}
+                        ariaLabel="Select repository for Q&A"
+                      />
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    className="ai-close-btn"
+                    onClick={() => setShowRepoQA(false)}
+                    aria-label="Close Q&A dialog"
                   >
-                    {repositories.map((r) => (
-                      <option key={r.id} value={r.name}>
-                        {r.name} {r.stargazers_count ? `(★ ${r.stargazers_count})` : ''}
-                      </option>
-                    ))}
-                  </select>
+                    <X size={15} />
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  className="ai-close-btn"
-                  onClick={() => setShowRepoQA(false)}
-                  aria-label="Close Q&A dialog"
-                >
-                  <X size={15} />
-                </button>
               </div>
 
               <RepositoryQA

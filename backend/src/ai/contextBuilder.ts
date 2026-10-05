@@ -5,6 +5,7 @@ import type {
   GithubApiComparison,
 } from '../github/types.js';
 import type {
+  CommitRelationshipGraph,
   CommitStatistics,
   BranchDivergenceAnalysis,
   FileChurnAnalysis,
@@ -19,6 +20,18 @@ const MAX_TOTAL_DIFF_PATCH_LENGTH = 6000; // characters
 const MAX_HOTSPOTS_IN_CONTEXT = 8;
 const MAX_COMMITS_IN_DELTA = 15;
 const MAX_EXTENSIONS_IN_CONTEXT = 10;
+const MAX_INVESTIGATION_COMMITS = 15;
+const MAX_INVESTIGATION_MESSAGE_LENGTH = 160;
+const MAX_INVESTIGATION_HOTSPOTS = 10;
+const MAX_INVESTIGATION_QUERY_LENGTH = 500;
+
+/**
+ * Estimates the token count of a JSON-serializable context object (heuristic: ~4 chars per token).
+ */
+export function estimatePayloadTokens(payload: unknown): number {
+  const json = typeof payload === 'string' ? payload : JSON.stringify(payload);
+  return Math.ceil(json.length / 4);
+}
 
 /**
  * Truncates text safely with an explicit indicator if it exceeds maxLength.
@@ -340,14 +353,15 @@ export interface RepositoryQAContextInput {
   readonly repo: GithubApiRepo;
   readonly analysis?: Partial<RepositoryAnalysis> | null;
   readonly focusedContext?: Record<string, unknown>;
+  readonly investigation?: RepositoryInvestigationContextInput;
 }
 
 export function buildRepositoryQAContext(
   input: RepositoryQAContextInput
 ): Record<string, unknown> {
-  const { question, repo, analysis, focusedContext } = input;
+  const { question, repo, analysis, focusedContext, investigation } = input;
 
-  return {
+  const baseQAContext: Record<string, unknown> = {
     question,
     repository: {
       owner: repo.owner?.login,
@@ -369,6 +383,260 @@ export function buildRepositoryQAContext(
       : undefined,
     focusedEvidence: focusedContext && Object.keys(focusedContext).length > 0 ? focusedContext : undefined,
   };
+
+  if (investigation) {
+    const investigationContext = buildRepositoryInvestigationContext({
+      ...investigation,
+      repo,
+      query: question,
+      customEvidence: focusedContext,
+    });
+    return {
+      ...baseQAContext,
+      ...investigationContext,
+    };
+  }
+
+  return baseQAContext;
+}
+
+// 7. REPOSITORY_INVESTIGATION Context Engine (D8-P1)
+export interface InvestigationCommitSummary {
+  readonly sha: string;
+  readonly message: string;
+  readonly authorName: string;
+  readonly authorLogin?: string | null;
+  readonly date: string;
+  readonly isMerge?: boolean;
+  readonly parentCount?: number;
+}
+
+export interface RepositoryInvestigationContextInput {
+  readonly repo: GithubApiRepo;
+  readonly query?: string;
+  readonly analysis?: Partial<RepositoryAnalysis> | null;
+  readonly graph?: CommitRelationshipGraph | null;
+  readonly statistics?: CommitStatistics | null;
+  readonly fileAnalysis?: FileChurnAnalysis | null;
+  readonly evolution?: RepositoryEvolutionAnalysis | null;
+  readonly divergence?: BranchDivergenceAnalysis | null;
+  readonly recentCommits?: readonly InvestigationCommitSummary[];
+  readonly focusedFiles?: readonly string[];
+  readonly focusedAuthors?: readonly string[];
+  readonly customEvidence?: Record<string, unknown>;
+}
+
+export function buildRepositoryInvestigationContext(
+  input: RepositoryInvestigationContextInput
+): Record<string, unknown> {
+  const {
+    repo,
+    query,
+    analysis,
+    graph,
+    statistics,
+    fileAnalysis,
+    evolution,
+    divergence,
+    recentCommits,
+    focusedFiles,
+    focusedAuthors,
+    customEvidence,
+  } = input;
+
+  const repoPayload: Record<string, unknown> = {
+    owner: repo.owner?.login || '',
+    name: repo.name,
+    fullName: repo.full_name,
+    description: repo.description || 'No description provided',
+    primaryLanguage: repo.language || 'Unknown',
+    starsCount: repo.stargazers_count,
+    forksCount: repo.forks_count,
+    openIssuesCount: repo.open_issues_count,
+    defaultBranch: repo.default_branch,
+    isArchived: Boolean((repo as { archived?: boolean }).archived),
+    isFork: repo.fork,
+    sizeKb: repo.size,
+    createdAt: repo.created_at,
+    lastUpdatedAt: repo.updated_at,
+    lastPushedAt: repo.pushed_at,
+    topics: ((repo as { topics?: readonly string[] }).topics || []).slice(0, 8),
+  };
+
+  // 1. Commit Relationship Graph / DAG Intelligence
+  const effectiveGraph = graph || analysis?.graph;
+  let graphSummary: Record<string, unknown> | undefined;
+  if (effectiveGraph) {
+    const nodeValues = Object.values(effectiveGraph.nodes || {});
+    const mergeCommitsCount = nodeValues.filter((n) => n.isMerge).length;
+    graphSummary = {
+      totalCommitsInGraph: effectiveGraph.totalCommits,
+      rootCommitsCount: (effectiveGraph.rootShas || []).length,
+      headCommitsCount: (effectiveGraph.headShas || []).length,
+      mergeCommitsCount,
+      sampleRootShas: (effectiveGraph.rootShas || []).slice(0, 5),
+      sampleHeadShas: (effectiveGraph.headShas || []).slice(0, 5),
+    };
+  }
+
+  // 2. Bounded Recent Commits (Token limit enforcement: max 15 commits, max 160 chars message)
+  let commitsList: InvestigationCommitSummary[] = [];
+  if (recentCommits && recentCommits.length > 0) {
+    commitsList = recentCommits.slice(0, MAX_INVESTIGATION_COMMITS).map((c) => ({
+      sha: c.sha.slice(0, 7),
+      message: truncateText(c.message.split('\n')[0], MAX_INVESTIGATION_MESSAGE_LENGTH),
+      authorName: c.authorName,
+      authorLogin: c.authorLogin || undefined,
+      date: c.date,
+      isMerge: c.isMerge,
+      parentCount: c.parentCount,
+    }));
+  } else if (effectiveGraph) {
+    const orderedNodes = (effectiveGraph.orderedShas || [])
+      .slice(0, MAX_INVESTIGATION_COMMITS)
+      .map((sha) => effectiveGraph.nodes[sha])
+      .filter((n): n is NonNullable<typeof n> => Boolean(n));
+
+    commitsList = orderedNodes.map((node) => ({
+      sha: node.shortSha,
+      message: truncateText(node.message.split('\n')[0], MAX_INVESTIGATION_MESSAGE_LENGTH),
+      authorName: node.author.name,
+      authorLogin: node.author.login || undefined,
+      date: node.timestamp,
+      isMerge: node.isMerge,
+      parentCount: node.parentShas.length,
+    }));
+  }
+
+  // 3. Commit Statistics & Cadence
+  const effectiveStats = statistics || analysis?.statistics;
+  let statsSummary: Record<string, unknown> | undefined;
+  if (effectiveStats) {
+    statsSummary = {
+      totalCommits: effectiveStats.totalCommits,
+      cadence: {
+        commitsPerWeek: effectiveStats.frequency.commitsPerWeek,
+        commitsPerDay: effectiveStats.frequency.commitsPerDay,
+        activeDaysCount: effectiveStats.frequency.activeDaysCount,
+        timeSpanDays: effectiveStats.frequency.timeSpanDays,
+        firstCommitDate: effectiveStats.frequency.firstCommitDate,
+        lastCommitDate: effectiveStats.frequency.lastCommitDate,
+      },
+      changeMetrics: {
+        totalAdditions: effectiveStats.changeStats.totalAdditions,
+        totalDeletions: effectiveStats.changeStats.totalDeletions,
+        netChanges: effectiveStats.changeStats.totalAdditions - effectiveStats.changeStats.totalDeletions,
+        avgChangesPerCommit: effectiveStats.changeStats.avgChangesPerCommit,
+      },
+    };
+  }
+
+  // 4. File Architecture & Hotspots
+  const effectiveFileAnalysis = fileAnalysis || analysis?.fileAnalysis;
+  let fileSummary: Record<string, unknown> | undefined;
+  if (effectiveFileAnalysis) {
+    const sortedExtensions = Object.entries(effectiveFileAnalysis.fileExtensions || {})
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, MAX_EXTENSIONS_IN_CONTEXT);
+
+    const hotspots = (effectiveFileAnalysis.hotspots || [])
+      .slice(0, MAX_INVESTIGATION_HOTSPOTS)
+      .map((h) => ({
+        filename: h.filename,
+        churnScore: h.churnScore,
+        totalChanges: h.totalChanges,
+        changeCount: h.changeCount,
+      }));
+
+    fileSummary = {
+      totalFilesChanged: effectiveFileAnalysis.totalFilesChanged,
+      totalFileModifications: effectiveFileAnalysis.totalFileModifications,
+      topExtensions: Object.fromEntries(sortedExtensions),
+      criticalHotspots: hotspots,
+    };
+  }
+
+  // 5. Repository Evolution & Trajectory
+  const effectiveEvolution = evolution || analysis?.evolution;
+  let evolutionSummary: Record<string, unknown> | undefined;
+  if (effectiveEvolution) {
+    evolutionSummary = {
+      growthTrajectory: effectiveEvolution.trajectory.pattern,
+      trajectoryDescription: effectiveEvolution.trajectory.description,
+      momentumMultiplier: effectiveEvolution.trajectory.momentumMultiplier,
+      recentVelocityCommitsPerDay: effectiveEvolution.trajectory.recentVelocity,
+      previousVelocityCommitsPerDay: effectiveEvolution.trajectory.previousVelocity,
+      recentActivityPeriods: (effectiveEvolution.periods || []).slice(-3).map((p) => ({
+        intensity: p.intensity,
+        commitCount: p.commitCount,
+        startDate: p.startDate,
+        endDate: p.endDate,
+      })),
+    };
+  }
+
+  // 6. Branch Divergence (if available)
+  const effectiveDivergence = divergence || analysis?.divergence;
+  let divergenceSummary: Record<string, unknown> | undefined;
+  if (effectiveDivergence) {
+    divergenceSummary = {
+      baseRef: effectiveDivergence.baseRef,
+      headRef: effectiveDivergence.headRef,
+      status: effectiveDivergence.status,
+      aheadBy: effectiveDivergence.aheadBy,
+      behindBy: effectiveDivergence.behindBy,
+      deltaTotalCommits: effectiveDivergence.delta.totalCommits,
+      deltaTotalFilesChanged: effectiveDivergence.delta.totalFilesChanged,
+      topAuthors: (effectiveDivergence.delta.authors || []).slice(0, 5).map((a) => ({
+        name: a.name,
+        login: a.login,
+        commitCount: a.commitCount,
+      })),
+    };
+  }
+
+  // 7. Investigation Scope Filters
+  const investigationScope =
+    (focusedFiles && focusedFiles.length > 0) || (focusedAuthors && focusedAuthors.length > 0)
+      ? {
+          targetedFiles: (focusedFiles || []).slice(0, 10),
+          targetedAuthors: (focusedAuthors || []).slice(0, 10),
+        }
+      : undefined;
+
+  const context: Record<string, unknown> = {
+    investigationTarget: repoPayload,
+  };
+
+  if (query) {
+    context['investigationQuery'] = truncateText(query, MAX_INVESTIGATION_QUERY_LENGTH);
+  }
+  if (graphSummary) {
+    context['graphIntelligence'] = graphSummary;
+  }
+  if (commitsList.length > 0) {
+    context['recentCommits'] = commitsList;
+  }
+  if (statsSummary) {
+    context['commitStatistics'] = statsSummary;
+  }
+  if (fileSummary) {
+    context['fileArchitectureAndHotspots'] = fileSummary;
+  }
+  if (evolutionSummary) {
+    context['evolutionTrajectory'] = evolutionSummary;
+  }
+  if (divergenceSummary) {
+    context['branchDivergence'] = divergenceSummary;
+  }
+  if (investigationScope) {
+    context['investigationScope'] = investigationScope;
+  }
+  if (customEvidence && Object.keys(customEvidence).length > 0) {
+    context['customEvidence'] = customEvidence;
+  }
+
+  return context;
 }
 
 // Unified Dispatcher Interface

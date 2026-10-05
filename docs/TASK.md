@@ -2369,10 +2369,10 @@ Repository Q&A requires a rich, comprehensive context that spans DAG structure, 
 - Backend builds
 
 **Completion Criteria**
-- [ ] Investigation context builder functional
-- [ ] Combines multiple intelligence sources
-- [ ] Token limit enforced
-- [ ] Backend builds
+- [x] Investigation context builder functional
+- [x] Combines multiple intelligence sources
+- [x] Token limit enforced
+- [x] Backend builds
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -2380,7 +2380,7 @@ Repository Q&A requires a rich, comprehensive context that spans DAG structure, 
 **Git**
 - Implementation only. Antigravity MUST NOT commit. Antigravity MUST NOT push. User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

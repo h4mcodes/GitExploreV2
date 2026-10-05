@@ -1,12 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import {
   truncateText,
+  estimatePayloadTokens,
   buildRepositoryOverviewContext,
   buildCommitExplanationContext,
   buildDiffReviewContext,
   buildBranchAnalysisContext,
   buildRepositoryHealthContext,
   buildRepositoryQAContext,
+  buildRepositoryInvestigationContext,
   buildAIContext,
 } from '../../src/ai/contextBuilder.js';
 import type {
@@ -14,8 +16,10 @@ import type {
   GithubApiCommitDetail,
   GithubApiCommitFile,
   GithubApiComparison,
+  GithubApiCommitSummary,
 } from '../../src/github/types.js';
 import type {
+  CommitRelationshipGraph,
   CommitStatistics,
   BranchDivergenceAnalysis,
   FileChurnAnalysis,
@@ -161,6 +165,54 @@ const mockDivergence: BranchDivergenceAnalysis = {
     authors: [
       { name: 'Hamza', login: 'h4mcodes', commitCount: 4 },
     ],
+  },
+};
+
+const mockGraph: CommitRelationshipGraph = {
+  totalCommits: 3,
+  orderedShas: ['c333333333333333', 'b222222222222222', 'a111111111111111'],
+  rootShas: ['a111111111111111'],
+  headShas: ['c333333333333333'],
+  nodes: {
+    'a111111111111111': {
+      sha: 'a111111111111111',
+      shortSha: 'a111111',
+      message: 'feat: initial root commit',
+      author: { name: 'Hamza', login: 'h4mcodes', email: null, date: '2026-01-01T00:00:00Z', avatarUrl: null },
+      timestamp: '2026-01-01T00:00:00Z',
+      parentShas: [],
+      childShas: ['b222222222222222'],
+      isMerge: false,
+      isRoot: true,
+      htmlUrl: 'https://github.com/h4mcodes/gitexplore/commit/a111111',
+      rawCommit: {} as unknown as GithubApiCommitSummary,
+    },
+    'b222222222222222': {
+      sha: 'b222222222222222',
+      shortSha: 'b222222',
+      message: 'feat: add core workbench structure',
+      author: { name: 'Hamza', login: 'h4mcodes', email: null, date: '2026-01-02T00:00:00Z', avatarUrl: null },
+      timestamp: '2026-01-02T00:00:00Z',
+      parentShas: ['a111111111111111'],
+      childShas: ['c333333333333333'],
+      isMerge: false,
+      isRoot: false,
+      htmlUrl: 'https://github.com/h4mcodes/gitexplore/commit/b222222',
+      rawCommit: {} as unknown as GithubApiCommitSummary,
+    },
+    'c333333333333333': {
+      sha: 'c333333333333333',
+      shortSha: 'c333333',
+      message: 'Merge pull request #1 from branch\n\nFull details of the merge',
+      author: { name: 'Hamza', login: 'h4mcodes', email: null, date: '2026-01-03T00:00:00Z', avatarUrl: null },
+      timestamp: '2026-01-03T00:00:00Z',
+      parentShas: ['b222222222222222', 'd444444444444444'],
+      childShas: [],
+      isMerge: true,
+      isRoot: false,
+      htmlUrl: 'https://github.com/h4mcodes/gitexplore/commit/c333333',
+      rawCommit: {} as unknown as GithubApiCommitSummary,
+    },
   },
 };
 
@@ -500,6 +552,154 @@ describe('AI Context Builders (D6-P2)', () => {
 
       const focused = context.focusedEvidence as Record<string, unknown>;
       expect(focused.queriedHotspot).toBe('src/services/githubApi.ts');
+    });
+  });
+
+  describe('buildRepositoryInvestigationContext (D8-P1)', () => {
+    it('combines multiple intelligence sources into a coherent investigation context', () => {
+      const context = buildRepositoryInvestigationContext({
+        repo: mockRepo,
+        query: 'What architectural shifts happened in the codebase recently?',
+        graph: mockGraph,
+        statistics: mockStats,
+        fileAnalysis: mockFileAnalysis,
+        evolution: mockEvolution,
+        divergence: mockDivergence,
+        focusedFiles: ['src/services/githubApi.ts', 'src/components/DiffViewer.tsx'],
+        focusedAuthors: ['Hamza'],
+        customEvidence: { issueRef: '#42' },
+      });
+
+      // 1. Target metadata
+      const target = context.investigationTarget as Record<string, unknown>;
+      expect(target.name).toBe('gitexplore');
+      expect(target.fullName).toBe('h4mcodes/gitexplore');
+      expect(target.primaryLanguage).toBe('TypeScript');
+      expect(target.starsCount).toBe(350);
+
+      // 2. Query
+      expect(context.investigationQuery).toBe('What architectural shifts happened in the codebase recently?');
+
+      // 3. Graph intelligence
+      const graphInfo = context.graphIntelligence as Record<string, unknown>;
+      expect(graphInfo.totalCommitsInGraph).toBe(3);
+      expect(graphInfo.rootCommitsCount).toBe(1);
+      expect(graphInfo.headCommitsCount).toBe(1);
+      expect(graphInfo.mergeCommitsCount).toBe(1);
+
+      // 4. Recent commits extracted from graph
+      const commits = context.recentCommits as Array<Record<string, unknown>>;
+      expect(commits).toHaveLength(3);
+      expect(commits[0].sha).toBe('c333333');
+      expect(commits[0].isMerge).toBe(true);
+
+      // 5. Commit statistics
+      const stats = context.commitStatistics as Record<string, unknown>;
+      expect(stats.totalCommits).toBe(120);
+      const cadence = stats.cadence as Record<string, unknown>;
+      expect(cadence.commitsPerWeek).toBe(10.5);
+
+      // 6. File architecture & hotspots
+      const files = context.fileArchitectureAndHotspots as Record<string, unknown>;
+      expect(files.totalFilesChanged).toBe(45);
+      const hotspots = files.criticalHotspots as Array<Record<string, unknown>>;
+      expect(hotspots.length).toBeGreaterThan(0);
+      expect(hotspots[0].filename).toBe('src/services/githubApi.ts');
+
+      // 7. Evolution & trajectory
+      const evo = context.evolutionTrajectory as Record<string, unknown>;
+      expect(evo.growthTrajectory).toBe('ACCELERATING');
+      expect(evo.momentumMultiplier).toBe(1.85);
+
+      // 8. Branch divergence
+      const div = context.branchDivergence as Record<string, unknown>;
+      expect(div.status).toBe('DIVERGED');
+      expect(div.aheadBy).toBe(4);
+      expect(div.behindBy).toBe(2);
+
+      // 9. Investigation scope
+      const scope = context.investigationScope as Record<string, unknown>;
+      expect(scope.targetedFiles).toEqual(['src/services/githubApi.ts', 'src/components/DiffViewer.tsx']);
+      expect(scope.targetedAuthors).toEqual(['Hamza']);
+
+      // 10. Custom evidence
+      expect(context.customEvidence).toEqual({ issueRef: '#42' });
+    });
+
+    it('assembles context from unified RepositoryAnalysis input gracefully', () => {
+      const context = buildRepositoryInvestigationContext({
+        repo: mockRepo,
+        analysis: {
+          graph: mockGraph,
+          statistics: mockStats,
+          fileAnalysis: mockFileAnalysis,
+          evolution: mockEvolution,
+          divergence: mockDivergence,
+        },
+      });
+
+      expect(context.investigationTarget).toBeDefined();
+      expect(context.graphIntelligence).toBeDefined();
+      expect(context.commitStatistics).toBeDefined();
+      expect(context.fileArchitectureAndHotspots).toBeDefined();
+      expect(context.evolutionTrajectory).toBeDefined();
+      expect(context.branchDivergence).toBeDefined();
+    });
+
+    it('enforces token safety boundaries by truncating long messages and bounding arrays', () => {
+      // Create 30 commits to test max limit capping at 15
+      const longCommits = Array.from({ length: 30 }, (_, i) => ({
+        sha: `abcdef${i}1234567890`,
+        message: `Commit ${i}: ${'x'.repeat(300)}`,
+        authorName: `Dev ${i}`,
+        date: '2026-03-01T00:00:00Z',
+      }));
+
+      // Create long query (> 500 chars)
+      const longQuery = 'Explain '.repeat(100);
+
+      const context = buildRepositoryInvestigationContext({
+        repo: mockRepo,
+        query: longQuery,
+        recentCommits: longCommits,
+      });
+
+      const commits = context.recentCommits as Array<Record<string, unknown>>;
+      expect(commits).toHaveLength(15); // Capped at MAX_INVESTIGATION_COMMITS
+      expect((commits[0].message as string).length).toBeLessThanOrEqual(210); // Truncated with ellipsis
+      expect(commits[0].message as string).toContain('[Truncated:');
+
+      expect((context.investigationQuery as string).length).toBeLessThanOrEqual(560);
+      expect(context.investigationQuery as string).toContain('[Truncated:');
+    });
+
+    it('estimatePayloadTokens calculates heuristic token budget accurately', () => {
+      const samplePayload = {
+        name: 'test',
+        items: [1, 2, 3],
+        description: 'short string',
+      };
+      const tokenEstimate = estimatePayloadTokens(samplePayload);
+      const jsonLength = JSON.stringify(samplePayload).length;
+      expect(tokenEstimate).toBe(Math.ceil(jsonLength / 4));
+      expect(tokenEstimate).toBeGreaterThan(0);
+    });
+
+    it('buildRepositoryQAContext delegates to investigation context engine when rich investigation is provided', () => {
+      const context = buildRepositoryQAContext({
+        question: 'What is the commit velocity?',
+        repo: mockRepo,
+        investigation: {
+          repo: mockRepo,
+          statistics: mockStats,
+          graph: mockGraph,
+        },
+      });
+
+      expect(context.question).toBe('What is the commit velocity?');
+      expect(context.investigationTarget).toBeDefined();
+      expect(context.graphIntelligence).toBeDefined();
+      expect(context.commitStatistics).toBeDefined();
     });
   });
 

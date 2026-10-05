@@ -232,11 +232,11 @@ See `docs/PRD.md` for full product requirements and `docs/ARCHITECTURE.md` for s
 ## Current Task
 
 ```
-Current Day:    7 (Completed)
-Current Push:   6 (D7-P6: AI UI Integration)
-Current Objective: Create frontend AI components, types, and services, integrating AI panels into the workbench
+Current Day:    8 (In Progress)
+Current Push:   1 (D8-P1: Repository Investigation Context Engine)
+Current Objective: Build comprehensive context assembly for free-form repository investigation combining all intelligence engine outputs
 Current Status: Completed
-Next Task:      D8-P1: Repository Investigation Context Engine
+Next Task:      D8-P2: Repository Q&A API (Create POST /api/ai/repository-qa endpoint for natural-language questions)
 ```
 
 
@@ -307,6 +307,7 @@ Next Task:      D8-P1: Repository Investigation Context Engine
 | 2026-10-04 | Implemented AI Branch Analysis (D7-P4) | Added structured JSON output guidance to prompt, enhanced Zod schema with mergeRisk/notableChanges, dynamic GitHub comparison resolution in aiController, and 13 tests |
 | 2026-10-05 | Implemented AI Repository Health (D7-P5) | Added structured health JSON prompt directives, enhanced Zod schema with healthScore/activityAssessment, dynamic GitHub telemetry fetch in aiController, and 13 tests |
 | 2026-10-05 | Implemented AI UI Integration (D7-P6) | Created 5 frontend AI components, strict TypeScript types, ApiClient methods, workbench integrations (RepoCard, CommitInspection, BranchCompare), and Linear/Vercel AI styling |
+| 2026-10-05 | Implemented Investigation Context Engine (D8-P1) | Built `buildRepositoryInvestigationContext`, combining graph, stats, churn, trajectory, divergence, and bounded recent commits with token limits and estimation utility |
 
 ---
 
@@ -360,6 +361,7 @@ Next Task:      D8-P1: Repository Investigation Context Engine
 | 2026-10-04 | Implemented AI Branch Analysis (D7-P4) | Enhanced branchAnalysis prompt and schema, updated aiController with dynamic GitHub branch comparison fetch, and added 13 new tests |
 | 2026-10-05 | Implemented AI Repository Health (D7-P5) | Enhanced repositoryHealth prompt and schema, updated aiController with dynamic GitHub repository telemetry fetch, and added 13 new tests |
 | 2026-10-05 | Implemented AI UI Integration (D7-P6) | Created 5 frontend AI components, strict TypeScript types, ApiClient methods, workbench integrations (RepoCard, CommitInspection, BranchCompare), and Linear/Vercel AI styling |
+| 2026-10-05 | Implemented Investigation Context Engine (D8-P1) | Built `buildRepositoryInvestigationContext`, combining graph, stats, churn, trajectory, divergence, and bounded recent commits with token limits and estimation utility |
 
 
 

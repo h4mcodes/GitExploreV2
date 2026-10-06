@@ -1463,6 +1463,7 @@ footer b {
 
 .repository-section {
   margin-top: 34px;
+  padding-bottom: clamp(280px, 45vh, 550px);
 }
 
 .repository-section-heading {

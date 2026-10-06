@@ -80,6 +80,24 @@ export const RepoCard = memo(function RepoCard(props: RepoCardProps) {
       gsap.killTweensOf(drawer);
       const currentHeight = drawer.offsetHeight;
 
+      // Prevent browser from clamping scrollY downward when document height shrinks
+      const currentScrollY = window.scrollY;
+      const viewportHeight = window.innerHeight;
+      const neededDocHeight = currentScrollY + viewportHeight;
+      const projectedDocHeight = document.documentElement.scrollHeight - currentHeight;
+
+      if (projectedDocHeight < neededDocHeight) {
+        document.documentElement.style.minHeight = `${neededDocHeight}px`;
+
+        const removeMinHeightOnScroll = () => {
+          if (window.scrollY < neededDocHeight - viewportHeight - 120) {
+            document.documentElement.style.minHeight = '';
+            window.removeEventListener('scroll', removeMinHeightOnScroll);
+          }
+        };
+        window.addEventListener('scroll', removeMinHeightOnScroll, { passive: true });
+      }
+
       gsap.fromTo(
         drawer,
         { height: currentHeight, opacity: 1 },

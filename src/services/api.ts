@@ -6,6 +6,7 @@ import type {
   SavedRepositoryItem,
   TagItem,
   InvestigationItem,
+  AIAnalysisRecordItem,
   NoteItem,
   BookmarkItem,
 } from '../types/workspace';
@@ -389,6 +390,30 @@ export class ApiClient {
     options?: BackendRequestOptions
   ): Promise<{ message: string; id: string }> {
     return this.delete<{ message: string; id: string }>(`/api/investigations/${id}`, options);
+  }
+
+  public async attachAIAnalysisToInvestigation(
+    id: string,
+    analysis: {
+      type: string;
+      data: unknown;
+      title?: string;
+      summary?: string;
+      modelId?: string;
+      provider?: string;
+      analysisId?: string;
+      contextHash?: string;
+    },
+    options?: BackendRequestOptions
+  ): Promise<InvestigationItem> {
+    return this.post<InvestigationItem>(`/api/investigations/${id}/analyses`, analysis, options);
+  }
+
+  public async getInvestigationAnalyses(
+    id: string,
+    options?: BackendRequestOptions
+  ): Promise<AIAnalysisRecordItem[]> {
+    return this.get<AIAnalysisRecordItem[]>(`/api/investigations/${id}/analyses`, options);
   }
 
   // ==========================================

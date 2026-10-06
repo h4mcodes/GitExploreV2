@@ -39,13 +39,34 @@ export interface SavedRepositoryItem {
   readonly repositoryTags?: readonly RepositoryTagRelation[];
 }
 
+export interface AIAnalysisRecordItem {
+  readonly id: string;
+  readonly type: string;
+  readonly title?: string;
+  readonly summary?: string;
+  readonly data: unknown;
+  readonly modelId?: string;
+  readonly provider?: string;
+  readonly contextHash?: string;
+  readonly createdAt?: string;
+  readonly timestamp?: string;
+}
+
+export interface InvestigationContext {
+  readonly branch?: string;
+  readonly commits?: readonly string[];
+  readonly files?: readonly string[];
+  readonly aiAnalyses?: readonly AIAnalysisRecordItem[];
+  readonly [key: string]: unknown;
+}
+
 export interface InvestigationItem {
   readonly id: string;
   readonly userId: string;
   readonly repositoryId: string;
   readonly title: string;
   readonly description?: string | null;
-  readonly context: Record<string, unknown>;
+  readonly context: InvestigationContext;
   readonly createdAt: string;
   readonly updatedAt: string;
   readonly repository?: {

@@ -7,6 +7,8 @@ import {
   createInvestigation,
   updateInvestigation,
   deleteInvestigation,
+  attachAIAnalysis,
+  getInvestigationAnalyses,
 } from '../controllers/investigationController.js';
 
 export const investigationsRouter: Router = Router();
@@ -94,6 +96,27 @@ const updateInvestigationValidation = validateRequest({
   },
 });
 
+const attachAnalysisValidation = validateRequest({
+  params: {
+    id: {
+      required: true,
+      type: 'string',
+      minLength: 1,
+      maxLength: 100,
+      description: 'Investigation UUID identifier',
+    },
+  },
+  body: {
+    type: {
+      required: true,
+      type: 'string',
+      minLength: 1,
+      maxLength: 100,
+      description: 'Analysis type (e.g. REPOSITORY_OVERVIEW, COMMIT_EXPLANATION, etc.)',
+    },
+  },
+});
+
 /**
  * GET /api/investigations
  * Lists investigations for authenticated user, with optional repositoryId filter.
@@ -124,3 +147,17 @@ investigationsRouter.patch('/:id', updateInvestigationValidation, updateInvestig
  * Removes an investigation from user workspace.
  */
 investigationsRouter.delete('/:id', idParamValidation, deleteInvestigation);
+
+/**
+ * POST /api/investigations/:id/analyses & /api/investigations/:id/ai-analyses
+ * Attaches or links an AI analysis report to an existing investigation.
+ */
+investigationsRouter.post('/:id/analyses', attachAnalysisValidation, attachAIAnalysis);
+investigationsRouter.post('/:id/ai-analyses', attachAnalysisValidation, attachAIAnalysis);
+
+/**
+ * GET /api/investigations/:id/analyses & /api/investigations/:id/ai-analyses
+ * Retrieves all saved AI analysis records linked to an investigation.
+ */
+investigationsRouter.get('/:id/analyses', idParamValidation, getInvestigationAnalyses);
+investigationsRouter.get('/:id/ai-analyses', idParamValidation, getInvestigationAnalyses);

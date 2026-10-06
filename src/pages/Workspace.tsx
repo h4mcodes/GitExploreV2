@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
+  Folders,
   FolderGit2,
   Search,
   Plus,
@@ -22,15 +23,30 @@ import {
   ArrowUpRight,
   X,
   Compass,
+  BrainCircuit,
+  ChevronDown,
+  ChevronUp,
+  FileDiff,
+  GitCommit,
+  GitBranch,
+  HeartPulse,
+  MessageSquare,
+  Cpu,
+  Clock,
+  Eye,
+  BookOpen,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
+import { EvidenceList } from '../components/EvidenceReference';
 import { apiClient, BackendApiError } from '../services/api';
 import type {
   AuthSession,
   SavedRepositoryItem,
   TagItem,
   WorkspaceOverview,
+  InvestigationItem,
+  AIAnalysisRecordItem,
 } from '../types/workspace';
 
 const PRESET_COLORS = [
@@ -48,15 +64,39 @@ export function Workspace() {
   const [session, setSession] = useState<AuthSession | null>(() => apiClient.getStoredAuth());
   const [overview, setOverview] = useState<WorkspaceOverview | null>(null);
   const [repositories, setRepositories] = useState<SavedRepositoryItem[]>([]);
+  const [investigations, setInvestigations] = useState<InvestigationItem[]>([]);
   const [tags, setTags] = useState<TagItem[]>([]);
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'repositories' | 'activity'>('repositories');
+  const [invSearchQuery, setInvSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<'repositories' | 'investigations' | 'activity'>('repositories');
 
   // Loading & Notification states
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Investigation Modal State (D8-P5)
+  const [showInvestigationModal, setShowInvestigationModal] = useState(false);
+  const [newInvRepoId, setNewInvRepoId] = useState('');
+  const [newInvTitle, setNewInvTitle] = useState('');
+  const [newInvDescription, setNewInvDescription] = useState('');
+  const [newInvBranch, setNewInvBranch] = useState('');
+  const [isCreatingInv, setIsCreatingInv] = useState(false);
+
+  // Attach AI Analysis Modal State (D8-P5)
+  const [attachAnalysisInvId, setAttachAnalysisInvId] = useState<string | null>(null);
+  const [attachAnalysisType, setAttachAnalysisType] = useState('REPOSITORY_OVERVIEW');
+  const [attachAnalysisTitle, setAttachAnalysisTitle] = useState('');
+  const [attachAnalysisSummary, setAttachAnalysisSummary] = useState('');
+  const [isAttachingAnalysis, setIsAttachingAnalysis] = useState(false);
+
+  // View AI Analysis Detail Modal (D8-P5)
+  const [viewAnalysisModal, setViewAnalysisModal] = useState<{
+    analysis: AIAnalysisRecordItem;
+    invTitle: string;
+    repoFullName: string;
+  } | null>(null);
 
   // Auth Form State
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
@@ -88,17 +128,20 @@ export function Workspace() {
     }
   }, [successMessage]);
 
-  // Keyboard shortcut: Escape to dismiss popover menu and tag modal
+  // Keyboard shortcut: Escape to dismiss popover menu and modals
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if (showTagModal) setShowTagModal(false);
+        if (showInvestigationModal) setShowInvestigationModal(false);
+        if (viewAnalysisModal) setViewAnalysisModal(null);
+        if (attachAnalysisInvId) setAttachAnalysisInvId(null);
         if (tagAssignRepoId) setTagAssignRepoId(null);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showTagModal, tagAssignRepoId]);
+  }, [showTagModal, showInvestigationModal, viewAnalysisModal, attachAnalysisInvId, tagAssignRepoId]);
 
   // Click outside to dismiss tag assignment popover
   useEffect(() => {
@@ -119,14 +162,16 @@ export function Workspace() {
     setIsLoading(true);
     setError(null);
     try {
-      const [overviewData, reposData, tagsData] = await Promise.all([
+      const [overviewData, reposData, tagsData, investigationsData] = await Promise.all([
         apiClient.getWorkspaceOverview(),
         apiClient.getSavedRepositories(),
         apiClient.getTags(),
+        apiClient.getInvestigations(),
       ]);
       setOverview(overviewData);
       setRepositories(reposData);
       setTags(tagsData);
+      setInvestigations(investigationsData);
     } catch (err) {
       if (err instanceof BackendApiError && err.status === 401) {
         apiClient.clearStoredAuth();
@@ -225,7 +270,134 @@ export function Workspace() {
     setOverview(null);
     setRepositories([]);
     setTags([]);
+    setInvestigations([]);
     setSuccessMessage('Successfully signed out.');
+  };
+
+  // Handle Create Investigation (D8-P5)
+  const handleCreateInvestigation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newInvTitle.trim()) {
+      setError('Investigation title is required.');
+      return;
+    }
+    if (!newInvRepoId) {
+      setError('Please select a saved repository for this investigation.');
+      return;
+    }
+
+    setIsCreatingInv(true);
+    try {
+      const created = await apiClient.createInvestigation({
+        repositoryId: newInvRepoId,
+        title: newInvTitle.trim(),
+        description: newInvDescription.trim() || undefined,
+        context: {
+          branch: newInvBranch.trim() || undefined,
+          aiAnalyses: [],
+        },
+      });
+
+      setInvestigations((prev) => [created, ...prev]);
+      setShowInvestigationModal(false);
+      setNewInvTitle('');
+      setNewInvDescription('');
+      setNewInvBranch('');
+      setSuccessMessage(`Investigation "${created.title}" successfully created!`);
+      if (overview) {
+        setOverview({
+          ...overview,
+          metrics: {
+            ...overview.metrics,
+            investigationsCount: overview.metrics.investigationsCount + 1,
+          },
+        });
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create investigation');
+    } finally {
+      setIsCreatingInv(false);
+    }
+  };
+
+  // Handle Delete Investigation (D8-P5)
+  const handleDeleteInvestigation = async (id: string, title: string) => {
+    if (!window.confirm(`Are you sure you want to delete investigation "${title}"?`)) {
+      return;
+    }
+    try {
+      await apiClient.deleteInvestigation(id);
+      setInvestigations((prev) => prev.filter((i) => i.id !== id));
+      setSuccessMessage(`Investigation "${title}" removed.`);
+      if (overview) {
+        setOverview({
+          ...overview,
+          metrics: {
+            ...overview.metrics,
+            investigationsCount: Math.max(0, overview.metrics.investigationsCount - 1),
+          },
+        });
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete investigation');
+    }
+  };
+
+  // Handle Attach AI Analysis / Report to Investigation (D8-P5)
+  const handleAttachAIAnalysis = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!attachAnalysisInvId || !attachAnalysisSummary.trim()) {
+      setError('Please provide a summary or observations for the AI analysis.');
+      return;
+    }
+
+    setIsAttachingAnalysis(true);
+    try {
+      const updated = await apiClient.attachAIAnalysisToInvestigation(attachAnalysisInvId, {
+        type: attachAnalysisType,
+        title: attachAnalysisTitle.trim() || undefined,
+        summary: attachAnalysisSummary.trim(),
+        data: {
+          summary: attachAnalysisSummary.trim(),
+          attachedAt: new Date().toISOString(),
+          manualEntry: true,
+        },
+        modelId: 'gemini-2.5-flash',
+        provider: 'Google Gemini',
+      });
+
+      setInvestigations((prev) =>
+        prev.map((inv) => (inv.id === attachAnalysisInvId ? updated : inv))
+      );
+      setAttachAnalysisInvId(null);
+      setAttachAnalysisSummary('');
+      setAttachAnalysisTitle('');
+      setSuccessMessage('AI analysis report successfully linked to investigation!');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to attach AI analysis');
+    } finally {
+      setIsAttachingAnalysis(false);
+    }
+  };
+
+  // AI analysis type styling helper
+  const getAnalysisTypeBadge = (type: string) => {
+    switch (type) {
+      case 'REPOSITORY_OVERVIEW':
+        return { label: 'Repository Overview', color: '#38bdf8', bg: 'rgba(56, 189, 248, 0.12)', border: 'rgba(56, 189, 248, 0.28)' };
+      case 'COMMIT_EXPLANATION':
+        return { label: 'Commit Explainer', color: '#c084fc', bg: 'rgba(192, 132, 252, 0.12)', border: 'rgba(192, 132, 252, 0.28)' };
+      case 'DIFF_REVIEW':
+        return { label: 'Diff Review', color: '#fbbf24', bg: 'rgba(251, 191, 36, 0.12)', border: 'rgba(251, 191, 36, 0.28)' };
+      case 'BRANCH_ANALYSIS':
+        return { label: 'Branch Analysis', color: '#34d399', bg: 'rgba(52, 211, 153, 0.12)', border: 'rgba(52, 211, 153, 0.28)' };
+      case 'REPOSITORY_HEALTH':
+        return { label: 'Repository Health', color: '#fb7185', bg: 'rgba(251, 113, 133, 0.12)', border: 'rgba(251, 113, 133, 0.28)' };
+      case 'REPOSITORY_QA':
+        return { label: 'Repository Q&A', color: '#a78bfa', bg: 'rgba(167, 139, 250, 0.12)', border: 'rgba(167, 139, 250, 0.28)' };
+      default:
+        return { label: type.replace('_', ' '), color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.12)', border: 'rgba(148, 163, 184, 0.28)' };
+    }
   };
 
   // Handle Saving New Repository
@@ -365,6 +537,26 @@ export function Workspace() {
       return matchesSearch && matchesTag;
     });
   }, [repositories, searchQuery, selectedTagId]);
+
+  // Aggregate count of AI analysis reports across all investigations (D8-P5)
+  const totalAiAnalysesCount = useMemo(() => {
+    return investigations.reduce((acc, inv) => {
+      const analyses = inv.context?.aiAnalyses;
+      return acc + (Array.isArray(analyses) ? analyses.length : 0);
+    }, 0);
+  }, [investigations]);
+
+  // Filtered Investigations (D8-P5)
+  const filteredInvestigations = useMemo(() => {
+    if (!invSearchQuery.trim()) return investigations;
+    const query = invSearchQuery.toLowerCase();
+    return investigations.filter((inv) => {
+      const titleMatch = inv.title.toLowerCase().includes(query);
+      const descMatch = inv.description?.toLowerCase().includes(query);
+      const repoMatch = inv.repository?.fullName.toLowerCase().includes(query);
+      return titleMatch || descMatch || repoMatch;
+    });
+  }, [investigations, invSearchQuery]);
 
   return (
     <main className="page-shell workspace-page" style={{ minHeight: '100vh', paddingBottom: '4rem' }}>
@@ -594,7 +786,12 @@ export function Workspace() {
                 </div>
               </div>
 
-              <div className="ws-stat-card">
+              <div
+                className="ws-stat-card"
+                onClick={() => setActiveTab('investigations')}
+                style={{ cursor: 'pointer' }}
+                title="View investigations and AI history"
+              >
                 <div className="ws-stat-header">
                   <span>Investigations</span>
                   <span className="ws-stat-icon-wrap">
@@ -602,8 +799,14 @@ export function Workspace() {
                   </span>
                 </div>
                 <div className="ws-stat-value">
-                  {overview?.metrics.investigationsCount ?? 0}
+                  {overview?.metrics.investigationsCount ?? investigations.length}
                 </div>
+                {totalAiAnalysesCount > 0 && (
+                  <div style={{ fontSize: '0.6875rem', color: '#c084fc', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Sparkles size={11} />
+                    <span>{totalAiAnalysesCount} AI report{totalAiAnalysesCount === 1 ? '' : 's'} linked</span>
+                  </div>
+                )}
               </div>
 
               <div className="ws-stat-card">
@@ -673,6 +876,17 @@ export function Workspace() {
                 </button>
                 <button
                   type="button"
+                  className={`ws-tab-btn ${activeTab === 'investigations' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('investigations')}
+                >
+                  <BrainCircuit size={14} />
+                  Investigations & AI History ({investigations.length})
+                  {totalAiAnalysesCount > 0 && (
+                    <span className="ws-tab-count-badge">{totalAiAnalysesCount} AI</span>
+                  )}
+                </button>
+                <button
+                  type="button"
                   className={`ws-tab-btn ${activeTab === 'activity' ? 'active' : ''}`}
                   onClick={() => setActiveTab('activity')}
                 >
@@ -702,6 +916,46 @@ export function Workspace() {
                       <X size={12} />
                     </button>
                   )}
+                </div>
+              )}
+
+              {activeTab === 'investigations' && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <div className="ws-search-wrap">
+                    <Search size={14} className="ws-search-icon" />
+                    <input
+                      type="text"
+                      value={invSearchQuery}
+                      onChange={(e) => setInvSearchQuery(e.target.value)}
+                      placeholder="Filter investigations or AI logs..."
+                      className="ws-search-input"
+                    />
+                    {invSearchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setInvSearchQuery('')}
+                        className="ws-search-clear-btn"
+                        title="Clear search"
+                        aria-label="Clear search"
+                      >
+                        <X size={12} />
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (repositories.length > 0 && !newInvRepoId) {
+                        setNewInvRepoId(repositories[0]?.id || '');
+                      }
+                      setShowInvestigationModal(true);
+                    }}
+                    className="ws-save-btn"
+                    style={{ padding: '0.45rem 0.85rem', fontSize: '0.75rem' }}
+                  >
+                    <Plus size={14} />
+                    <span>New Investigation</span>
+                  </button>
                 </div>
               )}
             </div>
@@ -936,6 +1190,201 @@ export function Workspace() {
                   ))}
                 </div>
               )
+            ) : activeTab === 'investigations' ? (
+              /* Investigations & AI History Tab (D8-P5) */
+              <div>
+                {filteredInvestigations.length === 0 ? (
+                  <div className="ws-empty-state">
+                    <div className="ws-empty-icon">
+                      <BrainCircuit size={28} style={{ color: '#a855f7' }} />
+                    </div>
+                    <h3 className="ws-empty-title">
+                      {invSearchQuery ? 'No matching investigations found' : 'No investigations tracked yet'}
+                    </h3>
+                    <p className="ws-empty-desc">
+                      {invSearchQuery
+                        ? 'Try modifying your search filter.'
+                        : 'Capture architectural discoveries, document code issues, and link AI analysis reports into persistent investigation workspaces.'}
+                    </p>
+                    {!invSearchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (repositories.length > 0 && !newInvRepoId) {
+                            setNewInvRepoId(repositories[0]?.id || '');
+                          }
+                          setShowInvestigationModal(true);
+                        }}
+                        className="ws-save-btn"
+                        style={{ marginTop: '1rem' }}
+                      >
+                        <Plus size={16} />
+                        <span>Create First Investigation</span>
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="ws-investigations-grid">
+                    {filteredInvestigations.map((inv) => {
+                      const analyses = Array.isArray(inv.context?.aiAnalyses)
+                        ? (inv.context.aiAnalyses as AIAnalysisRecordItem[])
+                        : [];
+
+                      return (
+                        <motion.div
+                          key={inv.id}
+                          className="ws-inv-card"
+                          initial={{ opacity: 0, y: 14 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.25 }}
+                        >
+                          {/* Card Header */}
+                          <div className="ws-inv-header">
+                            <div className="ws-inv-title-wrap">
+                              <div className="ws-inv-repo-badge">
+                                <FolderGit2 size={12} />
+                                <span>{inv.repository?.fullName || 'Repository'}</span>
+                              </div>
+                              <h3 className="ws-inv-title">{inv.title}</h3>
+                            </div>
+                            <div className="ws-repo-actions">
+                              <Link
+                                to={`/profile/${inv.repository?.owner || ''}?repo=${encodeURIComponent(inv.repository?.fullName || '')}`}
+                                className="ws-icon-btn"
+                                title="Open Repository in Workbench"
+                              >
+                                <Compass size={13} />
+                              </Link>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteInvestigation(inv.id, inv.title)}
+                                className="ws-icon-btn danger"
+                                title="Delete Investigation"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Description */}
+                          {inv.description ? (
+                            <p className="ws-inv-desc">{inv.description}</p>
+                          ) : (
+                            <p className="ws-inv-desc fallback">No description provided.</p>
+                          )}
+
+                          {/* Metadata row: Branch & Updated time */}
+                          <div className="ws-inv-meta-row">
+                            {inv.context?.branch && (
+                              <span className="ws-inv-branch-pill">
+                                <GitBranch size={11} />
+                                <span>{String(inv.context.branch)}</span>
+                              </span>
+                            )}
+                            <span className="ws-inv-date">
+                              <Clock size={11} />
+                              Updated {new Date(inv.updatedAt).toLocaleDateString(undefined, {
+                                month: 'short',
+                                day: 'numeric',
+                              })}
+                            </span>
+                          </div>
+
+                          {/* AI Analysis History Section */}
+                          <div className="ws-inv-analyses-section">
+                            <div className="ws-inv-analyses-header">
+                              <div className="ws-inv-analyses-title">
+                                <Sparkles size={13} style={{ color: '#c084fc' }} />
+                                <span>AI Analysis History ({analyses.length})</span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setAttachAnalysisInvId(inv.id);
+                                  setAttachAnalysisTitle('');
+                                  setAttachAnalysisSummary('');
+                                }}
+                                className="ws-inv-attach-btn"
+                                title="Attach an AI Analysis report"
+                              >
+                                <Plus size={11} />
+                                <span>Link AI Report</span>
+                              </button>
+                            </div>
+
+                            {analyses.length === 0 ? (
+                              <div className="ws-inv-empty-analyses">
+                                <span>No AI reports linked to this investigation yet.</span>
+                              </div>
+                            ) : (
+                              <div className="ws-inv-analyses-list">
+                                {analyses.map((analysis, aIdx) => {
+                                  const badge = getAnalysisTypeBadge(analysis.type);
+                                  return (
+                                    <div key={analysis.id || aIdx} className="ws-inv-analysis-item">
+                                      <div className="ws-inv-analysis-item-top">
+                                        <div
+                                          className="ws-inv-type-pill"
+                                          style={{
+                                            color: badge.color,
+                                            backgroundColor: badge.bg,
+                                            borderColor: badge.border,
+                                          }}
+                                        >
+                                          {badge.label}
+                                        </div>
+                                        {analysis.modelId && (
+                                          <span className="ws-inv-model-pill">
+                                            <Cpu size={10} />
+                                            {analysis.modelId}
+                                          </span>
+                                        )}
+                                      </div>
+
+                                      {analysis.summary && (
+                                        <p className="ws-inv-analysis-summary">
+                                          {analysis.summary}
+                                        </p>
+                                      )}
+
+                                      <div className="ws-inv-analysis-item-bottom">
+                                        <span className="ws-inv-analysis-time">
+                                          {analysis.createdAt
+                                            ? new Date(analysis.createdAt).toLocaleDateString(undefined, {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                              })
+                                            : 'Saved'}
+                                        </span>
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            setViewAnalysisModal({
+                                              analysis,
+                                              invTitle: inv.title,
+                                              repoFullName: inv.repository?.fullName || '',
+                                            })
+                                          }
+                                          className="ws-inv-view-analysis-btn"
+                                        >
+                                          <Eye size={11} />
+                                          <span>Inspect Report</span>
+                                        </button>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             ) : (
               /* Activity Tab */
               <div className="ws-activity-card">
@@ -1052,6 +1501,306 @@ export function Workspace() {
                   </button>
                 </div>
               </form>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Create Investigation Modal (D8-P5) */}
+        {showInvestigationModal && (
+          <div className="ws-modal-backdrop" onClick={() => setShowInvestigationModal(false)}>
+            <motion.div
+              className="ws-modal"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                <h3 className="ws-modal-title">
+                  <BrainCircuit size={18} style={{ color: '#7c3aed' }} />
+                  New Investigation Workspace
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setShowInvestigationModal(false)}
+                  className="ws-icon-btn"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+
+              <form onSubmit={handleCreateInvestigation} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div>
+                  <label className="ws-modal-label">Associated Repository *</label>
+                  {repositories.length === 0 ? (
+                    <p style={{ fontSize: '0.75rem', color: '#f87171' }}>
+                      Please save at least one repository in your workspace before starting an investigation.
+                    </p>
+                  ) : (
+                    <select
+                      value={newInvRepoId}
+                      onChange={(e) => setNewInvRepoId(e.target.value)}
+                      required
+                      className="ws-auth-input"
+                      style={{ background: '#0f172a', color: '#f8fafc' }}
+                    >
+                      {repositories.map((r) => (
+                        <option key={r.id} value={r.id}>
+                          {r.fullName} ({r.defaultBranch})
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+
+                <div>
+                  <label className="ws-modal-label">Investigation Title *</label>
+                  <input
+                    type="text"
+                    value={newInvTitle}
+                    onChange={(e) => setNewInvTitle(e.target.value)}
+                    placeholder="e.g. Memory leak in cache manager or v2 architecture review"
+                    required
+                    className="ws-auth-input"
+                  />
+                </div>
+
+                <div>
+                  <label className="ws-modal-label">Description / Goal (Optional)</label>
+                  <textarea
+                    value={newInvDescription}
+                    onChange={(e) => setNewInvDescription(e.target.value)}
+                    placeholder="Summarize the core hypothesis, investigation goals, or problem statement..."
+                    rows={3}
+                    className="ws-auth-input"
+                    style={{ resize: 'vertical' }}
+                  />
+                </div>
+
+                <div>
+                  <label className="ws-modal-label">Target Branch (Optional)</label>
+                  <input
+                    type="text"
+                    value={newInvBranch}
+                    onChange={(e) => setNewInvBranch(e.target.value)}
+                    placeholder="e.g. main, master, or feature/perf"
+                    className="ws-auth-input"
+                  />
+                </div>
+
+                <div className="ws-modal-actions">
+                  <button
+                    type="button"
+                    onClick={() => setShowInvestigationModal(false)}
+                    className="ws-modal-cancel-btn"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isCreatingInv || !newInvTitle.trim() || !newInvRepoId}
+                    className="ws-save-btn"
+                  >
+                    {isCreatingInv ? 'Creating...' : 'Create Investigation'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Attach AI Report Modal (D8-P5) */}
+        {attachAnalysisInvId && (
+          <div className="ws-modal-backdrop" onClick={() => setAttachAnalysisInvId(null)}>
+            <motion.div
+              className="ws-modal"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                <h3 className="ws-modal-title">
+                  <Sparkles size={18} style={{ color: '#c084fc' }} />
+                  Link AI Analysis Report
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setAttachAnalysisInvId(null)}
+                  className="ws-icon-btn"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+
+              <form onSubmit={handleAttachAIAnalysis} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div>
+                  <label className="ws-modal-label">Analysis Type</label>
+                  <select
+                    value={attachAnalysisType}
+                    onChange={(e) => setAttachAnalysisType(e.target.value)}
+                    className="ws-auth-input"
+                    style={{ background: '#0f172a', color: '#f8fafc' }}
+                  >
+                    <option value="REPOSITORY_OVERVIEW">Repository Overview</option>
+                    <option value="COMMIT_EXPLANATION">Commit Explainer</option>
+                    <option value="DIFF_REVIEW">Diff Review</option>
+                    <option value="BRANCH_ANALYSIS">Branch Analysis</option>
+                    <option value="REPOSITORY_HEALTH">Repository Health</option>
+                    <option value="REPOSITORY_QA">Repository Q&A</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="ws-modal-label">Report Title (Optional)</label>
+                  <input
+                    type="text"
+                    value={attachAnalysisTitle}
+                    onChange={(e) => setAttachAnalysisTitle(e.target.value)}
+                    placeholder="e.g. Initial Overview Assessment"
+                    className="ws-auth-input"
+                  />
+                </div>
+
+                <div>
+                  <label className="ws-modal-label">Key Findings & Summary *</label>
+                  <textarea
+                    value={attachAnalysisSummary}
+                    onChange={(e) => setAttachAnalysisSummary(e.target.value)}
+                    placeholder="Record key findings, architecture observations, or copy an AI summary..."
+                    rows={4}
+                    required
+                    className="ws-auth-input"
+                    style={{ resize: 'vertical' }}
+                  />
+                </div>
+
+                <div className="ws-modal-actions">
+                  <button
+                    type="button"
+                    onClick={() => setAttachAnalysisInvId(null)}
+                    className="ws-modal-cancel-btn"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isAttachingAnalysis || !attachAnalysisSummary.trim()}
+                    className="ws-save-btn"
+                  >
+                    {isAttachingAnalysis ? 'Saving...' : 'Link to Investigation'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Inspect Saved AI Analysis Modal (D8-P5) */}
+        {viewAnalysisModal && (
+          <div className="ws-modal-backdrop" onClick={() => setViewAnalysisModal(null)}>
+            <motion.div
+              className="ws-modal ws-modal-lg"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Sparkles size={18} style={{ color: '#c084fc' }} />
+                  <div>
+                    <h3 className="ws-modal-title" style={{ margin: 0 }}>
+                      {viewAnalysisModal.analysis.title || getAnalysisTypeBadge(viewAnalysisModal.analysis.type).label}
+                    </h3>
+                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>
+                      {viewAnalysisModal.invTitle} • {viewAnalysisModal.repoFullName}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setViewAnalysisModal(null)}
+                  className="ws-icon-btn"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+
+              <div className="ws-modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '70vh', overflowY: 'auto' }}>
+                {/* Meta pills */}
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <span
+                    className="ws-inv-type-pill"
+                    style={{
+                      color: getAnalysisTypeBadge(viewAnalysisModal.analysis.type).color,
+                      backgroundColor: getAnalysisTypeBadge(viewAnalysisModal.analysis.type).bg,
+                      borderColor: getAnalysisTypeBadge(viewAnalysisModal.analysis.type).border,
+                    }}
+                  >
+                    {getAnalysisTypeBadge(viewAnalysisModal.analysis.type).label}
+                  </span>
+                  {viewAnalysisModal.analysis.modelId && (
+                    <span className="ws-inv-model-pill">
+                      <Cpu size={11} />
+                      {viewAnalysisModal.analysis.modelId}
+                    </span>
+                  )}
+                  {viewAnalysisModal.analysis.createdAt && (
+                    <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Clock size={11} />
+                      {new Date(viewAnalysisModal.analysis.createdAt).toLocaleString()}
+                    </span>
+                  )}
+                </div>
+
+                {/* Summary */}
+                {viewAnalysisModal.analysis.summary && (
+                  <div style={{ padding: '0.85rem', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(168, 85, 247, 0.2)', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 650, color: '#a78bfa', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      Executive Summary
+                    </div>
+                    <p style={{ margin: 0, fontSize: '0.8125rem', color: '#f1f5f9', lineHeight: 1.5 }}>
+                      {viewAnalysisModal.analysis.summary}
+                    </p>
+                  </div>
+                )}
+
+                {/* Supporting Evidence References if available */}
+                {Boolean(
+                  viewAnalysisModal.analysis.data &&
+                  typeof viewAnalysisModal.analysis.data === 'object' &&
+                  'supportingEvidence' in (viewAnalysisModal.analysis.data as Record<string, unknown>) &&
+                  Array.isArray((viewAnalysisModal.analysis.data as Record<string, unknown>).supportingEvidence)
+                ) && (
+                  <EvidenceList
+                    evidence={(viewAnalysisModal.analysis.data as Record<string, unknown>).supportingEvidence as string[]}
+                    owner={viewAnalysisModal.repoFullName.split('/')[0] || ''}
+                    repo={viewAnalysisModal.repoFullName.split('/')[1] || ''}
+                  />
+                )}
+
+                {/* Raw JSON inspection view */}
+                <details style={{ background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '8px', padding: '0.625rem' }}>
+                  <summary style={{ cursor: 'pointer', fontSize: '0.75rem', color: '#94a3b8', userSelect: 'none' }}>
+                    View Raw Structured Payload
+                  </summary>
+                  <pre style={{ margin: '0.5rem 0 0', padding: '0.5rem', fontSize: '0.6875rem', color: '#cbd5e1', overflowX: 'auto', background: 'rgba(0,0,0,0.3)', borderRadius: '4px' }}>
+                    {JSON.stringify(viewAnalysisModal.analysis.data, null, 2)}
+                  </pre>
+                </details>
+              </div>
+
+              <div className="ws-modal-actions" style={{ marginTop: '1rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setViewAnalysisModal(null)}
+                  className="ws-save-btn"
+                  style={{ width: '100%' }}
+                >
+                  Close Inspection
+                </button>
+              </div>
             </motion.div>
           </div>
         )}

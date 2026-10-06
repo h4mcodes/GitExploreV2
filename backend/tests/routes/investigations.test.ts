@@ -18,6 +18,9 @@ vi.mock('../../src/config/database.js', () => ({
     savedRepository: {
       findUnique: vi.fn(),
     },
+    aIAnalysis: {
+      findUnique: vi.fn(),
+    },
   },
 }));
 
@@ -367,6 +370,143 @@ describe('Investigations Routes', () => {
       expect(response.status).toBe(403);
       expect(response.body.code).toBe('FORBIDDEN');
       expect(prisma.investigation.delete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('POST /api/investigations/:id/analyses (D8-P5)', () => {
+    it('returns HTTP 401 when Authorization header is omitted', async () => {
+      const response = await request(app)
+        .post('/api/investigations/inv-1/analyses')
+        .send({ type: 'REPOSITORY_OVERVIEW', data: { summary: 'test' } });
+
+      expect(response.status).toBe(401);
+      expect(response.body.code).toBe('AUTH_REQUIRED');
+    });
+
+    it('returns HTTP 404 when investigation is not found', async () => {
+      vi.mocked(prisma.investigation.findUnique).mockResolvedValueOnce(null);
+
+      const response = await request(app)
+        .post('/api/investigations/nonexistent-id/analyses')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ type: 'REPOSITORY_OVERVIEW', data: { summary: 'test' } });
+
+      expect(response.status).toBe(404);
+      expect(response.body.code).toBe('INVESTIGATION_NOT_FOUND');
+    });
+
+    it('returns HTTP 403 when trying to attach to another user investigation', async () => {
+      const otherUserInv: Investigation = {
+        id: 'inv-other',
+        userId: userB.userId,
+        repositoryId: 'repo-1',
+        title: 'Bob investigation',
+        description: null,
+        context: {},
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      vi.mocked(prisma.investigation.findUnique).mockResolvedValueOnce(otherUserInv);
+
+      const response = await request(app)
+        .post('/api/investigations/inv-other/analyses')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ type: 'REPOSITORY_OVERVIEW', data: { summary: 'test' } });
+
+      expect(response.status).toBe(403);
+      expect(response.body.code).toBe('FORBIDDEN');
+    });
+
+    it('returns HTTP 200 and saves AI analysis to investigation context', async () => {
+      const existingInv: Investigation = {
+        id: 'inv-1',
+        userId: userA.userId,
+        repositoryId: 'repo-1',
+        title: 'Architecture Review',
+        description: null,
+        context: { branch: 'main' },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const updatedInv: Investigation = {
+        ...existingInv,
+        context: {
+          branch: 'main',
+          aiAnalyses: [
+            {
+              id: 'analysis-123',
+              type: 'REPOSITORY_OVERVIEW',
+              title: 'Initial Overview',
+              summary: 'Architecture is healthy',
+              data: { architecturePattern: 'Modular' },
+              modelId: 'gemini-2.5-flash',
+              provider: 'Google Gemini',
+              createdAt: new Date().toISOString(),
+            },
+          ],
+        },
+      };
+
+      vi.mocked(prisma.investigation.findUnique).mockResolvedValueOnce(existingInv);
+      vi.mocked(prisma.investigation.update).mockResolvedValueOnce(updatedInv);
+
+      const response = await request(app)
+        .post('/api/investigations/inv-1/analyses')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({
+          type: 'REPOSITORY_OVERVIEW',
+          title: 'Initial Overview',
+          summary: 'Architecture is healthy',
+          data: { architecturePattern: 'Modular' },
+          modelId: 'gemini-2.5-flash',
+          provider: 'Google Gemini',
+        });
+
+      expect(response.status).toBe(200);
+      expect(prisma.investigation.update).toHaveBeenCalled();
+      const updateArgs = vi.mocked(prisma.investigation.update).mock.calls[0]?.[0];
+      expect(updateArgs?.where).toEqual({ id: 'inv-1' });
+      const savedContext = updateArgs?.data.context as Record<string, unknown>;
+      expect(Array.isArray(savedContext.aiAnalyses)).toBe(true);
+      expect((savedContext.aiAnalyses as unknown[]).length).toBe(1);
+    });
+  });
+
+  describe('GET /api/investigations/:id/analyses (D8-P5)', () => {
+    it('returns HTTP 200 with saved AI analyses array', async () => {
+      const existingInv: Investigation = {
+        id: 'inv-1',
+        userId: userA.userId,
+        repositoryId: 'repo-1',
+        title: 'Architecture Review',
+        description: null,
+        context: {
+          branch: 'main',
+          aiAnalyses: [
+            {
+              id: 'analysis-1',
+              type: 'REPOSITORY_HEALTH',
+              summary: 'High vitality',
+              data: { healthScore: 92 },
+            },
+          ],
+        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      vi.mocked(prisma.investigation.findUnique).mockResolvedValueOnce(existingInv);
+
+      const response = await request(app)
+        .get('/api/investigations/inv-1/analyses')
+        .set('Authorization', `Bearer ${tokenA}`);
+
+      expect(response.status).toBe(200);
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body).toHaveLength(1);
+      expect(response.body[0]?.type).toBe('REPOSITORY_HEALTH');
     });
   });
 });

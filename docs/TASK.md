@@ -2559,9 +2559,9 @@ Without history, AI analyses are ephemeral. Persisting them lets developers revi
 - Both builds pass
 
 **Completion Criteria**
-- [ ] AI analyses saved to investigation records
-- [ ] History displayed in workspace UI
-- [ ] Both builds pass
+- [x] AI analyses saved to investigation records
+- [x] History displayed in workspace UI
+- [x] Both builds pass
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -2569,7 +2569,7 @@ Without history, AI analyses are ephemeral. Persisting them lets developers revi
 **Git**
 - Implementation only. Antigravity MUST NOT commit. Antigravity MUST NOT push. User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

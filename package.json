@@ -12,6 +12,19 @@
   "workspaces": [
     "backend"
   ],
-  "dependencies": { "@vitejs/plugin-react": "latest", "framer-motion": "latest", "lucide-react": "latest", "react": "latest", "react-dom": "latest", "react-router-dom": "latest" },
-  "devDependencies": { "@types/react": "latest", "@types/react-dom": "latest", "typescript": "latest", "vite": "latest" }
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "framer-motion": "latest",
+    "gsap": "^3.15.0",
+    "lucide-react": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-router-dom": "latest"
+  },
+  "devDependencies": {
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "typescript": "latest",
+    "vite": "latest"
+  }
 }

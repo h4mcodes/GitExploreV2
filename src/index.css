@@ -1536,13 +1536,7 @@ footer b {
   width: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden;
-  contain: paint;
-}
-
-.repo-expandable-drawer.is-collapsing {
   overflow: hidden !important;
-  pointer-events: none;
 }
 
 .repo-expandable-body {
@@ -4133,9 +4127,12 @@ footer b {
   padding: 12px;
   border: 1px solid rgba(35, 70, 108, .2);
   border-radius: 12px;
-  background: rgba(235, 244, 253, .58);
+  background: rgba(235, 244, 253, .75);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7);
   backdrop-filter: blur(8px);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 .branch-explorer-header {

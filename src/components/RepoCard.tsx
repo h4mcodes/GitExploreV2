@@ -41,6 +41,8 @@ export const RepoCard = memo(function RepoCard(props: RepoCardProps) {
   const showBranches = activeSection === 'branches';
   const showAI = activeSection === 'ai';
   const currentSection = activeSection || persistedSection;
+  const isBranchesActive = showBranches || (isDrawerMounted && persistedSection === 'branches');
+  const isAIActive = showAI || (isDrawerMounted && persistedSection === 'ai');
 
   if ('repository' in props) {
     const { repository, index, targetState } = props;
@@ -58,7 +60,7 @@ export const RepoCard = memo(function RepoCard(props: RepoCardProps) {
       <motion.article
         id={`repo-card-${repository.name.toLowerCase()}`}
         data-repo-name={repository.full_name.toLowerCase()}
-        className={`repository-card ${showBranches ? 'branches-expanded' : ''} ${showAI ? 'ai-expanded' : ''} ${isDrawerMounted ? 'drawer-active' : ''}`}
+        className={`repository-card ${isBranchesActive ? 'branches-expanded' : ''} ${isAIActive ? 'ai-expanded' : ''} ${isDrawerMounted ? 'drawer-active' : ''}`}
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.38, delay: Math.min(index * 0.025, 0.16), ease: [0.16, 1, 0.3, 1] }}
@@ -136,26 +138,25 @@ export const RepoCard = memo(function RepoCard(props: RepoCardProps) {
           {activeSection && (
             <motion.div
               key="repo-expandable-drawer"
-              className={`repo-expandable-drawer ${!activeSection ? 'is-collapsing' : ''}`}
+              className="repo-expandable-drawer"
               initial={{ height: 0, opacity: 0 }}
               animate={{
                 height: 'auto',
                 opacity: 1,
                 transition: {
-                  height: { duration: 0.38, ease: [0.16, 1, 0.3, 1] },
+                  height: { duration: 0.32, ease: [0.16, 1, 0.3, 1] },
                   opacity: { duration: 0.22, delay: 0.02, ease: 'easeOut' },
                 },
-                transitionEnd: { overflow: 'visible' },
               }}
               exit={{
                 height: 0,
                 opacity: 0,
                 transition: {
-                  height: { duration: 0.32, ease: [0.16, 1, 0.3, 1] },
-                  opacity: { duration: 0.18, ease: 'easeInOut' },
+                  height: { duration: 0.28, ease: [0.16, 1, 0.3, 1] },
+                  opacity: { duration: 0.24, ease: 'easeInOut' },
                 },
               }}
-              style={{ overflow: activeSection ? undefined : 'hidden' }}
+              style={{ overflow: 'hidden' }}
             >
               <div className="repo-expandable-body">
                 {currentSection === 'ai' && (

@@ -23,8 +23,11 @@
   --duration-ambient: 24s;
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+  overflow-anchor: none !important;
 }
 
 html,

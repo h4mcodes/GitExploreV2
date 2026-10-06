@@ -80,9 +80,6 @@ export const RepoCard = memo(function RepoCard(props: RepoCardProps) {
       gsap.killTweensOf(drawer);
       const currentHeight = drawer.offsetHeight;
 
-      // Lock card top screen coordinate so the upper screen cannot shift downwards
-      const initialCardTop = cardRef.current ? cardRef.current.getBoundingClientRect().top : null;
-
       gsap.fromTo(
         drawer,
         { height: currentHeight, opacity: 1 },
@@ -91,15 +88,6 @@ export const RepoCard = memo(function RepoCard(props: RepoCardProps) {
           opacity: 0,
           duration: 0.3,
           ease: 'power3.inOut',
-          onUpdate: () => {
-            if (initialCardTop !== null && cardRef.current) {
-              const currentCardTop = cardRef.current.getBoundingClientRect().top;
-              const delta = currentCardTop - initialCardTop;
-              if (Math.abs(delta) > 0.5) {
-                window.scrollBy({ top: delta, behavior: 'instant' });
-              }
-            }
-          },
           onComplete: () => {
             setIsDrawerMounted(false);
           },

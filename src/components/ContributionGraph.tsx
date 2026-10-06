@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, memo, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Activity,
@@ -68,7 +68,7 @@ function formatDayTooltip(item: DailyActivityItem): string {
   }
 }
 
-export function ContributionGraph({ username, className = '', onOpenRepoCommits }: ContributionGraphProps) {
+export const ContributionGraph = memo(function ContributionGraph({ username, className = '', onOpenRepoCommits }: ContributionGraphProps) {
   if (!username) {
     return null;
   }
@@ -554,4 +554,4 @@ export function ContributionGraph({ username, className = '', onOpenRepoCommits 
       )}
     </section>
   );
-}
+});

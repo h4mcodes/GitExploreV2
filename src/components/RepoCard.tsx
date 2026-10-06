@@ -27,10 +27,20 @@ function normaliseHomepage(homepage: string) {
 
 export const RepoCard = memo(function RepoCard(props: RepoCardProps) {
   const [activeSection, setActiveSection] = useState<'branches' | 'ai' | null>(null);
+  const [persistedSection, setPersistedSection] = useState<'branches' | 'ai'>('branches');
+  const [isDrawerMounted, setIsDrawerMounted] = useState(false);
   const [aiTab, setAiTab] = useState<'overview' | 'health' | 'qa'>('overview');
+
+  useEffect(() => {
+    if (activeSection) {
+      setPersistedSection(activeSection);
+      setIsDrawerMounted(true);
+    }
+  }, [activeSection]);
 
   const showBranches = activeSection === 'branches';
   const showAI = activeSection === 'ai';
+  const currentSection = activeSection || persistedSection;
 
   if ('repository' in props) {
     const { repository, index, targetState } = props;
@@ -48,7 +58,7 @@ export const RepoCard = memo(function RepoCard(props: RepoCardProps) {
       <motion.article
         id={`repo-card-${repository.name.toLowerCase()}`}
         data-repo-name={repository.full_name.toLowerCase()}
-        className={`repository-card ${showBranches ? 'branches-expanded' : ''} ${showAI ? 'ai-expanded' : ''}`}
+        className={`repository-card ${showBranches ? 'branches-expanded' : ''} ${showAI ? 'ai-expanded' : ''} ${isDrawerMounted ? 'drawer-active' : ''}`}
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.38, delay: Math.min(index * 0.025, 0.16), ease: [0.16, 1, 0.3, 1] }}
@@ -117,129 +127,119 @@ export const RepoCard = memo(function RepoCard(props: RepoCardProps) {
           </div>
         </div>
 
-        <AnimatePresence initial={false}>
+        <AnimatePresence
+          initial={false}
+          onExitComplete={() => {
+            setIsDrawerMounted(false);
+          }}
+        >
           {activeSection && (
             <motion.div
               key="repo-expandable-drawer"
-              className="repo-expandable-drawer"
+              className={`repo-expandable-drawer ${!activeSection ? 'is-collapsing' : ''}`}
               initial={{ height: 0, opacity: 0 }}
               animate={{
                 height: 'auto',
                 opacity: 1,
                 transition: {
-                  height: { duration: 0.42, ease: [0.16, 1, 0.3, 1] },
-                  opacity: { duration: 0.28, delay: 0.04, ease: 'easeOut' },
+                  height: { duration: 0.38, ease: [0.16, 1, 0.3, 1] },
+                  opacity: { duration: 0.22, delay: 0.02, ease: 'easeOut' },
                 },
                 transitionEnd: { overflow: 'visible' },
               }}
               exit={{
                 height: 0,
                 opacity: 0,
-                overflow: 'hidden',
                 transition: {
-                  height: { duration: 0.36, ease: [0.16, 1, 0.3, 1] },
-                  opacity: { duration: 0.22, ease: 'easeInOut' },
+                  height: { duration: 0.32, ease: [0.16, 1, 0.3, 1] },
+                  opacity: { duration: 0.18, ease: 'easeInOut' },
                 },
               }}
-              style={{ overflow: 'hidden' }}
+              style={{ overflow: activeSection ? undefined : 'hidden' }}
             >
               <div className="repo-expandable-body">
-                <AnimatePresence mode="wait" initial={false}>
-                  {showAI && (
-                    <motion.div
-                      key="repo-ai-panel"
-                      initial={{ opacity: 0, y: -8, scale: 0.99 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -6, scale: 0.99 }}
-                      transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
-                    >
-                      <div className="repo-ai-tabs">
-                        <button
-                          type="button"
-                          className={`repo-ai-tab ${aiTab === 'overview' ? 'active' : ''}`}
-                          onClick={() => setAiTab('overview')}
-                        >
-                          <Layers size={12} />
-                          <span>Architecture Overview</span>
-                        </button>
-                        <button
-                          type="button"
-                          className={`repo-ai-tab ${aiTab === 'health' ? 'active' : ''}`}
-                          onClick={() => setAiTab('health')}
-                        >
-                          <HeartPulse size={12} />
-                          <span>Health & Vitality</span>
-                        </button>
-                        <button
-                          type="button"
-                          className={`repo-ai-tab ${aiTab === 'qa' ? 'active' : ''}`}
-                          onClick={() => setAiTab('qa')}
-                        >
-                          <MessageSquareCode size={12} />
-                          <span>Ask AI (Q&A)</span>
-                        </button>
-                      </div>
-
-                      <ErrorBoundary
-                        fallbackTitle="AI Analysis Error"
-                        fallbackMessage={`Failed to render AI analysis for ${repository.name}.`}
-                        isCompact
+                {currentSection === 'ai' && (
+                  <div className="repo-ai-panel">
+                    <div className="repo-ai-tabs">
+                      <button
+                        type="button"
+                        className={`repo-ai-tab ${aiTab === 'overview' ? 'active' : ''}`}
+                        onClick={() => setAiTab('overview')}
                       >
-                        {aiTab === 'overview' && (
-                          <AIOverview
-                            owner={owner}
-                            repo={repoName}
-                            branch={repository.default_branch}
-                            onClose={() => setActiveSection(null)}
-                          />
-                        )}
-                        {aiTab === 'health' && (
-                          <AIHealthAnalysis
-                            owner={owner}
-                            repo={repoName}
-                            branch={repository.default_branch}
-                            onClose={() => setActiveSection(null)}
-                          />
-                        )}
-                        {aiTab === 'qa' && (
-                          <RepositoryQA
-                            owner={owner}
-                            repo={repoName}
-                            branch={repository.default_branch}
-                            isCompact
-                            onClose={() => setActiveSection(null)}
-                          />
-                        )}
-                      </ErrorBoundary>
-                    </motion.div>
-                  )}
-
-                  {showBranches && (
-                    <motion.div
-                      key="repo-branches-panel"
-                      initial={{ opacity: 0, y: -8, scale: 0.99 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -6, scale: 0.99 }}
-                      transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
-                    >
-                      <ErrorBoundary
-                        fallbackTitle="Branch Explorer Error"
-                        fallbackMessage={`Failed to render branch graph for ${repository.name}.`}
-                        isCompact
+                        <Layers size={12} />
+                        <span>Architecture Overview</span>
+                      </button>
+                      <button
+                        type="button"
+                        className={`repo-ai-tab ${aiTab === 'health' ? 'active' : ''}`}
+                        onClick={() => setAiTab('health')}
                       >
-                        <BranchExplorer
+                        <HeartPulse size={12} />
+                        <span>Health & Vitality</span>
+                      </button>
+                      <button
+                        type="button"
+                        className={`repo-ai-tab ${aiTab === 'qa' ? 'active' : ''}`}
+                        onClick={() => setAiTab('qa')}
+                      >
+                        <MessageSquareCode size={12} />
+                        <span>Ask AI (Q&A)</span>
+                      </button>
+                    </div>
+
+                    <ErrorBoundary
+                      fallbackTitle="AI Analysis Error"
+                      fallbackMessage={`Failed to render AI analysis for ${repository.name}.`}
+                      isCompact
+                    >
+                      {aiTab === 'overview' && (
+                        <AIOverview
                           owner={owner}
                           repo={repoName}
-                          defaultBranch={repository.default_branch}
-                          fullName={repository.full_name}
-                          initialBranch={targetState?.branch || repository.default_branch}
-                          initialSha={targetState?.sha}
+                          branch={repository.default_branch}
                           onClose={() => setActiveSection(null)}
                         />
-                      </ErrorBoundary>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                      )}
+                      {aiTab === 'health' && (
+                        <AIHealthAnalysis
+                          owner={owner}
+                          repo={repoName}
+                          branch={repository.default_branch}
+                          onClose={() => setActiveSection(null)}
+                        />
+                      )}
+                      {aiTab === 'qa' && (
+                        <RepositoryQA
+                          owner={owner}
+                          repo={repoName}
+                          branch={repository.default_branch}
+                          isCompact
+                          onClose={() => setActiveSection(null)}
+                        />
+                      )}
+                    </ErrorBoundary>
+                  </div>
+                )}
+
+                {currentSection === 'branches' && (
+                  <div className="repo-branches-panel">
+                    <ErrorBoundary
+                      fallbackTitle="Branch Explorer Error"
+                      fallbackMessage={`Failed to render branch graph for ${repository.name}.`}
+                      isCompact
+                    >
+                      <BranchExplorer
+                        owner={owner}
+                        repo={repoName}
+                        defaultBranch={repository.default_branch}
+                        fullName={repository.full_name}
+                        initialBranch={targetState?.branch || repository.default_branch}
+                        initialSha={targetState?.sha}
+                        onClose={() => setActiveSection(null)}
+                      />
+                    </ErrorBoundary>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}

@@ -1,6 +1,6 @@
 import { ArrowLeft, Building2, ExternalLink, FolderGit2, Link2, MapPin, RotateCw, Search, Users, X, MessageSquareCode } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ContributionGraph } from '../components/ContributionGraph';
 import { ErrorBoundary } from '../components/ErrorBoundary';
@@ -104,7 +104,10 @@ export function Profile() {
     return list.slice().sort((a, b) => b.updated_at.localeCompare(a.updated_at));
   }, [repositories, repositoryQuery, repositorySort, selectedLanguage]);
 
-  const visibleRepositories = filteredRepositories.slice(0, visibleRepositoryCount);
+  const visibleRepositories = useMemo(
+    () => filteredRepositories.slice(0, visibleRepositoryCount),
+    [filteredRepositories, visibleRepositoryCount]
+  );
   const repositoryTotals = useMemo(() => {
     let stars = 0;
     let forks = 0;
@@ -115,12 +118,12 @@ export function Profile() {
     return { stars, forks };
   }, [repositories]);
 
-  const resetRepositoryFilters = () => {
+  const resetRepositoryFilters = useCallback(() => {
     setRepositoryQuery('');
     setSelectedLanguage('all');
     setRepositorySort('updated');
     setVisibleRepositoryCount(REPOSITORIES_PER_PAGE);
-  };
+  }, []);
 
   const loadRepositories = (profileUsername: string, bypassCache = false) => {
     setRepositoryStatus('loading');
@@ -195,7 +198,7 @@ export function Profile() {
     id: number;
   } | null>(null);
 
-  const handleOpenRepoCommits = (repoFullName: string, branch?: string, sha?: string) => {
+  const handleOpenRepoCommits = useCallback((repoFullName: string, branch?: string, sha?: string) => {
     const normName = repoFullName.trim().toLowerCase();
     const repoShortName = normName.includes('/') ? normName.split('/')[1] : normName;
 
@@ -235,7 +238,7 @@ export function Profile() {
         setTimeout(() => el.classList.remove('repo-card-pulse-highlight'), 2200);
       }
     }, 120);
-  };
+  }, [repositories, visibleRepositoryCount]);
 
   const languageOptions: DropdownOption[] = useMemo(() => [
     { value: 'all', label: 'All languages' },

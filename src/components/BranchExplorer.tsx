@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { ArrowLeftRight, ExternalLink, GitBranch, GitCommit, History, RotateCw, Search, ShieldCheck, X } from 'lucide-react';
 import { fetchGithubBranches, GithubApiError } from '../services/githubApi';
 import type { GithubBranch } from '../types/github';
@@ -17,7 +17,7 @@ interface BranchExplorerProps {
   onClose: () => void;
 }
 
-export function BranchExplorer({
+export const BranchExplorer = memo(function BranchExplorer({
   owner,
   repo,
   defaultBranch,
@@ -352,4 +352,4 @@ export function BranchExplorer({
       )}
     </div>
   );
-}
+});

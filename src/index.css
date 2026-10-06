@@ -27,6 +27,21 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#root,
+.page-shell,
+.profile-page,
+.profile-content,
+.profile-content-inner,
+.repository-section,
+.repository-grid,
+.repository-column,
+.repository-card,
+.repo-expandable-drawer {
+  overflow-anchor: none !important;
+}
+
 body {
   margin: 0;
   min-width: 320px;

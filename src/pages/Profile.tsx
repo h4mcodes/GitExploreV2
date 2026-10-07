@@ -5,7 +5,6 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ContributionGraph } from '../components/ContributionGraph';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { GlassDropdown, type DropdownOption } from '../components/GlassDropdown';
-import { Navbar } from '../components/Navbar';
 import { RepoCard } from '../components/RepoCard';
 import { RepositoryQA } from '../components/RepositoryQA';
 import { StatsCard } from '../components/StatsCard';
@@ -264,11 +263,7 @@ export function Profile() {
   const rightColumnRepos = useMemo(() => visibleRepositories.filter((_, i) => i % 2 !== 0), [visibleRepositories]);
 
   return (
-    <main className="page-shell profile-page">
-      <div className="ambient ambient-blue" />
-      <div className="ambient ambient-purple" />
-      <div className="ambient ambient-green" />
-      <Navbar />
+    <main className="page-shell profile-page" style={{ minHeight: 'calc(100vh - 84px)' }}>
       <div className="profile-content">
         <Link className="back-link" to="/">
           <ArrowLeft size={15} /> Back to search

@@ -1,17 +1,10 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Navbar } from '../components/Navbar';
 import { SearchBar } from '../components/SearchBar';
 
 export function Home() {
   return (
     <main className="page-shell home-page">
-      {/* Precision Engineering Grid Background over Frosted Glass */}
-      <div className="tech-grid-bg" aria-hidden="true" />
-      
-      {/* Primary Navigation */}
-      <Navbar showLabel={false} />
-
       {/* Focused Centered Hero & Search Section */}
       <section className="hero-section" aria-labelledby="hero-title">
         <motion.div

@@ -37,7 +37,6 @@ import {
   BookOpen,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Navbar } from '../components/Navbar';
 import { EvidenceList } from '../components/EvidenceReference';
 import { apiClient, BackendApiError } from '../services/api';
 import type {
@@ -559,13 +558,7 @@ export function Workspace() {
   }, [investigations, invSearchQuery]);
 
   return (
-    <main className="page-shell workspace-page" style={{ minHeight: '100vh', paddingBottom: '4rem' }}>
-      <div className="ambient ambient-blue" />
-      <div className="ambient ambient-purple" />
-      <div className="ambient ambient-green" />
-
-      <Navbar showLabel={false} />
-
+    <main className="page-shell workspace-page">
       <motion.div
         className="ws-container"
         initial={{ opacity: 0, y: 22, filter: 'blur(6px)' }}

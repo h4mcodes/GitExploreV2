@@ -2752,10 +2752,10 @@ AI contract tests verify that the boundary between GitExplore and external AI pr
 - Prompt version changes invalidate cached results
 
 **Completion Criteria**
-- [ ] Schema validation tests for all analysis types
-- [ ] Cache hit/miss tests
-- [ ] Prompt version invalidation tests
-- [ ] All tests pass
+- [x] Schema validation tests for all analysis types
+- [x] Cache hit/miss tests
+- [x] Prompt version invalidation tests
+- [x] All tests pass
 
 **Documentation Updates**
 - Update `docs/MEMORY.md` — Current Task section
@@ -2763,7 +2763,7 @@ AI contract tests verify that the boundary between GitExplore and external AI pr
 **Git**
 - Implementation only. Antigravity MUST NOT commit. Antigravity MUST NOT push. User manually reviews and runs Git commands.
 
-**Status:** `[ ]`
+**Status:** `[x]`
 
 ---
 

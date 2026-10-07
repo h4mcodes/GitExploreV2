@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { validateRequest } from '../middleware/validation.js';
+import { aiRateLimiter } from '../middleware/rateLimiter.js';
 import {
   getAIStatus,
   postAnalyze,
@@ -12,6 +13,9 @@ import {
 } from '../controllers/aiController.js';
 
 export const aiRouter: Router = Router();
+
+// Apply AI rate limiter to all AI routes
+aiRouter.use(aiRateLimiter);
 
 const validAnalysisTypes = [
   'REPOSITORY_OVERVIEW',

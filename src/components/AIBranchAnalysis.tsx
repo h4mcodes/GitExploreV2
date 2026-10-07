@@ -18,6 +18,7 @@ import {
 import { apiClient } from '../services/api';
 import type { AIAnalysisEnvelope, BranchAnalysisData } from '../types/ai';
 import { EvidenceList } from './EvidenceReference';
+import { AIFallbackState } from './AIFallbackState';
 
 interface AIBranchAnalysisProps {
   owner: string;
@@ -146,16 +147,11 @@ export function AIBranchAnalysis({ owner, repo, base, head, onClose }: AIBranchA
       )}
 
       {error && !loading && (
-        <div className="ai-error-banner" role="alert">
-          <AlertCircle size={16} />
-          <div className="ai-error-text">
-            <strong>Branch Divergence Analysis Failed</strong>
-            <p>{error}</p>
-          </div>
-          <button type="button" className="ai-retry-btn" onClick={() => fetchBranchAnalysis(true)}>
-            Retry
-          </button>
-        </div>
+        <AIFallbackState
+          error={error}
+          onRetry={() => fetchBranchAnalysis(true)}
+          featureName="Branch Divergence AI Analysis"
+        />
       )}
 
       {data && !loading && !error && (

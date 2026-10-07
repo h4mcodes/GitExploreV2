@@ -126,8 +126,9 @@ export class GeminiProvider implements AIProvider {
       };
     }
 
+    const effectiveTimeoutMs = request.timeoutMs ?? this.defaultTimeoutMs;
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), this.defaultTimeoutMs);
+    const timeoutId = setTimeout(() => controller.abort(), effectiveTimeoutMs);
 
     try {
       // Send API key via x-goog-api-key header to avoid exposing secrets in query string or access logs

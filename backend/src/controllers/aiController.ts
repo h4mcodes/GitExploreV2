@@ -8,7 +8,15 @@ import {
   type ContextBuilderInputMap,
   type InvestigationCommitSummary,
 } from '../ai/contextBuilder.js';
-import type { AnalysisType, TokenUsage } from '../ai/types.js';
+import {
+  type AnalysisType,
+  type TokenUsage,
+  AITimeoutError,
+  AIRateLimitError,
+  AIProviderError,
+  AIConfigurationError,
+  AIInvalidResponseError,
+} from '../ai/types.js';
 import { BadRequestError } from '../types/api.js';
 import { githubClient } from '../github/client.js';
 import {
@@ -40,6 +48,70 @@ export interface PipelineExecutionOptions<T extends AnalysisType> {
   readonly bypassCache?: boolean;
   readonly ttlMs?: number;
   readonly providerOverride?: AIProvider;
+  readonly maxRetries?: number;
+  readonly initialRetryDelayMs?: number;
+  readonly timeoutMs?: number;
+}
+
+/**
+ * Determines whether an AI provider failure is transient and eligible for automatic retry.
+ */
+export function isRetryableAIError(error: unknown): boolean {
+  if (error instanceof AITimeoutError) {
+    return true;
+  }
+  if (error instanceof AIRateLimitError) {
+    return true;
+  }
+  if (error instanceof AIConfigurationError || error instanceof AIInvalidResponseError) {
+    return false;
+  }
+  if (error instanceof AIProviderError) {
+    if (error.statusCode === 502 || error.statusCode === 503 || error.statusCode === 504) {
+      return true;
+    }
+    if (error.code === 'AI_NETWORK_ERROR' || error.code === 'AI_SERVICE_UNAVAILABLE') {
+      return true;
+    }
+  }
+  if (error instanceof Error) {
+    const msg = error.message.toLowerCase();
+    if (
+      msg.includes('network') ||
+      msg.includes('timeout') ||
+      msg.includes('econnrefused') ||
+      msg.includes('econnreset') ||
+      msg.includes('fetch failed')
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Executes an AI provider call with configurable exponential backoff retry for transient failures.
+ */
+export async function executeWithRetry<R>(
+  fn: () => Promise<R>,
+  maxRetries: number = 2,
+  initialDelayMs: number = 250
+): Promise<R> {
+  let attempt = 0;
+  while (true) {
+    try {
+      return await fn();
+    } catch (error) {
+      attempt++;
+      if (attempt > maxRetries || !isRetryableAIError(error)) {
+        throw error;
+      }
+      const delay = initialDelayMs * Math.pow(2, attempt - 1);
+      if (delay > 0) {
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  }
 }
 
 /**
@@ -58,6 +130,9 @@ export async function executeAIPipeline<T extends AnalysisType>(
     bypassCache = false,
     ttlMs,
     providerOverride,
+    maxRetries = 2,
+    initialRetryDelayMs = 250,
+    timeoutMs,
   } = options;
 
   // 1. Build or extract context
@@ -89,12 +164,18 @@ export async function executeAIPipeline<T extends AnalysisType>(
     ttlMs,
     bypassCache,
     fetcher: async () => {
-      const rawResponse = await provider.analyze({
-        type,
-        context: finalContext,
-        prompt: promptResult.prompt,
-        systemInstruction: promptResult.systemInstruction,
-      });
+      const rawResponse = await executeWithRetry(
+        () =>
+          provider.analyze({
+            type,
+            context: finalContext,
+            prompt: promptResult.prompt,
+            systemInstruction: promptResult.systemInstruction,
+            timeoutMs,
+          }),
+        maxRetries,
+        initialRetryDelayMs
+      );
 
       const validatedData = validateAIResponse(type, rawResponse.content);
 

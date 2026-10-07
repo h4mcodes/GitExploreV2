@@ -14,6 +14,7 @@ import {
 import { apiClient } from '../services/api';
 import type { AIAnalysisEnvelope, CommitExplanationData } from '../types/ai';
 import { EvidenceList } from './EvidenceReference';
+import { AIFallbackState } from './AIFallbackState';
 
 interface AICommitExplainerProps {
   owner: string;
@@ -130,15 +131,11 @@ export function AICommitExplainer({ owner, repo, sha, onClose }: AICommitExplain
       )}
 
       {error && !loading && (
-        <div className="ai-error-box" role="alert">
-          <AlertCircle size={16} />
-          <div className="ai-error-content">
-            <p className="ai-error-msg">{error}</p>
-            <button type="button" className="ai-retry-btn" onClick={() => fetchExplanation(true)}>
-              Retry Analysis
-            </button>
-          </div>
-        </div>
+        <AIFallbackState
+          error={error}
+          onRetry={() => fetchExplanation(true)}
+          featureName="Commit Forensics Explainer"
+        />
       )}
 
       {data && !loading && !error && (

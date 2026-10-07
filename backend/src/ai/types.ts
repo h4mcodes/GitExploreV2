@@ -24,6 +24,7 @@ export interface AIAnalysisRequest {
   readonly maxTokens?: number;
   readonly temperature?: number;
   readonly stopSequences?: readonly string[];
+  readonly timeoutMs?: number;
 }
 
 export interface AIRawResponse {

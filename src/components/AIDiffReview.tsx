@@ -19,6 +19,7 @@ import {
 import { apiClient } from '../services/api';
 import type { AIAnalysisEnvelope, DiffReviewData, DiffObservation } from '../types/ai';
 import { EvidenceList } from './EvidenceReference';
+import { AIFallbackState } from './AIFallbackState';
 
 interface AIDiffReviewProps {
   owner: string;
@@ -163,16 +164,11 @@ export function AIDiffReview({ owner, repo, base, head, onClose }: AIDiffReviewP
       )}
 
       {error && !loading && (
-        <div className="ai-error-banner" role="alert">
-          <AlertCircle size={16} />
-          <div className="ai-error-text">
-            <strong>Diff Analysis Failed</strong>
-            <p>{error}</p>
-          </div>
-          <button type="button" className="ai-retry-btn" onClick={() => fetchDiffReview(true)}>
-            Retry
-          </button>
-        </div>
+        <AIFallbackState
+          error={error}
+          onRetry={() => fetchDiffReview(true)}
+          featureName="AI Diff & Code Review"
+        />
       )}
 
       {data && !loading && !error && (

@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { apiClient } from '../services/api';
 import type { AIAnalysisEnvelope, RepositoryQAData } from '../types/ai';
 import { EvidenceList } from './EvidenceReference';
+import { AIFallbackState } from './AIFallbackState';
 
 export interface RepositoryQAProps {
   owner: string;
@@ -248,19 +249,12 @@ export function RepositoryQA({
 
       {/* Error State */}
       {error && !loading && (
-        <div className="ai-error-box" role="alert">
-          <div className="ai-error-content">
-            <AlertCircle size={15} />
-            <span>{error}</span>
-          </div>
-          <button
-            type="button"
-            className="ai-retry-btn"
-            onClick={() => askQuestion(activeQuery)}
-          >
-            Retry
-          </button>
-        </div>
+        <AIFallbackState
+          error={error}
+          onRetry={() => askQuestion(activeQuery)}
+          featureName="Repository AI Q&A"
+          isCompact={isCompact}
+        />
       )}
 
       {/* Result Display */}

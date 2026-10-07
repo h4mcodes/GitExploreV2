@@ -18,6 +18,7 @@ import {
 import { apiClient } from '../services/api';
 import type { AIAnalysisEnvelope, RepositoryHealthData } from '../types/ai';
 import { EvidenceList } from './EvidenceReference';
+import { AIFallbackState } from './AIFallbackState';
 
 interface AIHealthAnalysisProps {
   owner: string;
@@ -137,16 +138,11 @@ export function AIHealthAnalysis({ owner, repo, branch, onClose }: AIHealthAnaly
       )}
 
       {error && !loading && (
-        <div className="ai-error-banner" role="alert">
-          <AlertCircle size={16} />
-          <div className="ai-error-text">
-            <strong>Health Assessment Failed</strong>
-            <p>{error}</p>
-          </div>
-          <button type="button" className="ai-retry-btn" onClick={() => fetchHealth(true)}>
-            Retry
-          </button>
-        </div>
+        <AIFallbackState
+          error={error}
+          onRetry={() => fetchHealth(true)}
+          featureName="Repository Vitality & Health Analysis"
+        />
       )}
 
       {data && !loading && !error && (

@@ -370,6 +370,7 @@ Next Task:      D8-P2: Repository Q&A API (Create POST /api/ai/repository-qa end
 | 2026-10-05 | Implemented Repository Q&A UI (D8-P3) | Created `RepositoryQA.tsx`, integrated into Profile toolbar modal & RepoCard tabs, added `askRepositoryQA` to `api.ts`, and verified via real browser testing |
 | 2026-10-06 | Implemented Evidence References (D8-P4) | Added supportingEvidence arrays to schemas & prompts, built EvidenceReference.tsx, added clickable links & badges |
 | 2026-10-06 | Implemented AI Investigation History (D8-P5) | Added investigation AI analysis persistence endpoints, Investigations & AI History workspace tab, interactive cards, and inspection modals |
+| 2026-10-07 | Implemented AI Failure and Error Hardening (D8-P6) | Added rate limiter middleware with standard headers, exponential backoff retry for transient failures, provider timeout support, and resilient frontend fallback states |
 
 
 

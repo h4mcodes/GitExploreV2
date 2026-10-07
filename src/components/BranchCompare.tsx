@@ -172,6 +172,7 @@ export function BranchCompare({
             aria-label="Back to branch explorer"
           >
             <ArrowLeft size={13} />
+            <span>Branches</span>
           </button>
           <div className="commit-inspect-context">
             <span className="commit-inspect-repo-label">
@@ -180,7 +181,7 @@ export function BranchCompare({
             </span>
             <span className="commit-inspect-divider">/</span>
             <span className="compare-header-title-badge">
-              <GitBranch size={10} />
+              <GitBranch size={11} />
               Compare
             </span>
           </div>
@@ -195,7 +196,7 @@ export function BranchCompare({
               title="Inspect full code diff"
               aria-label="Inspect full code diff"
             >
-              <FileCode size={12} />
+              <FileCode size={13} />
               <span>Show Code</span>
             </button>
           )}

@@ -195,7 +195,7 @@ export function CommitInspection({
             className={`commit-ai-btn ${aiMode === 'explainer' ? 'active' : ''}`}
             title="AI Forensics & Intent Analysis"
           >
-            <Sparkles size={11} />
+            <Sparkles size={12} />
             <span>AI Forensics</span>
           </button>
 
@@ -206,7 +206,7 @@ export function CommitInspection({
               className={`commit-ai-btn ${aiMode === 'review' ? 'active' : ''}`}
               title="AI Code Review against parent commit"
             >
-              <Scale size={11} />
+              <Scale size={12} />
               <span>AI Review</span>
             </button>
           )}
@@ -218,7 +218,7 @@ export function CommitInspection({
               className="show-code-nav-btn"
               title="Open full code diff in window"
             >
-              <FileCode size={12} />
+              <FileCode size={13} />
               <span>Show Code ({files.length})</span>
             </button>
           )}
@@ -232,7 +232,7 @@ export function CommitInspection({
               title="Open commit on GitHub"
             >
               <span>GitHub</span>
-              <ExternalLink size={11} />
+              <ExternalLink size={12} />
             </a>
           )}
           {onClose && (

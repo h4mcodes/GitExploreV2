@@ -4728,22 +4728,30 @@ footer b {
 }
 
 .commit-close-btn {
-  display: grid;
-  width: 22px;
-  height: 22px;
-  place-items: center;
-  border: 0;
-  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(35, 70, 108, .18);
+  border-radius: 7px;
   color: #436488;
-  background: transparent;
+  background: rgba(255, 255, 255, .7);
   cursor: pointer;
-  transition: color .15s, background .15s;
+  transition: color .18s ease, background .18s ease, border-color .18s ease, transform .12s ease;
   flex: none;
+  box-shadow: 0 1px 2px rgba(35, 70, 108, .05);
 }
 
 .commit-close-btn:hover {
-  color: #142c48;
-  background: rgba(35, 70, 108, .1);
+  color: #dc2626;
+  background: rgba(239, 68, 68, .1);
+  border-color: rgba(239, 68, 68, .3);
+  transform: translateY(-1px);
+}
+
+.commit-close-btn:active {
+  transform: translateY(0);
 }
 
 .commit-search-bar {
@@ -5198,9 +5206,9 @@ footer b {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 12px;
-  padding-bottom: 10px;
+  gap: 10px 14px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
   border-bottom: 1px solid rgba(35, 70, 108, .14);
   flex-wrap: wrap;
 }
@@ -5210,124 +5218,175 @@ footer b {
   align-items: center;
   gap: 8px;
   min-width: 0;
-  flex: 1;
-  flex-wrap: wrap;
+  flex: 0 1 auto;
+  flex-wrap: nowrap;
 }
 
 .commit-inspect-back-btn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  height: 24px;
-  padding: 0 8px;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
   border: 1px solid rgba(35, 70, 108, .22);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, .7);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, .8);
   color: #1b3f66;
-  font: 9.5px 'DM Mono', monospace;
-  font-weight: 650;
+  font: 11px 'DM Mono', monospace;
+  font-weight: 600;
   cursor: pointer;
-  transition: background .15s, color .15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(35, 70, 108, .05);
+  transition: background .18s ease, color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .12s ease;
 }
 
 .commit-inspect-back-btn:hover {
-  background: #245691;
+  background: #1b3f66;
   color: #fff;
+  border-color: #1b3f66;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(27, 63, 102, .2);
+}
+
+.commit-inspect-back-btn:active {
+  transform: translateY(0);
 }
 
 .commit-inspect-divider {
-  color: #8aa4c2;
-  font-size: 11px;
-  font-weight: 300;
+  color: #7b9bbd;
+  font-size: 13px;
+  font-weight: 400;
+  user-select: none;
+  margin: 0 1px;
+  flex-shrink: 0;
 }
 
 .commit-inspect-context {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .commit-inspect-repo-label {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  color: #183350;
-  font: 10px 'DM Mono', monospace;
+  gap: 5px;
+  color: #122b46;
+  font: 11px 'DM Mono', monospace;
   font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.commit-inspect-repo-label svg {
+  color: #2b5684;
+  flex-shrink: 0;
 }
 
 .commit-inspect-branch-tag {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  padding: 1px 6px;
+  gap: 4px;
+  height: 22px;
+  padding: 0 7px;
   border: 1px solid rgba(34, 139, 88, .3);
   border-radius: 99px;
   background: #e0f2e9;
   color: #155538;
-  font: 8.5px 'DM Mono', monospace;
+  font: 9.5px 'DM Mono', monospace;
   font-weight: 650;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .compare-header-title-badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 1px 7px;
+  height: 22px;
+  padding: 0 8px;
   border: 1px solid rgba(36, 86, 145, .25);
   border-radius: 99px;
   background: rgba(235, 244, 253, .9);
   color: #1c4a7c;
-  font: 8.5px 'DM Mono', monospace;
+  font: 9.5px 'DM Mono', monospace;
   font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .commit-inspect-nav-right {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-left: auto;
 }
 
 .show-code-nav-btn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  height: 24px;
-  padding: 0 9px;
-  border: 1px solid rgba(36, 86, 145, .35);
-  border-radius: 6px;
-  background: #245691;
+  gap: 6px;
+  height: 28px;
+  padding: 0 11px;
+  border: 1px solid rgba(30, 73, 118, .45);
+  border-radius: 7px;
+  background: #1e4a7a;
   color: #fff;
-  font: 9.5px 'DM Mono', monospace;
-  font-weight: 700;
+  font: 11px 'DM Mono', monospace;
+  font-weight: 650;
   cursor: pointer;
-  transition: background .15s, box-shadow .15s;
-  box-shadow: 0 2px 6px rgba(36, 86, 145, .2);
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(30, 74, 122, .2);
+  transition: background .18s ease, box-shadow .18s ease, transform .12s ease;
 }
 
 .show-code-nav-btn:hover {
-  background: #184475;
+  background: #15395f;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(21, 57, 95, .28);
+}
+
+.show-code-nav-btn:active {
+  transform: translateY(0);
 }
 
 .commit-inspect-github-link {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  height: 24px;
-  padding: 0 8px;
-  border: 1px solid rgba(35, 70, 108, .2);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, .6);
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid rgba(35, 70, 108, .22);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, .75);
   color: #20456e;
-  font: 9.5px 'DM Mono', monospace;
+  font: 11px 'DM Mono', monospace;
   font-weight: 600;
   text-decoration: none;
-  transition: background .15s, color .15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(35, 70, 108, .05);
+  transition: background .18s ease, color .18s ease, border-color .18s ease, transform .12s ease;
 }
 
 .commit-inspect-github-link:hover {
-  background: #245691;
+  background: #20456e;
   color: #fff;
+  border-color: #20456e;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(32, 69, 110, .2);
+}
+
+.commit-inspect-github-link:active {
+  transform: translateY(0);
 }
 
 /* Compare Selector Bar & Controls */
@@ -9368,22 +9427,26 @@ footer b {
 .commit-ai-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  height: 24px;
-  padding: 0 9px;
-  background: rgba(245, 243, 255, 0.8);
+  gap: 6px;
+  height: 28px;
+  padding: 0 11px;
+  background: rgba(245, 243, 255, 0.85);
   border: 1px solid rgba(139, 92, 246, 0.35);
-  border-radius: 6px;
+  border-radius: 7px;
   color: #4c1d95;
-  font: 9.5px 'DM Mono', monospace;
+  font: 11px 'DM Mono', monospace;
   font-weight: 600;
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(139, 92, 246, 0.08);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .commit-ai-btn svg {
   color: #7c3aed;
   transition: color 0.2s ease;
+  flex-shrink: 0;
 }
 
 .commit-ai-btn:hover {

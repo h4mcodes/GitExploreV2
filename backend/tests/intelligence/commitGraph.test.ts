@@ -166,4 +166,176 @@ describe('Commit Graph Intelligence Engine (DAG)', () => {
 
     expect(graph1).toBe(graph2); // exact object reference from cache
   });
+
+  it('identifies octopus merges with 3 or more parents', () => {
+    const base = createMockCommit('base00000000000000000000000000000000000', []);
+    const feat1 = createMockCommit('feat10000000000000000000000000000000000', [base.sha]);
+    const feat2 = createMockCommit('feat20000000000000000000000000000000000', [base.sha]);
+    const feat3 = createMockCommit('feat30000000000000000000000000000000000', [base.sha]);
+    const octopus = createMockCommit('octo0000000000000000000000000000000000', [feat1.sha, feat2.sha, feat3.sha]);
+
+    const graph = buildCommitRelationshipModel([octopus, feat3, feat2, feat1, base]);
+
+    expect(graph.nodes[octopus.sha].isMerge).toBe(true);
+    expect(graph.nodes[octopus.sha].parentShas).toEqual([feat1.sha, feat2.sha, feat3.sha]);
+    expect(graph.nodes[feat1.sha].childShas).toContain(octopus.sha);
+    expect(graph.nodes[feat2.sha].childShas).toContain(octopus.sha);
+    expect(graph.nodes[feat3.sha].childShas).toContain(octopus.sha);
+    expect(graph.rootShas).toEqual([base.sha]);
+    expect(graph.headShas).toEqual([octopus.sha]);
+  });
+
+  it('correctly builds a diamond graph and resolves parent/child traversal', () => {
+    //        base
+    //       /    \
+    //    left    right
+    //       \    /
+    //        join
+    const base = createMockCommit('base00000000000000000000000000000000001', []);
+    const left = createMockCommit('left00000000000000000000000000000000001', [base.sha]);
+    const right = createMockCommit('righ00000000000000000000000000000000001', [base.sha]);
+    const join = createMockCommit('join00000000000000000000000000000000001', [left.sha, right.sha]);
+
+    const graph = buildCommitRelationshipModel([join, right, left, base]);
+
+    expect(graph.totalCommits).toBe(4);
+    expect(graph.nodes[join.sha].isMerge).toBe(true);
+    expect(graph.nodes[base.sha].childShas.sort()).toEqual([left.sha, right.sha].sort());
+
+    const parentsOfJoin = getParentCommits(graph, join.sha);
+    expect(parentsOfJoin.map((p) => p.sha).sort()).toEqual([left.sha, right.sha].sort());
+
+    const childrenOfBase = getChildCommits(graph, base.sha);
+    expect(childrenOfBase.map((c) => c.sha).sort()).toEqual([left.sha, right.sha].sort());
+  });
+
+  it('handles multiple disconnected roots and multiple independent heads', () => {
+    // Two disconnected repos/histories merged into one list
+    const r1 = createMockCommit('root10000000000000000000000000000000000', []);
+    const h1 = createMockCommit('head10000000000000000000000000000000000', [r1.sha]);
+    const r2 = createMockCommit('root20000000000000000000000000000000000', []);
+    const h2 = createMockCommit('head20000000000000000000000000000000000', [r2.sha]);
+
+    const graph = buildCommitRelationshipModel([h1, h2, r1, r2]);
+
+    expect(graph.totalCommits).toBe(4);
+    expect(graph.rootShas.sort()).toEqual([r1.sha, r2.sha].sort());
+    expect(graph.headShas.sort()).toEqual([h1.sha, h2.sha].sort());
+  });
+
+  it('deduplicates commits with identical SHAs without corrupting relations', () => {
+    const c1 = createMockCommit('1111111111111111111111111111111111111111', []);
+    const c2 = createMockCommit('2222222222222222222222222222222222222222', [c1.sha]);
+    // duplicate c1 and c2 in array
+    const graph = buildCommitRelationshipModel([c2, c1, c2, c1]);
+
+    expect(graph.totalCommits).toBe(2);
+    expect(graph.orderedShas).toEqual([c2.sha, c1.sha]);
+    expect(graph.nodes[c1.sha].childShas).toEqual([c2.sha]);
+  });
+
+  it('handles commits with missing or partial metadata gracefully', () => {
+    const incompleteCommit: GithubApiCommitSummary = {
+      sha: 'inc00000000000000000000000000000000000',
+      html_url: '',
+      commit: {
+        message: 'No author info',
+        comment_count: 0,
+        author: null,
+        committer: null,
+      },
+      author: null,
+      committer: null,
+      parents: [],
+    };
+
+    const graph = buildCommitRelationshipModel([incompleteCommit]);
+
+    expect(graph.totalCommits).toBe(1);
+    const node = graph.nodes[incompleteCommit.sha];
+    expect(node).toBeDefined();
+    expect(node.author.name).toBe('Unknown Author');
+    expect(node.author.email).toBeNull();
+    expect(node.isRoot).toBe(true);
+  });
+
+  describe('Large Scale Graph Stress Testing (1,000+ Commits)', () => {
+    it('efficiently builds a DAG for 1,200 sequential commits in O(N)', () => {
+      const count = 1200;
+      const commits: GithubApiCommitSummary[] = [];
+
+      for (let i = 0; i < count; i++) {
+        const sha = `sha${String(i).padStart(37, '0')}`;
+        const parentSha = i > 0 ? `sha${String(i - 1).padStart(37, '0')}` : undefined;
+        commits.push(createMockCommit(sha, parentSha ? [parentSha] : []));
+      }
+
+      // Reverse so newest is first (standard GitHub API ordering)
+      commits.reverse();
+
+      const startTime = performance.now();
+      const graph = buildCommitRelationshipModel(commits);
+      const elapsed = performance.now() - startTime;
+
+      expect(graph.totalCommits).toBe(count);
+      expect(graph.rootShas).toEqual([`sha${String(0).padStart(37, '0')}`]);
+      expect(graph.headShas).toEqual([`sha${String(count - 1).padStart(37, '0')}`]);
+
+      // Verify intermediate bidirectional links
+      const midSha = `sha${String(500).padStart(37, '0')}`;
+      const prevSha = `sha${String(499).padStart(37, '0')}`;
+      const nextSha = `sha${String(501).padStart(37, '0')}`;
+
+      expect(graph.nodes[midSha].parentShas).toEqual([prevSha]);
+      expect(graph.nodes[midSha].childShas).toEqual([nextSha]);
+
+      // Should complete quickly under 150ms
+      expect(elapsed).toBeLessThan(500);
+    });
+
+    it('correctly models 1,000 commits with periodic branching and merges', () => {
+      const commits: GithubApiCommitSummary[] = [];
+      const rootSha = 'sha00000000000000000000000000000000000';
+      commits.push(createMockCommit(rootSha, []));
+
+      let currentMainSha = rootSha;
+      let mergeCount = 0;
+
+      // Build 100 cycles of: 7 main commits, 2 branch commits, 1 merge commit = 10 commits per cycle
+      for (let cycle = 0; cycle < 100; cycle++) {
+        // Main commits
+        for (let m = 0; m < 7; m++) {
+          const nextMain = `main_${cycle}_${m}_0000000000000000000000000`;
+          commits.push(createMockCommit(nextMain, [currentMainSha]));
+          currentMainSha = nextMain;
+        }
+
+        // Feature branch diverging from currentMainSha
+        const b1 = `feat_${cycle}_1_0000000000000000000000000`;
+        const b2 = `feat_${cycle}_2_0000000000000000000000000`;
+        commits.push(createMockCommit(b1, [currentMainSha]));
+        commits.push(createMockCommit(b2, [b1]));
+
+        // Merge commit
+        const mergeSha = `merge_${cycle}_00000000000000000000000000`;
+        commits.push(createMockCommit(mergeSha, [currentMainSha, b2]));
+        currentMainSha = mergeSha;
+        mergeCount++;
+      }
+
+      // Total commits = 1 (root) + 100 * 10 = 1,001 commits
+      expect(commits.length).toBe(1001);
+
+      commits.reverse(); // API order
+      const graph = buildCommitRelationshipModel(commits);
+
+      expect(graph.totalCommits).toBe(1001);
+      expect(graph.rootShas).toEqual([rootSha]);
+      expect(graph.headShas).toEqual([currentMainSha]);
+
+      // Verify all merge commits identified
+      const mergeNodes = Object.values(graph.nodes).filter((n) => n.isMerge);
+      expect(mergeNodes.length).toBe(mergeCount);
+    });
+  });
 });

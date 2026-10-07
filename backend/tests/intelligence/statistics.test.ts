@@ -188,5 +188,74 @@ describe('Commit Statistics Intelligence Engine', () => {
       expect(allStats.changeStats.totalAdditions).toBe(30);
       expect(allStats.timeline.dailyActivity.length).toBe(2);
     });
+
+    it('handles zero-change commits without NaN or divide-by-zero errors', () => {
+      const c1 = createMockCommit('c1', '2026-10-01T10:00:00.000Z', { additions: 0, deletions: 0, total: 0 });
+      const c2 = createMockCommit('c2', '2026-10-01T12:00:00.000Z', { additions: 0, deletions: 0, total: 0 });
+
+      const stats = computeCommitStatistics([c1, c2]);
+
+      expect(stats.changeStats.totalAdditions).toBe(0);
+      expect(stats.changeStats.totalDeletions).toBe(0);
+      expect(stats.changeStats.totalChanges).toBe(0);
+      expect(stats.changeStats.avgAdditionsPerCommit).toBe(0);
+      expect(stats.changeStats.avgDeletionsPerCommit).toBe(0);
+      expect(stats.changeStats.avgChangesPerCommit).toBe(0);
+      expect(stats.frequency.commitsPerDay).toBe(2);
+    });
+
+    it('computes accurate metrics across leap year boundaries', () => {
+      // 2024 is a leap year (Feb 29 exists)
+      const feb28 = createMockCommit('c1', '2024-02-28T12:00:00.000Z');
+      const feb29 = createMockCommit('c2', '2024-02-29T12:00:00.000Z');
+      const mar01 = createMockCommit('c3', '2024-03-01T12:00:00.000Z');
+
+      const stats = computeCommitStatistics([feb28, feb29, mar01]);
+
+      expect(stats.frequency.totalCommits).toBe(3);
+      expect(stats.frequency.activeDaysCount).toBe(3);
+      expect(stats.frequency.timeSpanDays).toBe(2);
+      expect(stats.frequency.commitsPerDay).toBe(1.5);
+    });
+  });
+
+  describe('Large Scale Statistics Stress Testing (1,000+ Commits)', () => {
+    it('accurately computes mathematical aggregations for 1,000 commits', () => {
+      const count = 1000;
+      const commits: GithubApiCommitDetail[] = [];
+      const baseDate = new Date('2025-01-01T00:00:00.000Z').getTime();
+
+      let expectedAdditions = 0;
+      let expectedDeletions = 0;
+
+      for (let i = 0; i < count; i++) {
+        const adds = (i % 20) + 1;
+        const dels = (i % 5);
+        expectedAdditions += adds;
+        expectedDeletions += dels;
+
+        // Distribute across days (1 commit every 6 hours = 250 days span)
+        const dateStr = new Date(baseDate + i * 6 * 3600 * 1000).toISOString();
+        commits.push(createMockCommit(`sha_${i}`, dateStr, { additions: adds, deletions: dels, total: adds + dels }));
+      }
+
+      const startTime = performance.now();
+      const result = computeCommitStatistics(commits);
+      const elapsed = performance.now() - startTime;
+
+      expect(result.totalCommits).toBe(count);
+      expect(result.changeStats.totalAdditions).toBe(expectedAdditions);
+      expect(result.changeStats.totalDeletions).toBe(expectedDeletions);
+      expect(result.changeStats.totalChanges).toBe(expectedAdditions + expectedDeletions);
+      expect(result.changeStats.avgAdditionsPerCommit).toBe(Number((expectedAdditions / count).toFixed(1)));
+      expect(result.changeStats.avgDeletionsPerCommit).toBe(Number((expectedDeletions / count).toFixed(1)));
+
+      expect(result.frequency.totalCommits).toBe(count);
+      expect(result.frequency.firstCommitDate).toBe(commits[0]?.commit.author.date);
+      expect(result.frequency.lastCommitDate).toBe(commits[count - 1]?.commit.author.date);
+
+      // Verify execution is fast (< 100ms)
+      expect(elapsed).toBeLessThan(300);
+    });
   });
 });

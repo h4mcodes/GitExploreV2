@@ -127,5 +127,72 @@ describe('Repository Evolution Intelligence Engine', () => {
       expect(feb?.additions).toBe(200);
       expect(feb?.deletions).toBe(20);
     });
+
+    it('handles empty and single commit evolution gracefully', () => {
+      const emptyEvolution = computeEvolutionTimeline([]);
+      expect(emptyEvolution.totalCommits).toBe(0);
+      expect(emptyEvolution.monthlyBuckets).toEqual([]);
+      expect(emptyEvolution.firstCommitDate).toBeNull();
+      expect(emptyEvolution.lastCommitDate).toBeNull();
+
+      const single = createMockCommit('c1', '2026-05-10T12:00:00Z', 'Dev');
+      const singleEvolution = computeEvolutionTimeline([single]);
+      expect(singleEvolution.totalCommits).toBe(1);
+      expect(singleEvolution.monthlyBuckets.length).toBe(1);
+      expect(singleEvolution.monthlyBuckets[0]?.period).toBe('2026-05');
+      expect(singleEvolution.monthlyBuckets[0]?.authorsCount).toBe(1);
+    });
+
+    it('detects steady trajectory when velocity is balanced', () => {
+      const c1 = createMockCommit('c1', '2026-01-01T00:00:00Z');
+      const c2 = createMockCommit('c2', '2026-01-05T00:00:00Z');
+      const c3 = createMockCommit('c3', '2026-01-10T00:00:00Z');
+      const c4 = createMockCommit('c4', '2026-01-20T00:00:00Z');
+      const c5 = createMockCommit('c5', '2026-01-25T00:00:00Z');
+      const c6 = createMockCommit('c6', '2026-01-30T00:00:00Z');
+
+      const trajectory = assessGrowthTrajectory([c1, c2, c3, c4, c5, c6]);
+      expect(trajectory.pattern).toBe('steady');
+      expect(trajectory.recentVelocity).toBe(3);
+      expect(trajectory.previousVelocity).toBe(3);
+    });
+
+    it('stress tests evolution timeline with 1,080 commits spanning 3 years', () => {
+      // 36 months, 30 commits per month, 5 distinct authors per month
+      const commits: GithubApiCommitDetail[] = [];
+      const authors = ['Alice', 'Bob', 'Charlie', 'Diana', 'Evan'];
+
+      for (let month = 0; month < 36; month++) {
+        const year = 2023 + Math.floor(month / 12);
+        const m = (month % 12) + 1;
+        const monthStr = `${year}-${String(m).padStart(2, '0')}`;
+
+        for (let c = 0; c < 30; c++) {
+          const day = Math.min(28, c + 1);
+          const author = authors[c % authors.length] || 'Alice';
+          const dateStr = `${monthStr}-${String(day).padStart(2, '0')}T12:00:00.000Z`;
+          commits.push(createMockCommit(`sha_${month}_${c}`, dateStr, author, { additions: 10, deletions: 2, total: 12 }));
+        }
+      }
+
+      const startTime = performance.now();
+      const evolution = computeEvolutionTimeline(commits);
+      const elapsed = performance.now() - startTime;
+
+      expect(evolution.totalCommits).toBe(1080);
+      expect(evolution.monthlyBuckets.length).toBe(36);
+      expect(evolution.monthlyBuckets[0]?.period).toBe('2023-01');
+      expect(evolution.monthlyBuckets[35]?.period).toBe('2025-12');
+
+      for (const bucket of evolution.monthlyBuckets) {
+        expect(bucket.commitCount).toBe(30);
+        expect(bucket.authorsCount).toBe(5);
+        expect(bucket.additions).toBe(300);
+        expect(bucket.deletions).toBe(60);
+      }
+
+      // Fast execution under 300ms
+      expect(elapsed).toBeLessThan(500);
+    });
   });
 });

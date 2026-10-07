@@ -164,5 +164,81 @@ describe('Branch Divergence Intelligence Engine', () => {
       expect(analysis.mergeBaseSha).toBeNull();
       expect(analysis.mergeBaseMessage).toBeNull();
     });
+
+    it('handles behind and identical status correctly', () => {
+      const baseCommit = createMockCommit('base1', 'Base', 'Dev');
+      const identicalComp: GithubApiComparison = {
+        url: '',
+        html_url: '',
+        permalink_url: '',
+        diff_url: '',
+        patch_url: '',
+        base_commit: baseCommit,
+        merge_base_commit: baseCommit,
+        status: 'identical',
+        ahead_by: 0,
+        behind_by: 0,
+        total_commits: 0,
+        commits: [],
+        files: [],
+      };
+
+      const identicalAnalysis = computeDivergence('main', 'main', identicalComp);
+      expect(identicalAnalysis.status).toBe('identical');
+      expect(identicalAnalysis.aheadBy).toBe(0);
+      expect(identicalAnalysis.behindBy).toBe(0);
+
+      const behindComp: GithubApiComparison = {
+        ...identicalComp,
+        status: 'behind',
+        ahead_by: 0,
+        behind_by: 4,
+      };
+
+      const behindAnalysis = computeDivergence('main', 'old-branch', behindComp);
+      expect(behindAnalysis.status).toBe('behind');
+      expect(behindAnalysis.aheadBy).toBe(0);
+      expect(behindAnalysis.behindBy).toBe(4);
+    });
+
+    it('aggregates authors and sorts by commitCount descending', () => {
+      const c1 = createMockCommit('c1', '1', 'Bob', 'bob');
+      const c2 = createMockCommit('c2', '2', 'Alice', 'alice');
+      const c3 = createMockCommit('c3', '3', 'Alice', 'alice');
+      const c4 = createMockCommit('c4', '4', 'Alice', 'alice');
+      const c5 = createMockCommit('c5', '5', 'Charlie', null); // no login
+
+      const summary = summarizeCommitDelta([c1, c2, c3, c4, c5], []);
+      expect(summary.authors.length).toBe(3);
+      expect(summary.authors[0]?.name).toBe('Alice');
+      expect(summary.authors[0]?.commitCount).toBe(3);
+      expect(summary.authors[1]?.name).toBe('Bob');
+      expect(summary.authors[1]?.commitCount).toBe(1);
+      expect(summary.authors[2]?.name).toBe('Charlie');
+      expect(summary.authors[2]?.login).toBeNull();
+    });
+
+    it('efficiently summarizes large delta with 500 commits and 500 files', () => {
+      const commits: GithubApiCommitSummary[] = [];
+      const files: GithubApiCommitFile[] = [];
+
+      for (let i = 0; i < 500; i++) {
+        const authorIdx = i % 10;
+        commits.push(createMockCommit(`c_${i}`, `Commit ${i}`, `Dev ${authorIdx}`, `dev${authorIdx}`));
+        files.push(createMockFile(`file_${i}.ts`, 10, 5));
+      }
+
+      const startTime = performance.now();
+      const summary = summarizeCommitDelta(commits, files);
+      const elapsed = performance.now() - startTime;
+
+      expect(summary.totalCommits).toBe(500);
+      expect(summary.totalFilesChanged).toBe(500);
+      expect(summary.totalAdditions).toBe(500 * 10);
+      expect(summary.totalDeletions).toBe(500 * 5);
+      expect(summary.authors.length).toBe(10);
+      expect(summary.authors[0]?.commitCount).toBe(50); // 500 / 10 = 50 per author
+      expect(elapsed).toBeLessThan(200);
+    });
   });
 });

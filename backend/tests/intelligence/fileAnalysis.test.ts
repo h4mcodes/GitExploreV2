@@ -157,5 +157,90 @@ describe('File-Change Intelligence Engine', () => {
       expect(churn.fileExtensions['.md']).toBe(1);
       expect(churn.fileExtensions['other']).toBe(1); // Dockerfile has no dot extension
     });
+
+    it('correctly categorizes dotfiles and multiple file extensions', () => {
+      const dotGitignore: GithubApiCommitFile = {
+        filename: '.gitignore',
+        status: 'added',
+        additions: 15,
+        deletions: 0,
+        changes: 15,
+      };
+      const eslintJson: GithubApiCommitFile = {
+        filename: '.eslintrc.json',
+        status: 'modified',
+        additions: 5,
+        deletions: 2,
+        changes: 7,
+      };
+      const deepTsx: GithubApiCommitFile = {
+        filename: 'src/components/ui/Button.tsx',
+        status: 'modified',
+        additions: 50,
+        deletions: 10,
+        changes: 60,
+      };
+
+      const commit = createMockCommitDetail('c1', '2026-10-01T00:00:00Z', [dotGitignore, eslintJson, deepTsx]);
+      const churn = computeFileChurn([commit]);
+
+      expect(churn.fileExtensions['.json']).toBe(1);
+      expect(churn.fileExtensions['.tsx']).toBe(1);
+      expect(churn.fileExtensions['other']).toBe(1); // .gitignore without dot extension
+    });
+
+    it('handles findHotspotFiles when requested limit exceeds file count', () => {
+      const files = [
+        {
+          filename: 'a.ts',
+          changeCount: 1,
+          additions: 10,
+          deletions: 0,
+          totalChanges: 10,
+          churnScore: 10,
+          lastModifiedDate: null,
+          statuses: ['modified'],
+        },
+      ];
+
+      const hotspots = findHotspotFiles(files, 50);
+      expect(hotspots.length).toBe(1);
+    });
+
+    it('stress tests churn and hotspots across 1,000 file modifications', () => {
+      // 200 commits, each modifying 5 files (total 1,000 modifications across 50 unique files)
+      const uniqueFileCount = 50;
+      const commitCount = 200;
+      const commits: GithubApiCommitDetail[] = [];
+
+      for (let c = 0; c < commitCount; c++) {
+        const commitFiles: GithubApiCommitFile[] = [];
+        for (let f = 0; f < 5; f++) {
+          const fileIndex = (c + f) % uniqueFileCount;
+          commitFiles.push({
+            filename: `src/module_${fileIndex}/file_${fileIndex}.ts`,
+            status: c === 0 ? 'added' : 'modified',
+            additions: 10,
+            deletions: 2,
+            changes: 12,
+          });
+        }
+        commits.push(createMockCommitDetail(`c_${c}`, new Date(2026, 0, c + 1).toISOString(), commitFiles));
+      }
+
+      const startTime = performance.now();
+      const churn = computeFileChurn(commits);
+      const elapsed = performance.now() - startTime;
+
+      expect(churn.totalFileModifications).toBe(1000);
+      expect(churn.totalFilesChanged).toBe(uniqueFileCount);
+      expect(churn.totalAdditions).toBe(1000 * 10);
+      expect(churn.totalDeletions).toBe(1000 * 2);
+      expect(churn.hotspots.length).toBe(10); // default top 10
+      expect(churn.fileExtensions['.ts']).toBe(1000);
+
+      // Fast execution under 250ms
+      expect(elapsed).toBeLessThan(400);
+    });
   });
 });

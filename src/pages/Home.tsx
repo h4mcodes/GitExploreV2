@@ -1,102 +1,62 @@
 import { motion } from 'framer-motion';
-import { ArrowDownRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { SearchBar } from '../components/SearchBar';
 
 export function Home() {
   return (
     <main className="page-shell home-page">
-      <div className="ambient ambient-blue" />
-      <div className="ambient ambient-purple" />
-      <div className="ambient ambient-green" />
+      {/* Precision Engineering Grid Background over Frosted Glass */}
+      <div className="tech-grid-bg" aria-hidden="true" />
+      
+      {/* Primary Navigation */}
       <Navbar showLabel={false} />
-      <section className="hero">
+
+      {/* Focused Centered Hero & Search Section */}
+      <section className="hero-section" aria-labelledby="hero-title">
         <motion.div
-          className="hero-copy"
-          initial={{ opacity: 0, y: 24, filter: 'blur(8px)' }}
-          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          transition={{ duration: 0.68, ease: [0.16, 1, 0.3, 1] }}
+          className="hero-header-box"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="glass-badge">
-            <div className="liquid-capsule-refract" aria-hidden="true" />
-            <div className="liquid-capsule-surface" aria-hidden="true" />
-            <div className="liquid-capsule-content">
-              <span className="badge-pulse" />
-              <span>Explore GitHub developers</span>
-              <ArrowDownRight size={14} className="liquid-capsule-arrow" />
-            </div>
-          </div>
-          <GlassFilter />
-          <h1>
-            Understand the <span>&lt;code&gt;</span>
-            <br />
-            behind developers.
+          <h1 id="hero-title" className="hero-headline">
+            Deep Git Intelligence.
+            <span className="hero-subheadline">Built for Serious Developers.</span>
           </h1>
-          <p>Explore the people, projects, and patterns shaping the open-source world.</p>
-          <SearchBar />
-          <div className="trust-note">
-            <span className="trust-dot" />Built for curious minds <span className="note-divider" /> Private by design
+
+          <p className="hero-description">
+            Deconstruct commit DAGs, trace ahead/behind branch divergence, detect codebase churn hotspots, and review code diffs with context-grounded AI intelligence.
+          </p>
+
+          <div className="hero-search-wrapper">
+            <SearchBar />
           </div>
         </motion.div>
-
       </section>
-      <footer>
-        <span>GitExplore <b>·</b> Developer intelligence, made clear.</span>
+
+      {/* Quiet Minimal Anchored Footer */}
+      <footer className="home-minimal-footer" aria-label="Site Footer">
+        <div className="footer-brand font-mono">
+          <div className="brand-dot" />
+          <span className="brand-title">GitExplore v2.0</span>
+          <span className="brand-divider">/</span>
+          <span className="brand-tagline">Repository Intelligence Platform</span>
+        </div>
+
+        <div className="footer-meta font-mono">
+          <span className="status-indicator-green" />
+          <span className="status-text">440 Tests Passing</span>
+          <span className="meta-sep">·</span>
+          <Link to="/workspace" className="footer-link">Workspace</Link>
+          <span className="meta-sep">·</span>
+          <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="footer-link">
+            GitHub API
+          </a>
+          <span className="meta-sep">·</span>
+          <span className="footer-mit">MIT</span>
+        </div>
       </footer>
     </main>
-  );
-}
-
-function GlassFilter() {
-  return (
-    <svg
-      aria-hidden="true"
-      style={{
-        position: 'absolute',
-        width: 0,
-        height: 0,
-        overflow: 'hidden',
-        pointerEvents: 'none',
-      }}
-    >
-      <defs>
-        <filter
-          id="container-glass"
-          x="0%"
-          y="0%"
-          width="100%"
-          height="100%"
-          colorInterpolationFilters="sRGB"
-        >
-          {/* Generate turbulent noise for distortion */}
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.05 0.05"
-            numOctaves="1"
-            seed="1"
-            result="turbulence"
-          />
-
-          {/* Blur the turbulence pattern slightly */}
-          <feGaussianBlur in="turbulence" stdDeviation="2" result="blurredNoise" />
-
-          {/* Displace the source graphic with the noise */}
-          <feDisplacementMap
-            in="SourceGraphic"
-            in2="blurredNoise"
-            scale="70"
-            xChannelSelector="R"
-            yChannelSelector="B"
-            result="displaced"
-          />
-
-          {/* Apply overall blur on the final result */}
-          <feGaussianBlur in="displaced" stdDeviation="4" result="finalBlur" />
-
-          {/* Output the result */}
-          <feComposite in="finalBlur" in2="finalBlur" operator="over" />
-        </filter>
-      </defs>
-    </svg>
   );
 }

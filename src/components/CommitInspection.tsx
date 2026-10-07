@@ -188,14 +188,14 @@ export function CommitInspection({
           </div>
         </div>
 
-        <div className="commit-inspect-nav-right">
+        <div className="commit-inspect-actions-group">
           <button
             type="button"
             onClick={() => setAiMode((prev) => (prev === 'explainer' ? 'off' : 'explainer'))}
             className={`commit-ai-btn ${aiMode === 'explainer' ? 'active' : ''}`}
             title="AI Forensics & Intent Analysis"
           >
-            <Sparkles size={12} />
+            <Sparkles size={11} />
             <span>AI Forensics</span>
           </button>
 
@@ -206,7 +206,7 @@ export function CommitInspection({
               className={`commit-ai-btn ${aiMode === 'review' ? 'active' : ''}`}
               title="AI Code Review against parent commit"
             >
-              <Scale size={12} />
+              <Scale size={11} />
               <span>AI Review</span>
             </button>
           )}
@@ -218,7 +218,7 @@ export function CommitInspection({
               className="show-code-nav-btn"
               title="Open full code diff in window"
             >
-              <FileCode size={13} />
+              <FileCode size={11} />
               <span>Show Code ({files.length})</span>
             </button>
           )}
@@ -232,20 +232,21 @@ export function CommitInspection({
               title="Open commit on GitHub"
             >
               <span>GitHub</span>
-              <ExternalLink size={12} />
+              <ExternalLink size={10} />
             </a>
           )}
-          {onClose && (
-            <button
-              type="button"
-              onClick={onClose}
-              className="commit-close-btn"
-              aria-label="Close commit investigation"
-            >
-              <X size={14} />
-            </button>
-          )}
         </div>
+
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="commit-close-btn"
+            aria-label="Close commit investigation"
+          >
+            <X size={13} />
+          </button>
+        )}
       </div>
 
       {aiMode === 'explainer' && (

@@ -187,7 +187,7 @@ export function BranchCompare({
           </div>
         </div>
 
-        <div className="commit-inspect-nav-right">
+        <div className="commit-inspect-actions-group">
           {status === 'ready' && comparison && (
             <button
               type="button"
@@ -196,7 +196,7 @@ export function BranchCompare({
               title="Inspect full code diff"
               aria-label="Inspect full code diff"
             >
-              <FileCode size={13} />
+              <FileCode size={11} />
               <span>Show Code</span>
             </button>
           )}
@@ -208,22 +208,23 @@ export function BranchCompare({
               className="commit-inspect-github-link"
               aria-label="View comparison on GitHub"
             >
-              <ExternalLink size={12} />
+              <ExternalLink size={10} />
               <span>GitHub</span>
             </a>
           )}
-          {onClose && (
-            <button
-              type="button"
-              onClick={onClose}
-              className="commit-close-btn"
-              title="Close comparison"
-              aria-label="Close comparison"
-            >
-              <X size={14} />
-            </button>
-          )}
         </div>
+
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="commit-close-btn"
+            title="Close comparison"
+            aria-label="Close comparison"
+          >
+            <X size={13} />
+          </button>
+        )}
       </div>
 
       {/* Ref Selector Bar */}

@@ -27,6 +27,24 @@ export function errorHandler(
     return;
   }
 
+  // Handle Prisma database connection / service outages
+  if (
+    err &&
+    typeof err === 'object' &&
+    ('name' in err || 'code' in err) &&
+    ((err as { name?: string }).name === 'PrismaClientInitializationError' ||
+     (err as { code?: string }).code === 'P1001' ||
+     (err as { code?: string }).code === 'P1002' ||
+     (err as { code?: string }).code === 'P1003' ||
+     (err as { code?: string }).code === 'P1017')
+  ) {
+    res.status(503).json({
+      error: 'Database connection failed or service unavailable',
+      code: 'DATABASE_UNAVAILABLE',
+    });
+    return;
+  }
+
   // Log unhandled server errors
   console.error('[Unhandled Error]', err);
 

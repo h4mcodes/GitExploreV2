@@ -104,10 +104,20 @@ export class GithubClient {
           headers['Authorization'] = `Bearer ${this.token.trim()}`;
         }
 
-        const response = await fetch(url.toString(), {
-          method: 'GET',
-          headers,
-        });
+        let response: Response;
+        try {
+          response = await fetch(url.toString(), {
+            method: 'GET',
+            headers,
+          });
+        } catch (fetchErr: unknown) {
+          throw new AppError(
+            `GitHub API service is unreachable: ${fetchErr instanceof Error ? fetchErr.message : String(fetchErr)}`,
+            503,
+            'GITHUB_SERVICE_UNAVAILABLE',
+            { endpoint }
+          );
+        }
 
         this.extractRateLimitHeaders(response.headers);
 

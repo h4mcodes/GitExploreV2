@@ -10,8 +10,8 @@ export function Navbar({ showLabel }: NavbarProps) {
   const location = useLocation();
   const isWorkspace = location.pathname.startsWith('/workspace');
   
-  // Show product label on profile pages, keep navigation pristine on explore & workspace
-  const shouldShowLabel = showLabel ?? location.pathname.startsWith('/profile');
+  // Show product label across all sections (homepage, workspace, profile)
+  const shouldShowLabel = showLabel ?? true;
 
   return (
     <header className="nav-shell">

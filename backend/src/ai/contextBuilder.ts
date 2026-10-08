@@ -15,6 +15,7 @@ import type {
 import type { AnalysisType } from './types.js';
 
 // Token and payload safety boundaries
+export const MAX_CONTEXT_TOKEN_BUDGET = 6000;
 const MAX_PATCH_LENGTH_PER_FILE = 1200; // characters
 const MAX_TOTAL_DIFF_PATCH_LENGTH = 6000; // characters
 const MAX_HOTSPOTS_IN_CONTEXT = 8;
@@ -34,10 +35,18 @@ export function estimatePayloadTokens(payload: unknown): number {
 }
 
 /**
+ * Normalizes diff patch content by collapsing redundant consecutive whitespace and blank lines.
+ */
+export function normalizePatch(patch: string | null | undefined): string {
+  if (!patch) return '';
+  return patch.replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+/**
  * Truncates text safely with an explicit indicator if it exceeds maxLength.
  */
 export function truncateText(text: string | null | undefined, maxLength: number): string {
-  if (!text) return '';
+  if (!text || maxLength <= 0) return '';
   if (text.length <= maxLength) return text;
   return `${text.slice(0, maxLength)}\n... [Truncated: ${text.length - maxLength} chars omitted]`;
 }
@@ -651,28 +660,98 @@ export type ContextBuilderInputMap = {
 };
 
 /**
+ * Enforces the maximum token budget on a context payload.
+ * When payload estimated tokens exceed the budget, it progressively prunes patch snippets,
+ * file lists, and oversized evidence so that model token boundaries are strictly respected.
+ */
+export function enforceContextTokenBudget(
+  context: Record<string, unknown>,
+  maxTokens: number = MAX_CONTEXT_TOKEN_BUDGET
+): Record<string, unknown> {
+  const currentTokens = estimatePayloadTokens(context);
+  if (currentTokens <= maxTokens) {
+    return context;
+  }
+
+  // Clone shallow/deep enough to safely prune without mutating raw source
+  const pruned: Record<string, unknown> = JSON.parse(JSON.stringify(context));
+
+  // 1. Truncate patch snippets in files or changedFiles
+  if (Array.isArray(pruned.files)) {
+    for (const file of pruned.files) {
+      if (typeof file === 'object' && file !== null && 'patchSnippet' in file && typeof file.patchSnippet === 'string') {
+        file.patchSnippet = truncateText(file.patchSnippet, 350);
+      }
+    }
+  }
+  if (Array.isArray(pruned.changedFiles)) {
+    for (const file of pruned.changedFiles) {
+      if (typeof file === 'object' && file !== null && 'patchSnippet' in file && typeof file.patchSnippet === 'string') {
+        file.patchSnippet = truncateText(file.patchSnippet, 350);
+      }
+    }
+  }
+
+  if (estimatePayloadTokens(pruned) <= maxTokens) {
+    return pruned;
+  }
+
+  // 2. Cap lists if still exceeding budget
+  if (Array.isArray(pruned.files) && pruned.files.length > 8) {
+    pruned.files = pruned.files.slice(0, 8);
+  }
+  if (Array.isArray(pruned.changedFiles) && pruned.changedFiles.length > 8) {
+    pruned.changedFiles = pruned.changedFiles.slice(0, 8);
+  }
+  if (Array.isArray(pruned.recentCommits) && pruned.recentCommits.length > 8) {
+    pruned.recentCommits = pruned.recentCommits.slice(0, 8);
+  }
+
+  // 3. Fallback: truncate custom/focused evidence
+  if (pruned.customEvidence && typeof pruned.customEvidence === 'object') {
+    pruned.customEvidence = { note: 'Truncated to respect context token budget' };
+  }
+  if (pruned.focusedEvidence && typeof pruned.focusedEvidence === 'object') {
+    pruned.focusedEvidence = { note: 'Truncated to respect context token budget' };
+  }
+
+  return pruned;
+}
+
+/**
  * Universal dispatcher to construct structured AI context payloads for any AnalysisType.
  */
 export function buildAIContext<T extends AnalysisType>(
   type: T,
   input: ContextBuilderInputMap[T]
 ): Record<string, unknown> {
+  let context: Record<string, unknown>;
+
   switch (type) {
     case 'REPOSITORY_OVERVIEW':
-      return buildRepositoryOverviewContext(input as RepositoryOverviewContextInput);
+      context = buildRepositoryOverviewContext(input as RepositoryOverviewContextInput);
+      break;
     case 'COMMIT_EXPLANATION':
-      return buildCommitExplanationContext(input as CommitExplanationContextInput);
+      context = buildCommitExplanationContext(input as CommitExplanationContextInput);
+      break;
     case 'DIFF_REVIEW':
-      return buildDiffReviewContext(input as DiffReviewContextInput);
+      context = buildDiffReviewContext(input as DiffReviewContextInput);
+      break;
     case 'BRANCH_ANALYSIS':
-      return buildBranchAnalysisContext(input as BranchAnalysisContextInput);
+      context = buildBranchAnalysisContext(input as BranchAnalysisContextInput);
+      break;
     case 'REPOSITORY_HEALTH':
-      return buildRepositoryHealthContext(input as RepositoryHealthContextInput);
+      context = buildRepositoryHealthContext(input as RepositoryHealthContextInput);
+      break;
     case 'REPOSITORY_QA':
-      return buildRepositoryQAContext(input as RepositoryQAContextInput);
+      context = buildRepositoryQAContext(input as RepositoryQAContextInput);
+      break;
     case 'CUSTOM':
-      return (input as Record<string, unknown>) || {};
+      context = (input as Record<string, unknown>) || {};
+      break;
     default:
       throw new Error(`Unsupported analysis type for context building: ${String(type)}`);
   }
+
+  return enforceContextTokenBudget(context);
 }

@@ -27,6 +27,21 @@ export function createApp(): Express {
     next();
   });
 
+  // 2. Response timing & performance profiling middleware
+  app.use((_req: Request, res: Response, next: NextFunction): void => {
+    const start = process.hrtime.bigint();
+    const originalSend = res.send;
+    res.send = function (body) {
+      if (!res.headersSent) {
+        const elapsedMs = Number(process.hrtime.bigint() - start) / 1_000_000;
+        res.setHeader('X-Response-Time', `${elapsedMs.toFixed(2)}ms`);
+        res.setHeader('Server-Timing', `total;dur=${elapsedMs.toFixed(2)}`);
+      }
+      return originalSend.call(this, body);
+    };
+    next();
+  });
+
   // 2. CORS restricted to frontend origin(s)
   const allowedOrigins = env.corsOrigin
     .split(',')

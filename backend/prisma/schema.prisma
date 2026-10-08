@@ -69,6 +69,8 @@ model SavedRepository {
   aiAnalyses     AIAnalysis[]
 
   @@index([userId])
+  @@index([userId, savedAt(sort: Desc)])
+  @@index([userId, fullName])
   @@map("saved_repositories")
 }
 
@@ -88,6 +90,8 @@ model Investigation {
 
   @@index([userId])
   @@index([repositoryId])
+  @@index([userId, updatedAt(sort: Desc)])
+  @@index([userId, repositoryId, updatedAt(sort: Desc)])
   @@map("investigations")
 }
 
@@ -109,6 +113,9 @@ model Note {
   @@index([userId])
   @@index([investigationId])
   @@index([repositoryId])
+  @@index([userId, updatedAt(sort: Desc)])
+  @@index([userId, repositoryId])
+  @@index([userId, investigationId])
   @@map("notes")
 }
 
@@ -126,6 +133,8 @@ model Bookmark {
 
   @@index([userId])
   @@index([repositoryId])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, repositoryId])
   @@map("bookmarks")
 }
 
@@ -174,5 +183,8 @@ model AIAnalysis {
 
   @@index([contextHash])
   @@index([repositoryId])
+  @@index([contextHash, createdAt(sort: Desc)])
+  @@index([expiresAt])
+  @@index([repositoryId, createdAt(sort: Desc)])
   @@map("ai_analyses")
 }

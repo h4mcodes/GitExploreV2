@@ -8,6 +8,15 @@ import {
   deleteSavedRepo,
 } from '../repositories/savedRepoRepository.js';
 import {
+  findTagsByUserId,
+  findTagByName,
+  findTagById,
+  createTag as dbCreateTag,
+  deleteTag as dbDeleteTag,
+  assignTagToRepo,
+  removeTagFromRepo,
+} from '../repositories/tagRepository.js';
+import {
   UnauthorizedError,
   NotFoundError,
   ForbiddenError,
@@ -250,7 +259,6 @@ export async function listTags(
       throw new UnauthorizedError('Authentication required', 'AUTH_REQUIRED');
     }
 
-    const { findTagsByUserId } = await import('../repositories/tagRepository.js');
     const tags = await findTagsByUserId(req.user.userId);
     res.status(200).json(tags);
   } catch (err) {
@@ -277,7 +285,6 @@ export async function createTag(
       throw new BadRequestError('Tag name is required.', 'TAG_NAME_REQUIRED');
     }
 
-    const { findTagByName, createTag: dbCreateTag } = await import('../repositories/tagRepository.js');
     const existing = await findTagByName(req.user.userId, name.trim());
     if (existing) {
       throw new ConflictError(`Tag '${name.trim()}' already exists.`, 'TAG_ALREADY_EXISTS');
@@ -310,7 +317,6 @@ export async function deleteTag(
     }
 
     const { id } = req.params;
-    const { findTagById, deleteTag: dbDeleteTag } = await import('../repositories/tagRepository.js');
     const existing = await findTagById(id);
 
     if (!existing) {
@@ -361,7 +367,6 @@ export async function assignTagToRepository(
       throw new ForbiddenError('You do not have permission to modify this repository.', 'FORBIDDEN');
     }
 
-    const { findTagById, assignTagToRepo } = await import('../repositories/tagRepository.js');
     const tag = await findTagById(tagId.trim());
     if (!tag) {
       throw new NotFoundError(`Tag with ID '${tagId}' was not found.`, 'TAG_NOT_FOUND');
@@ -401,7 +406,6 @@ export async function removeTagFromRepository(
       throw new ForbiddenError('You do not have permission to modify this repository.', 'FORBIDDEN');
     }
 
-    const { removeTagFromRepo } = await import('../repositories/tagRepository.js');
     await removeTagFromRepo(repoId, tagId);
 
     res.status(200).json({

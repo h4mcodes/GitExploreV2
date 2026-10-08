@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
 import { SearchBar } from '../components/SearchBar';
 
 export function Home() {
@@ -35,19 +34,6 @@ export function Home() {
           <span className="brand-title">GitExplore v2.0</span>
           <span className="brand-divider">/</span>
           <span className="brand-tagline">Repository Intelligence Platform</span>
-        </div>
-
-        <div className="footer-meta font-mono">
-          <span className="status-indicator-green" />
-          <span className="status-text">440 Tests Passing</span>
-          <span className="meta-sep">·</span>
-          <Link to="/workspace" className="footer-link">Workspace</Link>
-          <span className="meta-sep">·</span>
-          <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="footer-link">
-            GitHub API
-          </a>
-          <span className="meta-sep">·</span>
-          <span className="footer-mit">MIT</span>
         </div>
       </footer>
     </main>

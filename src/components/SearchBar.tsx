@@ -1,5 +1,5 @@
 import { ArrowUpRight, Search, X } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -70,7 +70,7 @@ export function SearchBar({ onSelectPreset: _ }: SearchBarProps) {
           setUsername(event.target.value);
           if (error) setError('');
         }}
-        placeholder="Search GitHub username or organization..."
+        placeholder="Search GitHub username or organization (e.g. torvalds, antfu, shadcn)..."
       />
 
       {!username && !isFocused && (
@@ -79,16 +79,22 @@ export function SearchBar({ onSelectPreset: _ }: SearchBarProps) {
         </span>
       )}
 
-      {username && (
-        <button
-          type="button"
-          onClick={handleClear}
-          className="search-clear-btn"
-          aria-label="Clear search input"
-        >
-          <X size={14} />
-        </button>
-      )}
+      <AnimatePresence>
+        {username && (
+          <motion.button
+            type="button"
+            onClick={handleClear}
+            className="search-clear-btn"
+            aria-label="Clear search input"
+            initial={{ opacity: 0, scale: 0.75 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.75 }}
+            transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <X size={13} strokeWidth={2.4} />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       <motion.button
         type="submit"

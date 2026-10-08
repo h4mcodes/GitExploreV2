@@ -70,7 +70,7 @@ export function SearchBar({ onSelectPreset: _ }: SearchBarProps) {
           setUsername(event.target.value);
           if (error) setError('');
         }}
-        placeholder="Search GitHub username or organization (e.g. torvalds, antfu, shadcn)..."
+        placeholder="Search GitHub username or organization..."
       />
 
       {!username && !isFocused && (

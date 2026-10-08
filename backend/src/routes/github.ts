@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { validateRequest } from '../middleware/validation.js';
+import { githubRateLimiter } from '../middleware/rateLimiter.js';
 import {
   getUserProfile,
   getUserRepositories,
@@ -10,6 +11,9 @@ import {
 } from '../controllers/githubController.js';
 
 export const githubRouter: Router = Router();
+
+// Apply GitHub proxy rate limiter to all proxy routes
+githubRouter.use(githubRateLimiter);
 
 // Validation schema for GitHub username parameter (1-39 chars, alphanumeric with single hyphens)
 const usernameValidation = validateRequest({

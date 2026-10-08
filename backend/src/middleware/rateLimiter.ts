@@ -18,6 +18,11 @@ export interface RateLimitOptions {
   readonly message?: string;
 
   /**
+   * Custom error code string (default: 'AI_RATE_LIMIT_EXCEEDED').
+   */
+  readonly code?: string;
+
+  /**
    * Custom key generator (default: IP address or client identifier).
    */
   readonly keyGenerator?: (req: Request) => string;
@@ -98,7 +103,7 @@ export function createRateLimiter(options: RateLimitOptions = {}) {
       return next(
         new RateLimitError(
           message,
-          'AI_RATE_LIMIT_EXCEEDED',
+          options.code ?? 'AI_RATE_LIMIT_EXCEEDED',
           { retryAfterSeconds: resetSeconds }
         )
       );
@@ -116,4 +121,16 @@ export const aiRateLimiter = createRateLimiter({
   windowMs: 60_000,
   max: 30,
   message: 'AI request limit reached. Please wait a moment before running more analyses.',
+  code: 'AI_RATE_LIMIT_EXCEEDED',
+});
+
+/**
+ * Dedicated rate limiter for GitHub proxy endpoints.
+ * Enforces max 60 requests per minute per client by default to protect API quotas.
+ */
+export const githubRateLimiter = createRateLimiter({
+  windowMs: 60_000,
+  max: 60,
+  message: 'GitHub proxy rate limit reached. Please wait before making more requests.',
+  code: 'GITHUB_RATE_LIMIT_EXCEEDED',
 });

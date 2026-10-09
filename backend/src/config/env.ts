@@ -48,6 +48,10 @@ export function loadEnvironmentConfig(): EnvironmentConfig {
   const aiApiKey = geminiApiKey;
   const geminiModel = process.env['GEMINI_MODEL'] || 'gemini-1.5-flash';
 
+  if (nodeEnv === 'production' && jwtSecret === 'gitexplore-v2-jwt-secret-key-32-chars-minimum-token') {
+    console.warn('[Security Warning] Running in production with default JWT_SECRET. Configure a unique random 32+ char secret.');
+  }
+
   return {
     port,
     nodeEnv,

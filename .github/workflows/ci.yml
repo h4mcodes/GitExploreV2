@@ -27,11 +27,15 @@ jobs:
       - name: Install Frontend Dependencies
         run: npm ci
 
+      - name: Generate Prisma Client
+        working-directory: backend
+        run: npx prisma generate
+
       - name: Validate Frontend TypeScript & Build
         run: npm run build
 
   validate-backend:
-    name: Backend Build & Typecheck
+    name: Backend Build, Typecheck & Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -48,10 +52,18 @@ jobs:
         working-directory: backend
         run: npm ci
 
+      - name: Generate Prisma Client
+        working-directory: backend
+        run: npx prisma generate
+
       - name: Validate Backend TypeScript & Build
         working-directory: backend
         run: npm run build
 
-      - name: Run Backend Tests
+      - name: Run Backend Vitest Test Suite
         working-directory: backend
         run: npm test
+        env:
+          NODE_ENV: test
+          JWT_SECRET: test-jwt-secret-key-32-chars-minimum-token
+          CORS_ORIGIN: http://localhost:5173
